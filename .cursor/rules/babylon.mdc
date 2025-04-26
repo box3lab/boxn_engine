@@ -1,0 +1,15 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+# Babylon ts
+- 使用babylon.js 8.1.1作为基础框架开发
+- 使用typescript进行代码编写
+- 需要添加详尽中英文注释
+
+# Directory Structure
+- 根目录`/babylon-project`包含项目的基本结构
+- `/node_modules`: 项目依赖模块
+- `/src/scripts`: 核心代码结构
