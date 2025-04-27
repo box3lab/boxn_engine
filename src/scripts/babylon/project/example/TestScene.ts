@@ -48,21 +48,22 @@ export class TestScene implements IScene {
         this.createPanel();
         this.createCharacter();
         
-        // Start the render loop
-        this.engine.runRenderLoop(() => {
-            this.scene.render();
-        });
+        // // Start the render loop
+        // this.engine.runRenderLoop(() => {
+        //     this.scene.render();
+        // });
         
-        // Handle browser resize
-        window.addEventListener('resize', () => {
-            this.engine.resize();
-        });
+        // // Handle browser resize
+        // window.addEventListener('resize', () => {
+        //     this.engine.resize();
+        // });
     }
     initialize(): Promise<void> {
-        throw new Error("Method not implemented.");
+        // Initialize scene resources
+        return Promise.resolve();
     }
     update(deltaTime: number): void {
-        throw new Error("Method not implemented.");
+        // Update scene components
     }
     
     /**
@@ -160,9 +161,9 @@ export class TestScene implements IScene {
         //     // Add code here
         // });
 
-        ResMgr.instance.setScene(this.scene);
+        // ResMgr.instance.setScene(this.scene);
 
-        ResMgr.instance.loadResource("./glb/Bird_5.glb", GLBAsset).then((mesh: GLBAsset) => {
+        ResMgr.instance.loadResource("./glb/Bird_5.glb", GLBAsset,undefined,this.scene).then((mesh: GLBAsset) => {
             console.log(mesh);
             // const gameEntity = new GameEntity("Bird_5");
             // gameEntity.addComponent(new MeshComp(mesh), "ThirdPersonComp");

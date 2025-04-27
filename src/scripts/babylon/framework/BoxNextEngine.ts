@@ -37,8 +37,10 @@ export class BoxNextEngine extends Singleton<BoxNextEngine>(){
         SceneMgr.instance.initialize(this.canvas, this.engine);
         // Register Test Scene
         SceneMgr.instance.registerScene(new TestScene("test", "test", this.engine, 0));
-        // Load Test Scene
-        SceneMgr.instance.loadScene("test");
+        // // Load Test Scene
+        // SceneMgr.instance.loadScene("test");
+
+        SceneMgr.instance.activateScene("test",true);
         // Set Scene for Resource Manager
         ResMgr.instance.setScene(SceneMgr.instance.getScene("test")?.scene as Scene);
     }

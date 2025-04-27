@@ -12,19 +12,23 @@ export interface IGameEntity {
 
     /**
      * The name of the entity.
+     * 实体的名称。
      */
     name: string;
     /**
      * The transform of the entity.
+     * 实体的变换节点。
      */
     transform: TransformNode;
     /**
      * The components of the entity.
+     * 实体的组件集合。
      */
     components: Map<string, IGameComponent>;
 
     /**
      * The scene of the entity.
+     * 实体所属的场景。
      */
     scene: IScene | undefined;
 
@@ -43,31 +47,17 @@ export interface IGameEntity {
      */
     dispose(): void;
 
-    /**
-     * Adds a component to the entity.
-     * 向实体添加一个组件。
-     * 
-     * @param component - The component to add
-     * @param name - The name of the component
-     */
-    addComponent(component: IGameComponent, name: string): void;
+    
+    addComponent(name:string, component: IGameComponent): boolean;
 
-    /**
-     * Gets a component from the entity by name.
-     * 通过名称从实体获取一个组件。
-     * 
-     * @param name - The name of the component
-     * @returns The component or undefined if it doesn't exist
-     */
-    getComponent<T extends IGameComponent>(name: string): T | undefined;
+    getComponent(name:string): IGameComponent | null;
 
-    /**
-     * Removes a component from the entity.
-     * 从实体中移除一个组件。
-     * 
-     * @param name - The name of the component
-     */
-    removeComponent(name: string): void;
+    getComponentByClass<T extends IGameComponent>(componentType: new () => T): T | null;
+
+    getComponentsByClass<T extends IGameComponent>(componentType: new () => T): Array<T> | null;
+
+
+    removeComponent(name:string): void;
 
     /**
      * Gets the name of the entity.
