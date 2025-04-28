@@ -1,4 +1,3 @@
-import type { AbstractMesh } from "babylonjs";
 import { type IGameAsset, ResourceStatus, ResourceType } from "../interface/IGameAsset";
 
 /**
@@ -12,7 +11,7 @@ export class MeshAsset implements IGameAsset {
     url: string = '';
     status: ResourceStatus = ResourceStatus.NotLoaded;
     refCount: number = 0;
-    data?: AbstractMesh[];
+    data?: BABYLON.AssetContainer;
     error?: string;
     tags?: string[];
     dependencies?: string[];

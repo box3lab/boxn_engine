@@ -114,50 +114,48 @@ export class ResMgr extends Singleton<ResMgr>(){
      * @returns Promise resolving to the loaded mesh asset / 解析为加载的网格资源的 Promise
      */
     private async loadMesh<T extends IGameAsset>(asset: T, options?: LoadingOptions, scene?: Scene): Promise<T> {
+        try {
+            const fileExtension = asset.url.split('.').pop()?.toLowerCase();
+            let rootUrl = asset.url.substring(0, asset.url.lastIndexOf('/') + 1);
+            let filename = asset.url.split('/').pop() || '';
 
-        return new Promise((resolve, reject) => {
-            try {
-                const fileExtension = asset.url.split('.').pop()?.toLowerCase();
-                let rootUrl = asset.url.substring(0, asset.url.lastIndexOf('/') + 1);
-                let filename = asset.url.split('/').pop() || '';
-
-                // Handle direct URLs
-                if (!rootUrl) {
-                    rootUrl = "./";
-                }
-
-                BABYLON.SceneLoader.ImportMesh(
-                    "",
-                    rootUrl,
-                    filename,
-                    // @ts-ignore
-                    scene?scene:this.scene!,
-                    (meshes) => {
-                        asset.data = meshes;
-                        asset.status = ResourceStatus.Loaded;
-                        this.resources.set(asset.id || asset.url, asset);
-                        resolve(asset);
-                    },
-                    (progressEvent) => {
-                        if (options?.onProgress && progressEvent.lengthComputable) {
-                            const progress = progressEvent.loaded / progressEvent.total;
-                            options.onProgress(progress);
-                        }
-                    },
-                    (scene, message) => {
-                        asset.status = ResourceStatus.Error;
-                        asset.error = message;
-                        options?.onError?.(message);
-                        reject(new Error(message));
-                    }
-                );
-            } catch (error) {
-                asset.status = ResourceStatus.Error;
-                asset.error = error instanceof Error ? error.message : String(error);
-                options?.onError?.(asset.error);
-                reject(error);
+            // Handle direct URLs
+            if (!rootUrl) {
+                rootUrl = "./";
             }
-        });
+
+            // Use the provided scene or the manager's scene
+            const currentScene = scene || this.scene!;
+
+            // Load the asset container
+            const container = await BABYLON.SceneLoader.LoadAssetContainerAsync(
+                rootUrl,
+                filename,
+                currentScene as any, // Type assertion to resolve compatibility issues
+                (progress) => {
+                    if (options?.onProgress && progress.lengthComputable) {
+                        const progressValue = progress.loaded / progress.total;
+                        options.onProgress(progressValue);
+                    }
+                }
+            );
+
+            // Add all meshes to the scene
+            // container.addAllToScene();
+
+            // Store the container and meshes in the asset
+            asset.data = container;
+
+            asset.status = ResourceStatus.Loaded;
+            this.resources.set(asset.id || asset.url, asset);
+            return asset;
+
+        } catch (error) {
+            asset.status = ResourceStatus.Error;
+            asset.error = error instanceof Error ? error.message : String(error);
+            options?.onError?.(asset.error);
+            throw error;
+        }
     }
 
     /**

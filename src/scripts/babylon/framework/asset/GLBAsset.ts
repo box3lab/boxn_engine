@@ -12,7 +12,7 @@ export class GLBAsset implements IGameAsset {
     url: string = '';
     status: ResourceStatus = ResourceStatus.NotLoaded;
     refCount: number = 0;
-    data?: AbstractMesh[];
+    data?: BABYLON.AssetContainer;
     error?: string;
     tags?: string[];
     dependencies?: string[];

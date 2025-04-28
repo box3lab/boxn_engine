@@ -8,7 +8,9 @@ import {
     Color3,
     ArcRotateCamera,
     // Mesh
-    AbstractMesh
+    AbstractMesh,
+    AssetsManager,
+    SceneLoader
 } from "@babylonjs/core";
 // import { ImportMeshAsync, LoadAssetContainerAsync } from "@babylonjs/core/Loading/sceneLoader";
 import * as BABYLON from 'babylonjs';
@@ -18,6 +20,7 @@ import { ResourceStatus, type IGameAsset, ResourceType } from "../../framework/i
 import { GLBAsset } from "../../framework/asset/GLBAsset";
 import { GameEntity } from "../../framework/entity/GameEntity";
 import type { IScene } from "../../framework/interface/IScene";
+import { StaticMeshComponent } from "../../framework/components/StaticMeshComponent";
 
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
@@ -144,7 +147,7 @@ export class TestScene implements IScene {
     /**
      * Create character and setup third person controller
      */
-    private createCharacter(): void {
+    private async createCharacter(): Promise<void> {
         // Load the blackPearl.glb model from local assets
         // ImportMeshAsync("./glb/ship.babylon", this.scene)
         //     .then((result) => {
@@ -163,11 +166,75 @@ export class TestScene implements IScene {
 
         // ResMgr.instance.setScene(this.scene);
 
-        ResMgr.instance.loadResource("./glb/Bird_5.glb", GLBAsset,undefined,this.scene).then((mesh: GLBAsset) => {
-            console.log(mesh);
-            // const gameEntity = new GameEntity("Bird_5");
-            // gameEntity.addComponent(new MeshComp(mesh), "ThirdPersonComp");
-        });
+        const gameEntity = new GameEntity("Bird_5",this);
+        const staticMeshComponent = new StaticMeshComponent();
+        staticMeshComponent.addMesh("./glb/Bird_5.glb",this.scene);
+        gameEntity.addComponent("StaticMeshComp",staticMeshComponent);
+
+        gameEntity.transform.position.y = 10;
+
+        console.log(gameEntity);
+
+        // ResMgr.instance.loadResource("./glb/Bird_5.glb", GLBAsset,undefined,this.scene).then((mesh: GLBAsset) => {
+        //     console.log(mesh);
+        //     const container = mesh.data;
+        //     if(container)container.instantiateModelsToScene();
+        //     // const gameEntity = new GameEntity("Bird_5");
+        //     // gameEntity.addComponent(new MeshComp(mesh), "ThirdPersonComp");
+        // });
+
+        // //@ts-ignore
+        // const assetsManager = new BABYLON.AssetsManager(this.scene);
+        // const meshTask = assetsManager.addMeshTask("./glb/Bird_5.glb","","./glb/","Bird_5.glb")
+
+        // meshTask.onSuccess = function(task) {
+        //     // 加载成功后，task.loadedMeshes 包含所有加载的网格
+        //     console.log("Mesh loaded:", task.loadedMeshes);
+        // };
+        // assetsManager.load();
+
+        // const container = await BABYLON.SceneLoader.LoadAssetContainerAsync(
+        //     "./glb/", 
+        //     "Bird_5.glb", 
+        //     //@ts-ignore
+        //     this.scene,
+        //     (container) => {
+        //         console.log(container);
+        //     }
+        // );
+
+        // container.instantiateModelsToScene();
+        // 使用SceneLoader加载资产到容器
+        // BABYLON.SceneLoader.LoadAssetContainer(
+        //     "./glb/", 
+        //     "Bird_5.glb", 
+        //     //@ts-ignore
+        //     this.scene,
+        //     (container) => {
+        //         console.log(container);
+        //         // // 使用容器中的资产
+        //         // container.addAllToScene(); // 添加到场景
+                
+        //         // 可以克隆整个容器
+        //         const cloneContainer = container.instantiateModelsToScene();
+        //         const cloneContainer2 = container.instantiateModelsToScene();
+        //         console.log(cloneContainer === cloneContainer2);
+        //         for (let index = 0; index < cloneContainer.rootNodes.length; index++) {
+        //             const element = cloneContainer.rootNodes[index];
+        //             element.setEnabled(false);
+        //         }
+        //         for (let index = 0; index < cloneContainer2.rootNodes.length; index++) {
+        //             const element = cloneContainer2.rootNodes[index];
+        //             element.setEnabled(false);
+        //         }
+        //     },
+        //     (progress) => {
+        //         console.log(`Loading progress: ${progress.loaded}/${progress.total}`);
+        //     },
+        //     (scene, message, exception) => {
+        //         console.error("Load error:", message);
+        //     }
+        // );
     }
     
     /**
