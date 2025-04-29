@@ -3,7 +3,7 @@ import type { IGameEntity } from "./IGameEntity";
 
 // 基础组件接口
 export interface IGameComponent {
-    name:string | undefined;
+    name:string;
     entity: IGameEntity | undefined;
 
     /**

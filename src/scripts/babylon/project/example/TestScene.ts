@@ -20,7 +20,8 @@ import { ResourceStatus, type IGameAsset, ResourceType } from "../../framework/i
 import { GLBAsset } from "../../framework/asset/GLBAsset";
 import { GameEntity } from "../../framework/entity/GameEntity";
 import type { IScene } from "../../framework/interface/IScene";
-import { StaticMeshComponent } from "../../framework/components/StaticMeshComponent";
+// import { StaticMeshComponent } from "../../framework/components/StaticMeshComponent";
+import { StaticMeshEntityComponent } from "../../framework/components/entityComponents/StaticMeshEntityComponent";
 
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
@@ -148,93 +149,24 @@ export class TestScene implements IScene {
      * Create character and setup third person controller
      */
     private async createCharacter(): Promise<void> {
-        // Load the blackPearl.glb model from local assets
-        // ImportMeshAsync("./glb/ship.babylon", this.scene)
-        //     .then((result) => {
-        //         console.log(result)
-        //         // newMeshes[0].position.copyFrom(shipPostion);
-        //         // result.meshes[0].setParent(null);
-        //         if (this.camera) {
-        //             this.camera.target = result.meshes[1].position;
-        //         }
-        //     });
+      
+        // const gameEntity = new GameEntity("Bird_5",this);
+        // const staticMeshComponent = new StaticMeshComponent("StaticMeshComp");
+        // staticMeshComponent.addMesh("./glb/Bird_5.glb",this.scene);
+        // gameEntity.addComponent(staticMeshComponent.name,staticMeshComponent);
 
-        // //@ts-ignore
-        // BABYLON.SceneLoader.ImportMesh("", "./glb/", "Bird_5.glb", this.scene, function(newMeshes: AbstractMesh[]){
-        //     // Add code here
-        // });
-
-        // ResMgr.instance.setScene(this.scene);
+        // gameEntity.transform.position.y = 10;
 
         const gameEntity = new GameEntity("Bird_5",this);
-        const staticMeshComponent = new StaticMeshComponent();
+        const staticMeshComponent = new StaticMeshEntityComponent("StaticMeshComp",this);
         staticMeshComponent.addMesh("./glb/Bird_5.glb",this.scene);
-        gameEntity.addComponent("StaticMeshComp",staticMeshComponent);
-
+        gameEntity.addComponent(staticMeshComponent.name,staticMeshComponent);
+        staticMeshComponent.transform.position.y = -10;
         gameEntity.transform.position.y = 10;
+     
 
         console.log(gameEntity);
 
-        // ResMgr.instance.loadResource("./glb/Bird_5.glb", GLBAsset,undefined,this.scene).then((mesh: GLBAsset) => {
-        //     console.log(mesh);
-        //     const container = mesh.data;
-        //     if(container)container.instantiateModelsToScene();
-        //     // const gameEntity = new GameEntity("Bird_5");
-        //     // gameEntity.addComponent(new MeshComp(mesh), "ThirdPersonComp");
-        // });
-
-        // //@ts-ignore
-        // const assetsManager = new BABYLON.AssetsManager(this.scene);
-        // const meshTask = assetsManager.addMeshTask("./glb/Bird_5.glb","","./glb/","Bird_5.glb")
-
-        // meshTask.onSuccess = function(task) {
-        //     // 加载成功后，task.loadedMeshes 包含所有加载的网格
-        //     console.log("Mesh loaded:", task.loadedMeshes);
-        // };
-        // assetsManager.load();
-
-        // const container = await BABYLON.SceneLoader.LoadAssetContainerAsync(
-        //     "./glb/", 
-        //     "Bird_5.glb", 
-        //     //@ts-ignore
-        //     this.scene,
-        //     (container) => {
-        //         console.log(container);
-        //     }
-        // );
-
-        // container.instantiateModelsToScene();
-        // 使用SceneLoader加载资产到容器
-        // BABYLON.SceneLoader.LoadAssetContainer(
-        //     "./glb/", 
-        //     "Bird_5.glb", 
-        //     //@ts-ignore
-        //     this.scene,
-        //     (container) => {
-        //         console.log(container);
-        //         // // 使用容器中的资产
-        //         // container.addAllToScene(); // 添加到场景
-                
-        //         // 可以克隆整个容器
-        //         const cloneContainer = container.instantiateModelsToScene();
-        //         const cloneContainer2 = container.instantiateModelsToScene();
-        //         console.log(cloneContainer === cloneContainer2);
-        //         for (let index = 0; index < cloneContainer.rootNodes.length; index++) {
-        //             const element = cloneContainer.rootNodes[index];
-        //             element.setEnabled(false);
-        //         }
-        //         for (let index = 0; index < cloneContainer2.rootNodes.length; index++) {
-        //             const element = cloneContainer2.rootNodes[index];
-        //             element.setEnabled(false);
-        //         }
-        //     },
-        //     (progress) => {
-        //         console.log(`Loading progress: ${progress.loaded}/${progress.total}`);
-        //     },
-        //     (scene, message, exception) => {
-        //         console.error("Load error:", message);
-        //     }
-        // );
     }
     
     /**
