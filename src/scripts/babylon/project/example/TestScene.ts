@@ -10,7 +10,9 @@ import {
     // Mesh
     AbstractMesh,
     AssetsManager,
-    SceneLoader
+    SceneLoader,
+    PhysicsImpostor,
+    CannonJSPlugin
 } from "@babylonjs/core";
 // import { ImportMeshAsync, LoadAssetContainerAsync } from "@babylonjs/core/Loading/sceneLoader";
 import * as BABYLON from 'babylonjs';
@@ -22,6 +24,8 @@ import { GameEntity } from "../../framework/entity/GameEntity";
 import type { IScene } from "../../framework/interface/IScene";
 // import { StaticMeshComponent } from "../../framework/components/StaticMeshComponent";
 import { StaticMeshEntityComponent } from "../../framework/components/entityComponents/StaticMeshEntityComponent";
+import { ColliderComponent } from "../../framework/components/ColliderComponent";
+import { PhyGameEntity } from "../../framework/entity/PhyGameEntity";
 
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
@@ -44,6 +48,7 @@ export class TestScene implements IScene {
         this.engine = engine;
         this.priority = priority;
         this.scene = new Scene(this.engine);
+        this.scene.enablePhysics(new Vector3(0, -9.81, 0), new CannonJSPlugin());
         
         // Setup scene
         this.setupCamera();
@@ -121,6 +126,14 @@ export class TestScene implements IScene {
         
         // Apply material to ground
         ground.material = groundMaterial;
+
+        // Add physics impostor to ground
+        ground.physicsImpostor = new PhysicsImpostor(
+            ground,
+            PhysicsImpostor.BoxImpostor,
+            { mass: 0, restitution: 0.2, friction: 0.5 },
+            this.scene
+        );
     }
     
     /**
@@ -149,24 +162,43 @@ export class TestScene implements IScene {
      * Create character and setup third person controller
      */
     private async createCharacter(): Promise<void> {
-      
-        // const gameEntity = new GameEntity("Bird_5",this);
-        // const staticMeshComponent = new StaticMeshComponent("StaticMeshComp");
-        // staticMeshComponent.addMesh("./glb/Bird_5.glb",this.scene);
-        // gameEntity.addComponent(staticMeshComponent.name,staticMeshComponent);
+        // Create physics cube using Babylon.js native physics
+        const cube = MeshBuilder.CreateBox(
+            "physicsCube",
+            { size: 2 },
+            this.scene
+        );
+        
+        // Create material for the cube
+        const cubeMaterial = new StandardMaterial("cubeMaterial", this.scene);
+        cubeMaterial.diffuseColor = new Color3(1, 0, 0); // Red color
+        cube.material = cubeMaterial;
+        
+        // Position the cube
+        cube.position = new Vector3(0, 10, 0);
+        
+        // Enable physics on the cube
+        cube.physicsImpostor = new PhysicsImpostor(
+            cube,
+            PhysicsImpostor.BoxImpostor,
+            { mass: 1, restitution: 0.7, friction: 0.2 },
+            this.scene
+        );
 
-        // gameEntity.transform.position.y = 10;
+        // Create the bird entity
+        const gameEntity = new PhyGameEntity("Bird_5", this);
+        const staticMeshComponent = new StaticMeshEntityComponent("StaticMeshComp", this);
+        staticMeshComponent.addMesh("./glb/Bird_5.glb", this.scene);
+        gameEntity.addComponent(staticMeshComponent.name, staticMeshComponent);
 
-        const gameEntity = new GameEntity("Bird_5",this);
-        const staticMeshComponent = new StaticMeshEntityComponent("StaticMeshComp",this);
-        staticMeshComponent.addMesh("./glb/Bird_5.glb",this.scene);
-        gameEntity.addComponent(staticMeshComponent.name,staticMeshComponent);
-        staticMeshComponent.transform.position.y = -10;
-        gameEntity.transform.position.y = 10;
-     
+        const colliderComponent = new ColliderComponent("ColliderComp", new Vector3(10, 10, 10), new Vector3(0, 5, 0));
+    
+        gameEntity.addComponent(colliderComponent.name, colliderComponent);
+        // colliderComponent.setPhysicsProperties(1, 0.5, 0.5);
+        // colliderComponent.setUseGravity(false);  
+        gameEntity.transform.position.y = 50;
 
         console.log(gameEntity);
-
     }
     
     /**

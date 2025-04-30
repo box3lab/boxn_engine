@@ -1,6 +1,7 @@
 import type { IGameComponent } from "./IGameComponent";
 import type { TransformNode } from "@babylonjs/core/Meshes/transformNode";
 import type { IScene } from "./IScene";
+import type { Mesh } from "@babylonjs/core/Meshes";
 /**
  * Game Entity Interface
  * 游戏实体接口
@@ -19,7 +20,7 @@ export interface IGameEntity {
      * The transform of the entity.
      * 实体的变换节点。
      */
-    transform: TransformNode;
+    transform: TransformNode | Mesh;
     /**
      * The components of the entity.
      * 实体的组件集合。

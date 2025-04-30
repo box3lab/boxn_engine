@@ -3,7 +3,7 @@ import { Singleton } from "./common/Singleton";
 import { TestScene } from "../project/example/TestScene";
 import { SceneMgr } from "./mgr/SceneMgr";
 import { ResMgr } from "./mgr/ResMgr";
-
+import { PhyMgr } from "./mgr/PhyMgr";
 /**
  * BoxNextEngine - A custom engine class for Babylon.js
  * 一个用于 Babylon.js 的自定义引擎类
@@ -43,6 +43,9 @@ export class BoxNextEngine extends Singleton<BoxNextEngine>(){
         SceneMgr.instance.activateScene("test",true);
         // Set Scene for Resource Manager
         ResMgr.instance.setScene(SceneMgr.instance.getScene("test")?.scene as Scene);
+
+        // Initialize Physics Manager
+        PhyMgr.instance.initialize();
     }
 
     /**

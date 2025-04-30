@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { onMounted, onBeforeUnmount, ref } from 'vue';
 import { BoxNextEngine } from '../scripts/babylon/framework/BoxNextEngine';
+import cannon from "cannon";
 
+window.CANNON = cannon;
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 let testScene: any = null;
 

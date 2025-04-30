@@ -12,4 +12,16 @@ alwaysApply: true
 # Directory Structure
 - 根目录`/babylon-project`包含项目的基本结构
 - `/node_modules`: 项目依赖模块
-- `/src/scripts`: 核心代码结构
+
+## Source Directory (/src)
+- `/scripts`: 核心代码结构
+- `/scripts/BoxNextEngine.ts`: 框架入口文件。
+- `/scripts/babylon/framework`: 框架代码
+- `/scripts/babylon/framework/mgr`: 各个模块管理者
+- `/scripts/babylon/framework/common`: 公共模块
+- `/scripts/babylon/framework/interface`: 各种类型的抽象接口
+- `/scripts/babylon/framework/asset`: 资源管理基类
+- `/scripts/babylon/framework/asset/loader`: 资源加载器
+- `/scripts/babylon/framework/entity`: 游戏实体对象（场景上所有物体基于实体对象拓展）
+- `/scripts/babylon/framework/component`: 游戏组件对象
+- `/scripts/babylon/framework/component/entityComponent`: 带实体节点的游戏组件对象（需要做相对父节点运动的组件使用这个类型）

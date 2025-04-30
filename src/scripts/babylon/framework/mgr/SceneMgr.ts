@@ -1,6 +1,7 @@
 import { Engine } from "@babylonjs/core";
 import type { IScene } from "../interface/IScene";
 import { Singleton } from "../common/Singleton";
+import { PhyMgr } from "./PhyMgr";
 
 /**
  * SceneMgr - Scene Manager class that handles multiple scenes
@@ -154,6 +155,7 @@ export class SceneMgr extends Singleton<SceneMgr>(){
             this.activeScenes.add(sceneId);
             scene.isActive = true;
             console.log(`Scene '${scene.name}' activated.`);
+            PhyMgr.instance.onSceneActivated(sceneId);
             
             this.refreshSortedScenes();
             // Start render loop if this is the first active scene
@@ -182,6 +184,7 @@ export class SceneMgr extends Singleton<SceneMgr>(){
             this.activeScenes.delete(sceneId);
             scene.isActive = false;
             console.log(`Scene '${scene.name}' deactivated.`);
+            PhyMgr.instance.onSceneDeactivated(sceneId);
             
             this.refreshSortedScenes();
             // Stop render loop if no active scenes
