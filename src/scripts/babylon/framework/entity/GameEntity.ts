@@ -117,7 +117,7 @@ export class GameEntity implements IGameEntity {
      * @returns The first component of the specified type, or null if not found
      *          指定类型的第一个组件，如果未找到则返回null
      */
-    getComponentByClass<T extends IGameComponent>(componentType: new () => T): T | null {
+    getComponentByClass<T extends IGameComponent>(componentType: new (...args: any[]) => T): T | null {
         for (const component of this.components.values()) {
             if (component instanceof componentType) {
                 return component as T;
@@ -135,7 +135,7 @@ export class GameEntity implements IGameEntity {
      * @returns An array of all components of the specified type, or null if none found
      *          指定类型的所有组件的数组，如果未找到则返回null
      */
-    getComponentsByClass<T extends IGameComponent>(componentType: new () => T): Array<T> | null {
+    getComponentsByClass<T extends IGameComponent>(componentType: new (...args: any[]) => T): Array<T> | null {
         const result: Array<T> = [];
         for (const component of this.components.values()) {
             if (component instanceof componentType) {

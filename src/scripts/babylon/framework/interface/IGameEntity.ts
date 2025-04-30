@@ -53,9 +53,9 @@ export interface IGameEntity {
 
     getComponent(name:string): IGameComponent | null;
 
-    getComponentByClass<T extends IGameComponent>(componentType: new () => T): T | null;
+    getComponentByClass<T extends IGameComponent>(componentType: new (...args: any[]) => T): T | null;
 
-    getComponentsByClass<T extends IGameComponent>(componentType: new () => T): Array<T> | null;
+    getComponentsByClass<T extends IGameComponent>(componentType: new (...args: any[]) => T): Array<T> | null;
 
 
     removeComponent(name:string): void;

@@ -12,7 +12,9 @@ import {
     AssetsManager,
     SceneLoader,
     PhysicsImpostor,
-    CannonJSPlugin
+    CannonJSPlugin,
+    TransformNode,
+    Mesh
 } from "@babylonjs/core";
 // import { ImportMeshAsync, LoadAssetContainerAsync } from "@babylonjs/core/Loading/sceneLoader";
 import * as BABYLON from 'babylonjs';
@@ -22,8 +24,6 @@ import { ResourceStatus, type IGameAsset, ResourceType } from "../../framework/i
 import { GLBAsset } from "../../framework/asset/GLBAsset";
 import { GameEntity } from "../../framework/entity/GameEntity";
 import type { IScene } from "../../framework/interface/IScene";
-// import { StaticMeshComponent } from "../../framework/components/StaticMeshComponent";
-import { StaticMeshEntityComponent } from "../../framework/components/entityComponents/StaticMeshEntityComponent";
 import { ColliderComponent } from "../../framework/components/ColliderComponent";
 import { PhyGameEntity } from "../../framework/entity/PhyGameEntity";
 
@@ -41,8 +41,10 @@ export class TestScene implements IScene {
     // private character: Mesh | null = null;
     // private thirdPersonController: ThirdPersonComp | null = null;
     private camera: ArcRotateCamera | null = null;
+
+    private root:Mesh | undefined;
     
-        constructor(id: string, name: string, engine: Engine, priority: number = 0) {
+    constructor(id: string, name: string, engine: Engine, priority: number = 0) {
         this.id = id;
         this.name = name;
         this.engine = engine;
@@ -73,6 +75,7 @@ export class TestScene implements IScene {
     }
     update(deltaTime: number): void {
         // Update scene components
+        // if(this.root)console.log(this.root);
     }
     
     /**
@@ -176,6 +179,10 @@ export class TestScene implements IScene {
         
         // Position the cube
         cube.position = new Vector3(0, 10, 0);
+
+        this.root = new Mesh("root_1",this.scene);
+        this.root.position = new Vector3(0, 10, 0);
+        cube.setParent(this.root);
         
         // Enable physics on the cube
         cube.physicsImpostor = new PhysicsImpostor(
@@ -185,20 +192,28 @@ export class TestScene implements IScene {
             this.scene
         );
 
+        this.root.physicsImpostor = new PhysicsImpostor(
+            this.root,
+            PhysicsImpostor.NoImpostor,
+            { mass: 1, restitution: 0.7, friction: 0.2 },
+            this.scene
+        );
+ 
+
         // Create the bird entity
-        const gameEntity = new PhyGameEntity("Bird_5", this);
-        const staticMeshComponent = new StaticMeshEntityComponent("StaticMeshComp", this);
-        staticMeshComponent.addMesh("./glb/Bird_5.glb", this.scene);
-        gameEntity.addComponent(staticMeshComponent.name, staticMeshComponent);
+        // const gameEntity = new PhyGameEntity("Bird_5", this);
+        // const staticMeshComponent = new StaticMeshEntityComponent("StaticMeshComp", this);
+        // staticMeshComponent.addMesh("./glb/Bird_5.glb", this.scene);
+        // gameEntity.addComponent(staticMeshComponent.name, staticMeshComponent);
 
-        const colliderComponent = new ColliderComponent("ColliderComp", new Vector3(10, 10, 10), new Vector3(0, 5, 0));
+        // const colliderComponent = new ColliderComponent("ColliderComp", new Vector3(10, 10, 10), new Vector3(0, 5, 0));
     
-        gameEntity.addComponent(colliderComponent.name, colliderComponent);
-        // colliderComponent.setPhysicsProperties(1, 0.5, 0.5);
-        // colliderComponent.setUseGravity(false);  
-        gameEntity.transform.position.y = 50;
+        // gameEntity.addComponent(colliderComponent.name, colliderComponent);
+        // // colliderComponent.setPhysicsProperties(1, 0.5, 0.5);
+        // // colliderComponent.setUseGravity(false);  
+        // gameEntity.transform.position.y = 50;
 
-        console.log(gameEntity);
+        // console.log(gameEntity);
     }
     
     /**

@@ -16,6 +16,11 @@ export class StaticMeshComponent extends BaseComponent {
     // 是否已绑定 / Whether the mesh is bound
     private isBind: boolean = false;
 
+    constructor(name: string, url: string, scene?: Scene) {
+        super(name);
+        this.addMesh(url, scene);
+    }
+
     /**
      * 附加到游戏实体 / Attach to game entity
      * @param gameEntity 游戏实体 / Game entity

@@ -1,9 +1,8 @@
 import { BaseComponent } from "./BaseComponent";
-import type { IGameEntity } from "../interface/IGameEntity";
-import { Vector3, PhysicsImpostor, CannonJSPlugin, MeshBuilder, Mesh, TransformNode } from "@babylonjs/core";
+import { Vector3, PhysicsImpostor, MeshBuilder, Mesh, TransformNode } from "@babylonjs/core";
 import type { PhysicsImpostorParameters } from "@babylonjs/core";
 import type { PhyGameEntity } from "../entity/PhyGameEntity";
-import { Const } from "../common/Const";
+
 export class ColliderComponent extends BaseComponent {
     /**
      * 碰撞器的尺寸
@@ -55,6 +54,11 @@ export class ColliderComponent extends BaseComponent {
      */
     public enableCCD: boolean = false;
 
+    /**
+     * 碰撞回调函数
+     */
+    public onCollide: ((other: ColliderComponent) => void) | null = null;
+
     constructor(name: string, size: Vector3, offset: Vector3 = new Vector3(0, 0, 0)) {
         super(name);
         this.size = size;
@@ -93,10 +97,11 @@ export class ColliderComponent extends BaseComponent {
                 { size: this.size.x },
                 this.entity.scene.scene
             );
-            this.collisionMesh.isVisible = true; // 隐藏碰撞器网格
+            this.collisionMesh.isVisible = true;
             this.collisionMesh.position = this.entity.transform.position;
             this.collisionMesh.rotation = this.entity.transform.rotation;
             this.collisionMesh.scaling = this.entity.transform.scaling;
+            
             this.entity.transform.getChildren().forEach(child => {
                 child.parent = this.collisionMesh;
                 if(this.offset.length() > 0 && child instanceof TransformNode){
@@ -111,6 +116,9 @@ export class ColliderComponent extends BaseComponent {
                 impostorParams,
                 this.entity.scene.scene
             );
+
+            // 注册碰撞事件
+            this.registerCollisionEvent();
         }else{
             this.physicsImpostor = new PhysicsImpostor(
                 this.entity.transform as Mesh,
@@ -120,6 +128,42 @@ export class ColliderComponent extends BaseComponent {
             );
         }
     }
+
+    /**
+     * 注册碰撞事件
+     */
+    private registerCollisionEvent(): void {
+        if (!this.collisionMesh || !this.physicsImpostor) return;
+        this.physicsImpostor.onCollideEvent = (collider,other) => {
+            // if (!this.onCollide) return;
+            console.log("onCollideEvent");
+            // console.log(collider);
+            console.log(other);
+            // // 查找碰撞的实体
+            // const otherMesh = collider.object as Mesh;
+            // const otherEntity = this.findEntityByMesh(otherMesh);
+        }
+
+        // this.physicsImpostor.registerOnPhysicsCollide(this.physicsImpostor, (collider,other) => {
+        //     console.log("registerOnPhysicsCollide");
+        //     console.log(collider);
+        //     console.log(other);
+        // });
+    }
+
+    // /**
+    //  * 通过网格查找实体
+    //  */
+    // private findEntityByMesh(mesh: Mesh): PhyGameEntity | null {
+    //     if (!this.entity?.scene) return null;
+        
+    //     for (const entity of this.entity.scene.entities) {
+    //         if (entity.transform === mesh) {
+    //             return entity as PhyGameEntity;
+    //         }
+    //     }
+    //     return null;
+    // }
 
     /**
      * 设置物理属性
