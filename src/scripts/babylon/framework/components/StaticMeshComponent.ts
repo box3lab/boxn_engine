@@ -16,9 +16,11 @@ export class StaticMeshComponent extends BaseComponent {
     // 是否已绑定 / Whether the mesh is bound
     private isBind: boolean = false;
 
-    constructor(name: string, url: string, scene?: Scene) {
+    constructor(name: string, url?: string, scene?: Scene) {
         super(name);
-        this.addMesh(url, scene);
+        if(url && scene){
+            this.addMesh(url, scene);
+        }
     }
 
     /**
@@ -61,7 +63,7 @@ export class StaticMeshComponent extends BaseComponent {
      * @param url 模型资源URL / Model resource URL
      * @param scene 场景引用 / Scene reference
      */
-    public addMesh(url:string, scene?:Scene){
+    public addMesh(url:string, scene:Scene){
         ResMgr.instance.loadResource(url, GLBAsset,undefined,scene).then((mesh: GLBAsset) => {
                 if(!mesh) return;
                 this.meshAssets = mesh;
