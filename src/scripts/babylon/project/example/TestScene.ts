@@ -13,6 +13,7 @@ import {
     SceneLoader,
     PhysicsImpostor,
     CannonJSPlugin,
+    HavokPlugin,
     TransformNode,
     Mesh
 } from "@babylonjs/core";
@@ -26,6 +27,11 @@ import { GameEntity } from "../../framework/entity/GameEntity";
 import type { IScene } from "../../framework/interface/IScene";
 import { ColliderComponent } from "../../framework/components/ColliderComponent";
 import { PhyGameEntity } from "../../framework/entity/PhyGameEntity";
+import HavokPhysics from "@babylonjs/havok";
+
+// 直接引用 node_modules 中的 WASM 文件
+// Vite server.fs.allow 设置允许访问 node_modules
+const wasmPath = '/node_modules/.pnpm/@babylonjs+havok@1.3.10/node_modules/@babylonjs/havok/lib/esm/HavokPhysics.wasm';
 
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
@@ -50,14 +56,19 @@ export class TestScene implements IScene {
         this.engine = engine;
         this.priority = priority;
         this.scene = new Scene(this.engine);
-        this.scene.enablePhysics(new Vector3(0, -9.81, 0), new CannonJSPlugin());
-        
-        // Setup scene
         this.setupCamera();
         this.setupLights();
-        this.createGround();
-        this.createPanel();
-        this.createCharacter();
+        // 直接使用 node_modules 中的 WASM 文件路径初始化物理引擎
+        HavokPhysics({
+            locateFile: () => wasmPath
+        }).then((havok) => {
+            this.scene.enablePhysics(new Vector3(0, -9.81, 0), new HavokPlugin(true,havok));
+            this.createGround();
+            this.createPanel();
+            this.createCharacter();
+        });
+
+
         
         // // Start the render loop
         // this.engine.runRenderLoop(() => {
