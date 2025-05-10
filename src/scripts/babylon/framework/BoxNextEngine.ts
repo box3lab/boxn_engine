@@ -45,7 +45,7 @@ export class BoxNextEngine extends Singleton<BoxNextEngine>(){
         ResMgr.instance.setScene(SceneMgr.instance.getScene("test")?.scene as Scene);
 
         // Initialize Physics Manager
-        PhyMgr.instance.initialize();
+        // PhyMgr.instance.initialize();
     }
 
     /**

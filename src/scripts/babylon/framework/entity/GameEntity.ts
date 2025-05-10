@@ -2,6 +2,8 @@ import type { IGameEntity } from "../interface/IGameEntity";
 import type { IGameComponent } from "../interface/IGameComponent";
 import { TransformNode } from "@babylonjs/core/Meshes/transformNode";
 import type { IScene } from "../interface/IScene";
+import type { Mesh, PhysicsBody } from "@babylonjs/core";
+import { RootComponent } from "../components/RootComponent";
 
 /**
  * GameEntity class implements the IGameEntity interface.
@@ -16,16 +18,25 @@ export class GameEntity implements IGameEntity {
      * 实体的名称。
      */
     public name: string;
+    
+
     /**
-     * The transform of the entity.
-     * 实体的变换节点。
+     * The root component of the entity.
+     * 实体的根组件。
      */
-    public transform: TransformNode;
+    public root: RootComponent;
+
     /**
      * The components of the entity.
      * 实体的组件集合。
      */
     public components: Map<string, IGameComponent> = new Map<string, IGameComponent>();
+
+     /**
+      * The physics body of the entity.
+      * 实体的物理体。
+      */
+     public physicsBody: PhysicsBody | undefined;
 
     /**
      * The scene of the entity.
@@ -44,7 +55,8 @@ export class GameEntity implements IGameEntity {
      */
     constructor(name: string = "", scene?: IScene) {
         this.name = name;
-        this.transform = scene ? new TransformNode(name,scene.scene) : new TransformNode(name);
+        this.root = new RootComponent(scene ? new TransformNode(name,scene.scene) : new TransformNode(name));
+        this.addComponent("RootComponent", this.root);
         this.scene = scene;
     }
 
@@ -74,7 +86,7 @@ export class GameEntity implements IGameEntity {
         this.components.clear();
         
         // Dispose transform
-        this.transform.dispose();
+        this.root.dispose();
     }
 
     /**
@@ -172,14 +184,14 @@ export class GameEntity implements IGameEntity {
     }
 
     /**
-     * Gets the transform of the entity.
-     * 获取实体的变换。
+     * Gets the root component of the entity.
+     * 获取实体的根组件。
      * 
-     * @returns The transform of the entity
-     *          实体的变换
+     * @returns The root component of the entity
+     *          实体的根组件
      */
-    getTransform(): TransformNode {
-        return this.transform;
+    getRoot(): RootComponent {
+        return this.root;
     }
 
     /**
@@ -192,7 +204,7 @@ export class GameEntity implements IGameEntity {
     setScene(scene: IScene): void {
         this.scene = scene;
         if (this.scene) {
-            this.transform._scene = this.scene.scene;
+            this.root.root._scene = this.scene.scene;
         }
     }
 }

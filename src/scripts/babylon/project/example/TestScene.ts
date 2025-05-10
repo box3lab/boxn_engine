@@ -8,25 +8,24 @@ import {
     Color3,
     ArcRotateCamera,
     // Mesh
-    AbstractMesh,
-    AssetsManager,
-    SceneLoader,
-    PhysicsImpostor,
-    CannonJSPlugin,
     HavokPlugin,
     TransformNode,
-    Mesh
+    PhysicsAggregate,
+    PhysicsShapeType,
+    Quaternion,
+    PhysicsBody,
+    PhysicsMotionType,
+    PhysicsShapeContainer,
+    PhysicsShapeBox,
+    PhysicsEventType,
+    Ray,
+    PickingInfo,
+    AbstractMesh,
+    type Nullable
 } from "@babylonjs/core";
-// import { ImportMeshAsync, LoadAssetContainerAsync } from "@babylonjs/core/Loading/sceneLoader";
 import * as BABYLON from 'babylonjs';
 import 'babylonjs-loaders';
-import { ResMgr } from "../../framework/mgr/ResMgr";    
-import { ResourceStatus, type IGameAsset, ResourceType } from "../../framework/interface/IGameAsset";
-import { GLBAsset } from "../../framework/asset/GLBAsset";
-import { GameEntity } from "../../framework/entity/GameEntity";
 import type { IScene } from "../../framework/interface/IScene";
-import { ColliderComponent } from "../../framework/components/ColliderComponent";
-import { PhyGameEntity } from "../../framework/entity/PhyGameEntity";
 import HavokPhysics from "@babylonjs/havok";
 
 /**
@@ -40,11 +39,12 @@ export class TestScene implements IScene {
     isLoaded: boolean = false;       // Whether scene is loaded / 场景是否已加载
     priority: number = 0;            // Render priority / 渲染优先级（较低的优先渲染）
     private engine: Engine;
+    private physicsEngine: HavokPlugin | undefined;
     // private character: Mesh | null = null;
     // private thirdPersonController: ThirdPersonComp | null = null;
     private camera: ArcRotateCamera | null = null;
 
-    private root:Mesh | undefined;
+    private root:TransformNode | undefined;
     
     constructor(id: string, name: string, engine: Engine, priority: number = 0) {
         this.id = id;
@@ -57,7 +57,8 @@ export class TestScene implements IScene {
         HavokPhysics({
             locateFile: (fileName) => `${import.meta.env.BASE_URL}${fileName}`
         }).then((havok) => {
-            this.scene.enablePhysics(new Vector3(0, -9.81, 0), new HavokPlugin(true,havok));
+            this.physicsEngine = new HavokPlugin(true,havok);
+            this.scene.enablePhysics(new Vector3(0, -9.81, 0), this.physicsEngine);
             this.createGround();
             this.createPanel();
             this.createCharacter();
@@ -99,8 +100,8 @@ export class TestScene implements IScene {
         );
         
         // Camera settings
-        this.camera.lowerRadiusLimit = 200;
-        this.camera.upperRadiusLimit = 200;
+        this.camera.lowerRadiusLimit = 100;
+        this.camera.upperRadiusLimit = 100;
         this.camera.wheelDeltaPercentage = 0.01;
         // this.camera.position = new Vector3(500, 200, 200);
     }
@@ -123,26 +124,29 @@ export class TestScene implements IScene {
      */
     private createGround(): void {
         // Create a ground
-        const ground = MeshBuilder.CreateGround(
-            "ground", 
-            { width: 20, height: 20 }, 
-            this.scene
-        );
+        // const ground = MeshBuilder.CreateGround(
+        //     "ground", 
+        //     { width: 20, height: 20 }, 
+        //     this.scene
+        // );
         
-        // Create material for the ground
-        const groundMaterial = new StandardMaterial("groundMaterial", this.scene);
-        groundMaterial.diffuseColor = new Color3(0.5, 0.5, 0.5);
+        // // Create material for the ground
+        // const groundMaterial = new StandardMaterial("groundMaterial", this.scene);
+        // groundMaterial.diffuseColor = new Color3(0.5, 0.5, 0.5);
         
-        // Apply material to ground
-        ground.material = groundMaterial;
+        // // Apply material to ground
+        // ground.material = groundMaterial;
 
         // Add physics impostor to ground
-        ground.physicsImpostor = new PhysicsImpostor(
-            ground,
-            PhysicsImpostor.BoxImpostor,
-            { mass: 0, restitution: 0.2, friction: 0.5 },
-            this.scene
-        );
+        // ground.physicsImpostor = new PhysicsImpostor(
+        //     ground,
+        //     PhysicsImpostor.BoxImpostor,
+        //     { mass: 0, restitution: 0.2, friction: 0.5 },
+        //     this.scene
+        // );
+
+        // const groundAggregate = new PhysicsAggregate(ground, 
+        //     PhysicsShapeType.BOX, { mass: 0, restitution:0.75, friction:0.5, mesh:ground}, this.scene);
     }
     
     /**
@@ -152,12 +156,12 @@ export class TestScene implements IScene {
         // Create a panel
         const panel = MeshBuilder.CreateBox(
             "panel", 
-            { width: 5, height: 0.1, depth: 5 }, 
+            { width: 50, height: 1, depth: 50 }, 
             this.scene
         );
         
         // Position panel above ground
-        panel.position.y = 0.5;
+        panel.position.y = 0;
         
         // Create material for the panel
         const panelMaterial = new StandardMaterial("panelMaterial", this.scene);
@@ -165,16 +169,22 @@ export class TestScene implements IScene {
         
         // Apply material to panel
         panel.material = panelMaterial;
+
+         const panelAggregate = new PhysicsAggregate(panel, 
+            PhysicsShapeType.BOX, { mass: 0, restitution:0.75, friction:0.5, mesh:panel}, this.scene);
+        // panelAggregate.body.setEventMask(0x1);
     }
     
     /**
      * Create character and setup third person controller
      */
     private async createCharacter(): Promise<void> {
-        // Create physics cube using Babylon.js native physics
+        this.root = new TransformNode("root", this.scene);
+        this.root.position = new Vector3(0, 5, 0);
+        console.log("this.root.uniqueId",this.root.uniqueId);
         const cube = MeshBuilder.CreateBox(
             "physicsCube",
-            { size: 2 },
+            { height: 8, width: 5, depth: 5},
             this.scene
         );
         
@@ -182,44 +192,155 @@ export class TestScene implements IScene {
         const cubeMaterial = new StandardMaterial("cubeMaterial", this.scene);
         cubeMaterial.diffuseColor = new Color3(1, 0, 0); // Red color
         cube.material = cubeMaterial;
-        
-        // Position the cube
-        cube.position = new Vector3(0, 10, 0);
 
-        this.root = new Mesh("root_1",this.scene);
-        this.root.position = new Vector3(0, 10, 0);
-        cube.setParent(this.root);
-        
-        // Enable physics on the cube
-        cube.physicsImpostor = new PhysicsImpostor(
-            cube,
-            PhysicsImpostor.BoxImpostor,
-            { mass: 1, restitution: 0.7, friction: 0.2 },
+        cube.parent = this.root;
+        cube.position = new Vector3(0, 0, 0);
+
+      
+        // cube.parent = this.root;
+
+        const cube2 = MeshBuilder.CreateBox(
+            "physicsCube2",
+            { height: 5, width: 5, depth: 5},
             this.scene
         );
+        
+        // Create material for the cube
+        const cubeMaterial2 = new StandardMaterial("cubeMaterial2", this.scene);
+        cubeMaterial2.diffuseColor = new Color3(0, 0, 0); // Red color
+        cube2.material = cubeMaterial2;
 
-        this.root.physicsImpostor = new PhysicsImpostor(
-            this.root,
-            PhysicsImpostor.NoImpostor,
-            { mass: 1, restitution: 0.7, friction: 0.2 },
-            this.scene
-        );
+        cube2.parent = this.root;
+        cube2.position = new Vector3(0, 4, 0);
+
+        const cubeShape = new PhysicsShapeBox( new Vector3(0, 0, 0),
+            Quaternion.Identity(),
+        new Vector3(5, 8, 5),
+            this.scene);
+        const cubeShape2 = new PhysicsShapeBox( new Vector3(0, 0, 0),
+            Quaternion.Identity(),
+            new Vector3(5, 5, 5),
+            this.scene);
  
+        // const cubeAggregate = new PhysicsAggregate(cube, 
+        //     PhysicsShapeType.BOX, { mass: 1, restitution:0.75, friction:0.5, mesh:cube}, this.scene);
+        // const cubeAggregate2 = new PhysicsAggregate(cube2, 
+        //     PhysicsShapeType.BOX, { mass: 1, restitution:0.75, friction:0.5, mesh:cube2}, this.scene);
 
-        // Create the bird entity
-        // const gameEntity = new PhyGameEntity("Bird_5", this);
-        // const staticMeshComponent = new StaticMeshEntityComponent("StaticMeshComp", this);
-        // staticMeshComponent.addMesh("./glb/Bird_5.glb", this.scene);
-        // gameEntity.addComponent(staticMeshComponent.name, staticMeshComponent);
+        const shape = new PhysicsShapeContainer(this.scene);
+        shape.addChildFromParent(this.root,cubeShape,cube);
+        shape.addChildFromParent(this.root,cubeShape2,cube2);
 
-        // const colliderComponent = new ColliderComponent("ColliderComp", new Vector3(10, 10, 10), new Vector3(0, 5, 0));
-    
-        // gameEntity.addComponent(colliderComponent.name, colliderComponent);
-        // // colliderComponent.setPhysicsProperties(1, 0.5, 0.5);
-        // // colliderComponent.setUseGravity(false);  
-        // gameEntity.transform.position.y = 50;
+        const body = new PhysicsBody(this.root, 
+            PhysicsMotionType.DYNAMIC, false, this.scene);
+        shape.material = {friction: 0.2, restitution: 0};
+        body.shape = shape;
 
-        // console.log(gameEntity);
+        body.setMassProperties ({
+            mass: 1,
+        });
+        
+        // body.setCollisionCallbackEnabled(true);
+        // body.shape.isTrigger = false;
+        // const observable = body.getCollisionObservable();
+        // const observer = observable.add((collisionEvent) => {
+        //   // Process collisions for the player
+        //   console.log("collisionEvent",collisionEvent);
+        // //   if(collisionEvent.type === PhysicsEventType.COLLISION_STARTED){
+        // //     console.log("碰撞开始");
+        // //     // console.log(collisionEvent.collidedAgainstIndex);
+        // //     console.log(collisionEvent.collidedAgainst.transformNode.uniqueId);
+        // //     console.log(collisionEvent.collidedAgainst.transformNode.name);
+        // //   }
+        // });
+
+        // const cube3 = MeshBuilder.CreateBox(
+        //     "Trigger3",
+        //     { height: 10, width: 10, depth: 10},
+        //     this.scene
+        // );
+        // // cube3.position = new Vector3(0, 30, 0);
+        // // cube3.parent = this.root;
+        // // Create material for the cube
+        // const cubeMaterial3 = new StandardMaterial("cubeMaterial3", this.scene);
+        // cubeMaterial3.diffuseColor = new Color3(0, 0, 0); // Red color
+        // cube3.material = cubeMaterial3;
+
+        // const cubeShape3 = new PhysicsShapeBox( new Vector3(0, 0, 0),
+        //     Quaternion.Identity(),
+        //     new Vector3(10, 10, 10),
+        //     this.scene);
+        // cubeShape3.isTrigger = true;
+        // const body3 = new PhysicsBody(cube3 ,
+        //     PhysicsMotionType.STATIC, false, this.scene);
+        // body3.shape = cubeShape3;
+        // // body3.setCollisionCallbackEnabled(true);
+        // // body3.setCollisionEndedCallbackEnabled(true);
+        // body3.disablePreStep = true;
+        // body3.shape.isTrigger = true;
+
+        // cube3.parent = this.root;
+        // const observable3 = body3.getCollisionObservable();
+        // const observer3 = observable3.add((collisionEvent) => {
+        //     console.log("collisionEvent",collisionEvent);
+        // });
+
+        // this.physicsEngine?.onTriggerCollisionObservable.add((collisionEvent) => {
+        //     console.log("collisionEvent",collisionEvent);
+        // });
+        // 射线检测
+        this.scene.onPointerDown = (evt, pickResult) => {
+            // if (pickResult.hit) {
+            //     console.log("Hit:", pickResult.pickedMesh?.name);
+            //     // 可以根据pickedMesh.name判断击中了哪个碰撞器
+            // }
+            const ray: Ray = new Ray(new Vector3(0, 3, -10), new Vector3(0, 0, 1), 10);
+            const rayResult: Nullable<PickingInfo> = this.scene.pickWithRay(ray, (mesh:AbstractMesh) => {
+                // return mesh !== cube; // 排除子弹自身
+                return true;
+            });
+
+            if (rayResult && rayResult.hit) {
+                console.log("Hit1:", rayResult.pickedMesh?.name);
+                // // 处理击中逻辑
+                // if (rayResult.pickedMesh && rayResult.pickedMesh.name === "enemy") {
+                //     (rayResult.pickedMesh as any).takeDamage(damageAmount); // 假设敌人有takeDamage方法
+                // }
+                
+                // if (pickResult.pickedPoint) {
+                //     createExplosionEffect(pickResult.pickedPoint);
+                // }
+            }
+
+            const ray2: Ray = new Ray(new Vector3(0, 10, -10), new Vector3(0, 0, 1), 10);
+            const rayResult2: Nullable<PickingInfo> = this.scene.pickWithRay(ray2, (mesh:AbstractMesh) => {
+                // return mesh !== cube; // 排除子弹自身
+                return true;
+            });
+
+            if (rayResult2 && rayResult2.hit) {
+                console.log("Hit2:", rayResult2.pickedMesh?.name);
+                // // 处理击中逻辑
+                // if (rayResult.pickedMesh && rayResult.pickedMesh.name === "enemy") {
+                //     (rayResult.pickedMesh as any).takeDamage(damageAmount); // 假设敌人有takeDamage方法
+                // }
+                
+                // if (pickResult.pickedPoint) {
+                //     createExplosionEffect(pickResult.pickedPoint);
+                // }
+            }
+        };
+        // cube3.parent = this.root;
+      
+        // You have two options:
+        // Body-specific callback
+        // const observable = cubeAggregate.body.getCollisionObservable();
+        // const observer = observable.add((collisionEvent) => {
+        // // Process collisions for the player
+        //     console.log(collisionEvent);
+        // });
+
+
     }
     
     /**

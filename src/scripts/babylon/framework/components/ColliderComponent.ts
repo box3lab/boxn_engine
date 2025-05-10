@@ -1,7 +1,8 @@
 import { BaseComponent } from "./BaseComponent";
 import { Vector3, PhysicsImpostor, MeshBuilder, Mesh, TransformNode } from "@babylonjs/core";
 import type { PhysicsImpostorParameters } from "@babylonjs/core";
-import type { PhyGameEntity } from "../entity/PhyGameEntity";
+import { PhyMgr } from "../mgr/PhyMgr";
+import type { GameEntity } from "../entity/GameEntity";
 
 export class ColliderComponent extends BaseComponent {
     /**
@@ -45,14 +46,14 @@ export class ColliderComponent extends BaseComponent {
     public restitution: number = 0.8;
 
     /**
-     * 是否受重力影响
+     * 是否静态
      */
-    public useGravity: boolean = true;
+    public isStatic: boolean = true;
 
-    /**
-     * 是否启用连续碰撞检测
-     */
-    public enableCCD: boolean = false;
+    // /**
+    //  * 是否启用连续碰撞检测
+    //  */
+    // public enableCCD: boolean = false;
 
     /**
      * 碰撞回调函数
@@ -69,7 +70,7 @@ export class ColliderComponent extends BaseComponent {
      * 将组件附加到实体
      * @param gameEntity 要附加的实体
      */
-    public attachTo(gameEntity: PhyGameEntity): void {
+    public attachTo(gameEntity: GameEntity): void {
         super.attachTo(gameEntity);
         this.initializePhysics();
     }
@@ -78,10 +79,10 @@ export class ColliderComponent extends BaseComponent {
      * 初始化物理系统
      */
     private initializePhysics(): void {
-        if (!this.entity || !this.entity.transform || !this.entity.scene?.scene) return;
+        if (!this.entity || !this.entity.root || !this.entity.scene?.scene) return;
 
         // 判断是否是物理实体
-        let isPhysical = this.entity.transform instanceof Mesh;
+        let isPhysical = this.entity.root.root instanceof Mesh;
 
         // 创建物理模拟器
         const impostorParams: PhysicsImpostorParameters = {
@@ -98,34 +99,38 @@ export class ColliderComponent extends BaseComponent {
                 this.entity.scene.scene
             );
             this.collisionMesh.isVisible = true;
-            this.collisionMesh.position = this.entity.transform.position;
-            this.collisionMesh.rotation = this.entity.transform.rotation;
-            this.collisionMesh.scaling = this.entity.transform.scaling;
+            this.collisionMesh.position = this.entity.root.root.position;
+            this.collisionMesh.rotation = this.entity.root.root.rotation;
+            this.collisionMesh.scaling = this.entity.root.root.scaling;
             
-            this.entity.transform.getChildren().forEach(child => {
+            this.entity.root.root.getChildren().forEach(child => {
                 child.parent = this.collisionMesh;
                 if(this.offset.length() > 0 && child instanceof TransformNode){
                     child.position = child.position.subtract(this.offset);
                 }
             });
-            this.entity.transform.dispose();
-            this.entity.transform = this.collisionMesh;
-            this.physicsImpostor = new PhysicsImpostor(
-                this.collisionMesh,
-                PhysicsImpostor.BoxImpostor,
-                impostorParams,
-                this.entity.scene.scene
-            );
+            this.entity.root.root.dispose();
+            this.entity.root.root = this.collisionMesh;
+            
+            PhyMgr.instance.addPhysicsImpostor
+                (this, this.collisionMesh, PhysicsImpostor.BoxImpostor, impostorParams);
+
+            this.physicsImpostor = this.collisionMesh.physicsImpostor;
 
             // 注册碰撞事件
             this.registerCollisionEvent();
         }else{
             this.physicsImpostor = new PhysicsImpostor(
-                this.entity.transform as Mesh,
+                this.entity.root.root as Mesh,
                 PhysicsImpostor.NoImpostor,
                 impostorParams,
                 this.entity.scene.scene
             );
+
+            PhyMgr.instance.addPhysicsImpostor
+                (this, this.entity.root.root as Mesh, PhysicsImpostor.BoxImpostor, impostorParams);
+
+            this.physicsImpostor = (this.entity.root.root as Mesh).physicsImpostor;
         }
     }
 
@@ -137,34 +142,12 @@ export class ColliderComponent extends BaseComponent {
         this.physicsImpostor.onCollideEvent = (collider,other) => {
             // if (!this.onCollide) return;
             console.log("onCollideEvent");
-            // console.log(collider);
             console.log(other);
             // // 查找碰撞的实体
-            // const otherMesh = collider.object as Mesh;
-            // const otherEntity = this.findEntityByMesh(otherMesh);
+            const colliderComponent = PhyMgr.instance.getColliderComponent(other.uniqueId);
+            if(colliderComponent)this.onCollide?.call(this,colliderComponent);
         }
-
-        // this.physicsImpostor.registerOnPhysicsCollide(this.physicsImpostor, (collider,other) => {
-        //     console.log("registerOnPhysicsCollide");
-        //     console.log(collider);
-        //     console.log(other);
-        // });
     }
-
-    // /**
-    //  * 通过网格查找实体
-    //  */
-    // private findEntityByMesh(mesh: Mesh): PhyGameEntity | null {
-    //     if (!this.entity?.scene) return null;
-        
-    //     for (const entity of this.entity.scene.entities) {
-    //         if (entity.transform === mesh) {
-    //             return entity as PhyGameEntity;
-    //         }
-    //     }
-    //     return null;
-    // }
-
     /**
      * 设置物理属性
      * @param mass 质量
@@ -184,14 +167,14 @@ export class ColliderComponent extends BaseComponent {
     }
 
     /**
-     * 设置是否受重力影响
-     * @param useGravity 是否受重力影响
+     * 设置是否静态
+     * @param isStatic 是否静态
      */
-    public setUseGravity(useGravity: boolean): void {
-        this.useGravity = useGravity;
+    public setIsStatic(isStatic: boolean): void {
+        this.isStatic = isStatic;
 
         if (this.physicsImpostor) {
-            this.physicsImpostor.setParam("mass", useGravity ? this.mass : 0);
+            this.physicsImpostor.setParam("mass", isStatic ? this.mass : 0);
         }
     }
 
@@ -228,8 +211,7 @@ export class ColliderComponent extends BaseComponent {
      */
     public dispose(): void {
         if (this.physicsImpostor) {
-            this.physicsImpostor.dispose();
-            this.physicsImpostor = null;
+            PhyMgr.instance.removePhysicsImpostor(this.collisionMesh as Mesh);
         }
         if (this.collisionMesh) {
             this.collisionMesh.dispose();

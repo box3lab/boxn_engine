@@ -3,16 +3,20 @@ import { CannonJSPlugin } from "@babylonjs/core/Physics/Plugins/cannonJSPlugin";
 import { Singleton } from "../common/Singleton";
 import { Const } from "../common/Const";
 import { SceneMgr } from "./SceneMgr";
+import type { ColliderComponent } from "../components/ColliderComponent";
+import type { IPhysicsEngine } from "@babylonjs/core/Physics/IPhysicsEngine";
+import type { Nullable } from "babylonjs";
 
 /**
  * PhyMgr - Physics Manager class that handles physics simulation
- * 物理管理器类，用于处理物理模拟
+ * 物理管理器类v1，用于处理物理模拟
  */
 export class PhyMgr extends Singleton<PhyMgr>() {
     private gravity: Vector3 = Const.GRAVITY;
     private physicsPlugin: CannonJSPlugin | null = null;
     private physicsEnabled: boolean = false;
     private activeSceneIds: Set<string> = new Set();
+    private colliderComponents: Map<number, ColliderComponent> = new Map();
 
     /**
      * Initialize physics for all active scenes
@@ -44,6 +48,12 @@ export class PhyMgr extends Singleton<PhyMgr>() {
                 this.activeSceneIds.add(scene.id);
             }
         }
+    }
+
+    public getPhysicsEngine(sceneId:string):Nullable<IPhysicsEngine>{
+        const scene = SceneMgr.instance.getScene(sceneId);
+        if(!scene)return null;
+        return scene.scene.getPhysicsEngine();
     }
 
     /**
@@ -89,11 +99,13 @@ export class PhyMgr extends Singleton<PhyMgr>() {
      * @param options Physics impostor options / 物理碰撞体选项
      */
     public addPhysicsImpostor(
-        sceneId: string,
+        colliderComponent: ColliderComponent,
         mesh: Mesh,
         type: number = PhysicsImpostor.BoxImpostor,
         options: { mass?: number; friction?: number; restitution?: number } = {}
     ): void {
+        const sceneId = colliderComponent.entity?.scene?.id;
+        if(!sceneId)return;
         if (!this.physicsEnabled || !this.activeSceneIds.has(sceneId)) {
             console.warn("Physics not initialized for scene:", sceneId);
             return;
@@ -112,6 +124,8 @@ export class PhyMgr extends Singleton<PhyMgr>() {
             { mass, friction, restitution },
             scene.scene
         );
+
+        this.colliderComponents.set(mesh.physicsImpostor.uniqueId, colliderComponent);
     }
 
     /**
@@ -121,6 +135,7 @@ export class PhyMgr extends Singleton<PhyMgr>() {
      */
     public removePhysicsImpostor(mesh: AbstractMesh): void {
         if (mesh.physicsImpostor) {
+            this.colliderComponents.delete(mesh.physicsImpostor.uniqueId);
             mesh.physicsImpostor.dispose();
             mesh.physicsImpostor = null;
         }
@@ -168,6 +183,10 @@ export class PhyMgr extends Singleton<PhyMgr>() {
                 this.activeSceneIds.delete(sceneId);
             }
         }
+    }
+
+    public getColliderComponent(uniqueId: number): ColliderComponent | undefined {
+        return this.colliderComponents.get(uniqueId);
     }
 
     /**

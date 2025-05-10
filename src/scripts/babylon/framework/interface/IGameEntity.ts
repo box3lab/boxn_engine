@@ -2,6 +2,8 @@ import type { IGameComponent } from "./IGameComponent";
 import type { TransformNode } from "@babylonjs/core/Meshes/transformNode";
 import type { IScene } from "./IScene";
 import type { Mesh } from "@babylonjs/core/Meshes";
+import type { RootComponent } from "../components/RootComponent";
+import type { PhysicsBody } from "@babylonjs/core/Physics/v2";
 /**
  * Game Entity Interface
  * 游戏实体接口
@@ -16,11 +18,12 @@ export interface IGameEntity {
      * 实体的名称。
      */
     name: string;
+   
     /**
-     * The transform of the entity.
-     * 实体的变换节点。
+     * The root component of the entity.
+     * 实体的根组件。
      */
-    transform: TransformNode | Mesh;
+    root: RootComponent;
     /**
      * The components of the entity.
      * 实体的组件集合。
@@ -68,13 +71,14 @@ export interface IGameEntity {
      */
     getName(): string;
 
+
     /**
-     * Gets the transform of the entity.
-     * 获取实体的变换。
+     * Gets the root component of the entity.
+     * 获取实体的根组件。
      * 
-     * @returns The transform of the entity
+     * @returns The root component of the entity
      */
-    getTransform(): TransformNode;
+    getRoot(): RootComponent;
 
     /**
      * Sets the scene of the entity.
@@ -83,4 +87,10 @@ export interface IGameEntity {
      * @param scene - The scene to set
      */
     setScene(scene: IScene): void;
+
+    /**
+     * The physics body of the entity.
+     * 实体的物理体。
+     */
+    physicsBody: PhysicsBody | undefined;
 }
