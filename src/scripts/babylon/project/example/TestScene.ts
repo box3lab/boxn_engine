@@ -21,12 +21,21 @@ import {
     Ray,
     PickingInfo,
     AbstractMesh,
-    type Nullable
+    type Nullable,
+    EnvironmentHelper,
+    DefaultRenderingPipeline,
+    Color4,
+    DirectionalLight,
+    ShadowGenerator,
+    PBRMaterial
 } from "@babylonjs/core";
 import * as BABYLON from 'babylonjs';
 import 'babylonjs-loaders';
 import type { IScene } from "../../framework/interface/IScene";
 import HavokPhysics from "@babylonjs/havok";
+import { GameEntity } from "../../framework/entity/GameEntity";
+import { SkeletonMeshComponent } from "../../framework/components/mesh/SkeletonMeshComponent";
+import { SkeletonAnimationComponent } from "../../framework/components/SkeletonAnimationComponent";
 
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
@@ -52,8 +61,36 @@ export class TestScene implements IScene {
         this.engine = engine;
         this.priority = priority;
         this.scene = new Scene(this.engine);
+        
+        // 设置场景背景色
+        this.scene.clearColor = new Color4(0.1, 0.1, 0.1, 1);
+        
+        // 设置环境光
+        const envHelper = this.scene.createDefaultEnvironment({
+            createGround: false,
+            createSkybox: true,
+            environmentTexture: "https://playground.babylonjs.com/textures/environment.env",
+            cameraExposure: 1.0,
+            backgroundYRotation: Math.PI / 2,
+            sizeAuto: true,
+            skyboxSize: 1000,
+            groundSize: 1000,
+        });
+
+        // 添加主方向光
+        const dirLight = new DirectionalLight("dirLight", new Vector3(-1, -2, -1), this.scene);
+        dirLight.position = new Vector3(20, 40, 20);
+        dirLight.intensity = 0.7;
+
+        // 设置阴影
+        const shadowGenerator = new ShadowGenerator(1024, dirLight);
+        shadowGenerator.useBlurExponentialShadowMap = true;
+        shadowGenerator.blurKernel = 32;
+        shadowGenerator.darkness = 0.4;
+
         this.setupCamera();
         this.setupLights();
+        this.setupPostProcessing();
         HavokPhysics({
             locateFile: (fileName) => `${import.meta.env.BASE_URL}${fileName}`
         }).then((havok) => {
@@ -163,14 +200,17 @@ export class TestScene implements IScene {
         // Position panel above ground
         panel.position.y = 0;
         
-        // Create material for the panel
-        const panelMaterial = new StandardMaterial("panelMaterial", this.scene);
-        panelMaterial.diffuseColor = new Color3(0.2, 0.4, 0.8);
+        // Create PBR material for the panel
+        const panelMaterial = new PBRMaterial("panelMaterial", this.scene);
+        panelMaterial.albedoColor = new Color3(0.2, 0.4, 0.8);
+        panelMaterial.metallic = 0.0;
+        panelMaterial.roughness = 0.8;
+        panelMaterial.environmentIntensity = 1.0;
         
         // Apply material to panel
         panel.material = panelMaterial;
 
-         const panelAggregate = new PhysicsAggregate(panel, 
+        const panelAggregate = new PhysicsAggregate(panel, 
             PhysicsShapeType.BOX, { mass: 0, restitution:0.75, friction:0.5, mesh:panel}, this.scene);
         // panelAggregate.body.setEventMask(0x1);
     }
@@ -179,66 +219,66 @@ export class TestScene implements IScene {
      * Create character and setup third person controller
      */
     private async createCharacter(): Promise<void> {
-        this.root = new TransformNode("root", this.scene);
-        this.root.position = new Vector3(0, 5, 0);
-        console.log("this.root.uniqueId",this.root.uniqueId);
-        const cube = MeshBuilder.CreateBox(
-            "physicsCube",
-            { height: 8, width: 5, depth: 5},
-            this.scene
-        );
+        // this.root = new TransformNode("root", this.scene);
+        // this.root.position = new Vector3(0, 5, 0);
+        // console.log("this.root.uniqueId",this.root.uniqueId);
+        // const cube = MeshBuilder.CreateBox(
+        //     "physicsCube",
+        //     { height: 8, width: 5, depth: 5},
+        //     this.scene
+        // );
         
-        // Create material for the cube
-        const cubeMaterial = new StandardMaterial("cubeMaterial", this.scene);
-        cubeMaterial.diffuseColor = new Color3(1, 0, 0); // Red color
-        cube.material = cubeMaterial;
+        // // Create material for the cube
+        // const cubeMaterial = new StandardMaterial("cubeMaterial", this.scene);
+        // cubeMaterial.diffuseColor = new Color3(1, 0, 0); // Red color
+        // cube.material = cubeMaterial;
 
-        cube.parent = this.root;
-        cube.position = new Vector3(0, 0, 0);
+        // cube.parent = this.root;
+        // cube.position = new Vector3(0, 0, 0);
 
       
-        // cube.parent = this.root;
+        // // cube.parent = this.root;
 
-        const cube2 = MeshBuilder.CreateBox(
-            "physicsCube2",
-            { height: 5, width: 5, depth: 5},
-            this.scene
-        );
+        // const cube2 = MeshBuilder.CreateBox(
+        //     "physicsCube2",
+        //     { height: 5, width: 5, depth: 5},
+        //     this.scene
+        // );
         
-        // Create material for the cube
-        const cubeMaterial2 = new StandardMaterial("cubeMaterial2", this.scene);
-        cubeMaterial2.diffuseColor = new Color3(0, 0, 0); // Red color
-        cube2.material = cubeMaterial2;
+        // // Create material for the cube
+        // const cubeMaterial2 = new StandardMaterial("cubeMaterial2", this.scene);
+        // cubeMaterial2.diffuseColor = new Color3(0, 0, 0); // Red color
+        // cube2.material = cubeMaterial2;
 
-        cube2.parent = this.root;
-        cube2.position = new Vector3(0, 4, 0);
+        // cube2.parent = this.root;
+        // cube2.position = new Vector3(0, 4, 0);
 
-        const cubeShape = new PhysicsShapeBox( new Vector3(0, 0, 0),
-            Quaternion.Identity(),
-        new Vector3(5, 8, 5),
-            this.scene);
-        const cubeShape2 = new PhysicsShapeBox( new Vector3(0, 0, 0),
-            Quaternion.Identity(),
-            new Vector3(5, 5, 5),
-            this.scene);
+        // const cubeShape = new PhysicsShapeBox( new Vector3(0, 0, 0),
+        //     Quaternion.Identity(),
+        // new Vector3(5, 8, 5),
+        //     this.scene);
+        // const cubeShape2 = new PhysicsShapeBox( new Vector3(0, 0, 0),
+        //     Quaternion.Identity(),
+        //     new Vector3(5, 5, 5),
+        //     this.scene);
  
-        // const cubeAggregate = new PhysicsAggregate(cube, 
-        //     PhysicsShapeType.BOX, { mass: 1, restitution:0.75, friction:0.5, mesh:cube}, this.scene);
-        // const cubeAggregate2 = new PhysicsAggregate(cube2, 
-        //     PhysicsShapeType.BOX, { mass: 1, restitution:0.75, friction:0.5, mesh:cube2}, this.scene);
+        // // const cubeAggregate = new PhysicsAggregate(cube, 
+        // //     PhysicsShapeType.BOX, { mass: 1, restitution:0.75, friction:0.5, mesh:cube}, this.scene);
+        // // const cubeAggregate2 = new PhysicsAggregate(cube2, 
+        // //     PhysicsShapeType.BOX, { mass: 1, restitution:0.75, friction:0.5, mesh:cube2}, this.scene);
 
-        const shape = new PhysicsShapeContainer(this.scene);
-        shape.addChildFromParent(this.root,cubeShape,cube);
-        shape.addChildFromParent(this.root,cubeShape2,cube2);
+        // const shape = new PhysicsShapeContainer(this.scene);
+        // shape.addChildFromParent(this.root,cubeShape,cube);
+        // shape.addChildFromParent(this.root,cubeShape2,cube2);
 
-        const body = new PhysicsBody(this.root, 
-            PhysicsMotionType.DYNAMIC, false, this.scene);
-        shape.material = {friction: 0.2, restitution: 0};
-        body.shape = shape;
+        // const body = new PhysicsBody(this.root, 
+        //     PhysicsMotionType.DYNAMIC, false, this.scene);
+        // shape.material = {friction: 0.2, restitution: 0};
+        // body.shape = shape;
 
-        body.setMassProperties ({
-            mass: 1,
-        });
+        // body.setMassProperties ({
+        //     mass: 1,
+        // });
         
         // body.setCollisionCallbackEnabled(true);
         // body.shape.isTrigger = false;
@@ -289,47 +329,47 @@ export class TestScene implements IScene {
         //     console.log("collisionEvent",collisionEvent);
         // });
         // 射线检测
-        this.scene.onPointerDown = (evt, pickResult) => {
-            // if (pickResult.hit) {
-            //     console.log("Hit:", pickResult.pickedMesh?.name);
-            //     // 可以根据pickedMesh.name判断击中了哪个碰撞器
-            // }
-            const ray: Ray = new Ray(new Vector3(0, 3, -10), new Vector3(0, 0, 1), 10);
-            const rayResult: Nullable<PickingInfo> = this.scene.pickWithRay(ray, (mesh:AbstractMesh) => {
-                // return mesh !== cube; // 排除子弹自身
-                return true;
-            });
+        // this.scene.onPointerDown = (evt, pickResult) => {
+        //     // if (pickResult.hit) {
+        //     //     console.log("Hit:", pickResult.pickedMesh?.name);
+        //     //     // 可以根据pickedMesh.name判断击中了哪个碰撞器
+        //     // }
+        //     const ray: Ray = new Ray(new Vector3(0, 3, -10), new Vector3(0, 0, 1), 10);
+        //     const rayResult: Nullable<PickingInfo> = this.scene.pickWithRay(ray, (mesh:AbstractMesh) => {
+        //         // return mesh !== cube; // 排除子弹自身
+        //         return true;
+        //     });
 
-            if (rayResult && rayResult.hit) {
-                console.log("Hit1:", rayResult.pickedMesh?.name);
-                // // 处理击中逻辑
-                // if (rayResult.pickedMesh && rayResult.pickedMesh.name === "enemy") {
-                //     (rayResult.pickedMesh as any).takeDamage(damageAmount); // 假设敌人有takeDamage方法
-                // }
+        //     if (rayResult && rayResult.hit) {
+        //         console.log("Hit1:", rayResult.pickedMesh?.name);
+        //         // // 处理击中逻辑
+        //         // if (rayResult.pickedMesh && rayResult.pickedMesh.name === "enemy") {
+        //         //     (rayResult.pickedMesh as any).takeDamage(damageAmount); // 假设敌人有takeDamage方法
+        //         // }
                 
-                // if (pickResult.pickedPoint) {
-                //     createExplosionEffect(pickResult.pickedPoint);
-                // }
-            }
+        //         // if (pickResult.pickedPoint) {
+        //         //     createExplosionEffect(pickResult.pickedPoint);
+        //         // }
+        //     }
 
-            const ray2: Ray = new Ray(new Vector3(0, 10, -10), new Vector3(0, 0, 1), 10);
-            const rayResult2: Nullable<PickingInfo> = this.scene.pickWithRay(ray2, (mesh:AbstractMesh) => {
-                // return mesh !== cube; // 排除子弹自身
-                return true;
-            });
+        //     const ray2: Ray = new Ray(new Vector3(0, 10, -10), new Vector3(0, 0, 1), 10);
+        //     const rayResult2: Nullable<PickingInfo> = this.scene.pickWithRay(ray2, (mesh:AbstractMesh) => {
+        //         // return mesh !== cube; // 排除子弹自身
+        //         return true;
+        //     });
 
-            if (rayResult2 && rayResult2.hit) {
-                console.log("Hit2:", rayResult2.pickedMesh?.name);
-                // // 处理击中逻辑
-                // if (rayResult.pickedMesh && rayResult.pickedMesh.name === "enemy") {
-                //     (rayResult.pickedMesh as any).takeDamage(damageAmount); // 假设敌人有takeDamage方法
-                // }
+        //     if (rayResult2 && rayResult2.hit) {
+        //         console.log("Hit2:", rayResult2.pickedMesh?.name);
+        //         // // 处理击中逻辑
+        //         // if (rayResult.pickedMesh && rayResult.pickedMesh.name === "enemy") {
+        //         //     (rayResult.pickedMesh as any).takeDamage(damageAmount); // 假设敌人有takeDamage方法
+        //         // }
                 
-                // if (pickResult.pickedPoint) {
-                //     createExplosionEffect(pickResult.pickedPoint);
-                // }
-            }
-        };
+        //         // if (pickResult.pickedPoint) {
+        //         //     createExplosionEffect(pickResult.pickedPoint);
+        //         // }
+        //     }
+        // };
         // cube3.parent = this.root;
       
         // You have two options:
@@ -340,7 +380,117 @@ export class TestScene implements IScene {
         //     console.log(collisionEvent);
         // });
 
+     
+        // Keyboard events
+        var inputMap:any = {};
+        //@ts-ignore
+        this.scene.actionManager = new BABYLON.ActionManager(this.scene);
+        //@ts-ignore
+        this.scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, (evt) => {
+            inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+        }));
+        //@ts-ignore
+        this.scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, (evt) => {
+            inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+        }));
 
+        const entity = new GameEntity("player",this);
+        const skeletonMeshComponent = new SkeletonMeshComponent("skeletonMeshComponent","./glb/test.glb",this.scene);
+        entity.addComponent("SkeletonMeshComponent",skeletonMeshComponent);
+        skeletonMeshComponent.scale = 10;
+
+        const skeletonAnimationComponent = new SkeletonAnimationComponent("skeletonAnimationComponent",skeletonMeshComponent);
+        entity.addComponent("SkeletonAnimationComponent",skeletonAnimationComponent);
+        skeletonAnimationComponent.initAnimation("Idle",true);
+     
+        // BABYLON.SceneLoader.ImportMesh("", "./glb/", 
+        //     //@ts-ignore
+        //     "test.glb", this.scene, (newMeshes, particleSystems, skeletons, animationGroups) => {
+        //     var hero = newMeshes[0];
+
+        //     //Scale the model down        
+        //     hero.scaling.scaleInPlace(10);
+
+        //     //Lock camera on the character 
+        //     // camera1.target = hero;
+        //     //Hero character variables 
+        //     var heroSpeed = 0.03;
+        //     var heroSpeedBackwards = 0.01;
+        //     var heroRotationSpeed = 0.01;
+
+        //     var animating = true;
+        //     console.log("newMeshes",newMeshes);
+        //     // console.log("particleSystems",particleSystems);
+        //     console.log("skeletons",skeletons);
+        //     console.log("animationGroups",animationGroups);
+
+        //     const walkAnim = animationGroups.find(anim => anim.name === "Walking");
+        //     const walkBackAnim = animationGroups.find(anim => anim.name === "WalkingBack");
+        //     const idleAnim = animationGroups.find(anim => anim.name === "Idle");
+        //     // const sambaAnim = this.scene.getAnimationGroupByName("Samba");
+
+            
+
+        //     //Rendering loop (executed for everyframe)
+        //     this.scene.onBeforeRenderObservable.add(() => {
+        //         var keydown = false;
+        //         //Manage the movements of the character (e.g. position, direction)
+        //         if (inputMap["w"]) {
+        //             hero.moveWithCollisions(hero.forward.scaleInPlace(heroSpeed));
+        //             keydown = true;
+        //         }
+        //         if (inputMap["s"]) {
+        //             hero.moveWithCollisions(hero.forward.scaleInPlace(-heroSpeedBackwards));
+        //             keydown = true;
+        //         }
+        //         if (inputMap["a"]) {
+        //             hero.rotate(BABYLON.Vector3.Up(), -heroRotationSpeed);
+        //             keydown = true;
+        //         }
+        //         if (inputMap["d"]) {
+        //             hero.rotate(BABYLON.Vector3.Up(), heroRotationSpeed);
+        //             keydown = true;
+        //         }
+        //         if (inputMap["b"]) {
+        //             keydown = true;
+        //         }
+
+        //         //Manage animations to be played  
+        //         if (keydown) {
+        //             if (!animating) {
+        //                 animating = true;
+        //                 if (inputMap["s"]) {
+        //                     //Walk backwards
+        //                     walkBackAnim?.start(true, 1.0, walkBackAnim.from, walkBackAnim.to, false);
+        //                 }
+        //                 else if
+        //                     (inputMap["b"]) {
+        //                     //Samba!
+        //                     // sambaAnim?.start(true, 1.0, sambaAnim.from, sambaAnim.to, false);
+        //                 }
+        //                 else {
+        //                     //Walk
+        //                     walkAnim?.start(true, 1.0, walkAnim.from, walkAnim.to, false);
+        //                 }
+        //             }
+        //         }
+        //         else {
+
+        //             if (animating) {
+        //                 //Default animation is idle when no key is down     
+        //                 idleAnim?.start(true, 1.0, idleAnim.from, idleAnim.to, false);
+
+        //                 //Stop all animations besides Idle Anim when no key is down
+        //                 // sambaAnim?.stop();
+        //                 walkAnim?.stop();
+        //                 walkBackAnim?.stop();
+
+        //                 //Ensure animation are played only once per rendering loop
+        //                 animating = false;
+        //             }
+        //         }
+        //     });
+        // });
     }
     
     /**
@@ -357,5 +507,39 @@ export class TestScene implements IScene {
         
         // Dispose engine
         this.engine.dispose();
+    }
+
+    private setupPostProcessing(): void {
+        // 创建默认渲染管线
+        const pipeline = new DefaultRenderingPipeline(
+            "defaultPipeline", 
+            true, 
+            this.scene
+        );
+
+        // 启用泛光效果
+        pipeline.bloomEnabled = true;
+        pipeline.bloomThreshold = 0.7;
+        pipeline.bloomWeight = 0.3;
+        pipeline.bloomKernel = 64;
+        pipeline.bloomScale = 0.5;
+
+        // 启用景深效果
+        // pipeline.depthOfFieldEnabled = true;
+        // // pipeline.depthOfField.blur = 32; // Use correct property 'blur' instead of 'blurLevel'
+        // pipeline.depthOfField.focalLength = 100;
+        // pipeline.depthOfField.fStop = 1.4;
+        // pipeline.depthOfField.focusDistance = 2000;
+
+        // 启用环境光遮蔽
+        // pipeline.screenSpaceReflectionsEnabled = true;
+        // pipeline.screenSpaceReflectionBlurKernel = 32;
+        // pipeline.screenSpaceReflectionStrength = 0.5;
+
+        // 启用色调映射
+        pipeline.imageProcessingEnabled = true;
+        pipeline.imageProcessing.contrast = 1.1;
+        pipeline.imageProcessing.exposure = 1.0;
+        pipeline.imageProcessing.toneMappingEnabled = true;
     }
 }

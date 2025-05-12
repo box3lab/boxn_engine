@@ -1,12 +1,12 @@
 import type { PhysicsEngine } from "@babylonjs/core/Physics/v2/physicsEngine";
 import { Singleton } from "../common/Singleton";
 import { Const } from "../common/Const";
-import type { ColliderComponent } from "../components/ColliderComponent";
+import type { ColliderComponent } from "../components/collider/ColliderComponent";
 import { Vector3, HavokPlugin, PhysicsBody, PhysicsMotionType, type Nullable, PhysicsEventType, type IBasePhysicsCollisionEvent, } from "@babylonjs/core";
 import HavokPhysics from "@babylonjs/havok";
 import { SceneMgr } from "./SceneMgr";
 import type { GameEntity } from "../entity/GameEntity";
-import type { ColliderComponentV2 } from "../components/ColliderComponentV2";
+import type { ColliderComponentV2 } from "../components/collider/ColliderComponentV2";
 import type { IPhysicsEngine } from "@babylonjs/core/Physics/IPhysicsEngine";
 
 /**

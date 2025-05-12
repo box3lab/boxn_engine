@@ -1,8 +1,8 @@
-import { BaseComponent } from "./BaseComponent";
+import { BaseComponent } from "../BaseComponent";
 import { Vector3, PhysicsImpostor, MeshBuilder, Mesh, TransformNode } from "@babylonjs/core";
 import type { PhysicsImpostorParameters } from "@babylonjs/core";
-import { PhyMgr } from "../mgr/PhyMgr";
-import type { GameEntity } from "../entity/GameEntity";
+import { PhyMgr } from "../../mgr/PhyMgr";
+import type { GameEntity } from "../../entity/GameEntity";
 
 export class ColliderComponent extends BaseComponent {
     /**

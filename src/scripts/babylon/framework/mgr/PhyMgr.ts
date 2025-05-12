@@ -3,7 +3,7 @@ import { CannonJSPlugin } from "@babylonjs/core/Physics/Plugins/cannonJSPlugin";
 import { Singleton } from "../common/Singleton";
 import { Const } from "../common/Const";
 import { SceneMgr } from "./SceneMgr";
-import type { ColliderComponent } from "../components/ColliderComponent";
+import type { ColliderComponent } from "../components/collider/ColliderComponent";
 import type { IPhysicsEngine } from "@babylonjs/core/Physics/IPhysicsEngine";
 import type { Nullable } from "babylonjs";
 

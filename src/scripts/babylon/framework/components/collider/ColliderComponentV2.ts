@@ -1,10 +1,10 @@
 import type { PhysicsAggregate } from "babylonjs/Physics/v2/physicsAggregate";
-import { BaseComponent } from "./BaseComponent";
+import { BaseComponent } from "../BaseComponent";
 import { HavokPlugin, Mesh, PhysicsBody, PhysicsEventType, PhysicsMotionType, PhysicsShape, Vector3, type IBasePhysicsCollisionEvent, type IPhysicsCollisionEvent } from "@babylonjs/core";
-import type { IGameEntity } from "../interface/IGameEntity";
-import { PhyMgrV2 } from "../mgr/PhyMgrV2";
-import type { GameEntity } from "../entity/GameEntity";
-import { SceneMgr } from "../mgr/SceneMgr";
+import type { IGameEntity } from "../../interface/IGameEntity";
+import { PhyMgrV2 } from "../../mgr/PhyMgrV2";
+import type { GameEntity } from "../../entity/GameEntity";
+import { SceneMgr } from "../../mgr/SceneMgr";
 
 /**
  * 碰撞器组件基类 / Base class for collider components

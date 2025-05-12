@@ -1,8 +1,8 @@
 import type { Mesh, TransformNode } from "@babylonjs/core";
-import type { IGameComponent } from "../interface/IGameComponent";
 import type { IGameEntity } from "../interface/IGameEntity";
+import type { BaseComponent } from "./BaseComponent";
 
-export class RootComponent implements IGameComponent{
+export class RootComponent implements BaseComponent{
     public name: string = "RootComponent";
     public entity: IGameEntity | undefined;
 
@@ -18,7 +18,7 @@ export class RootComponent implements IGameComponent{
     public detach(): void {
         this.entity = undefined;
     }
-    public update?(deltaTime: number): void {
+    public update(deltaTime: number): void {
 
     }
     public dispose(): void {

@@ -145,6 +145,10 @@ export class ResMgr extends Singleton<ResMgr>(){
 
             // Store the container and meshes in the asset
             asset.data = container;
+            // container.meshes.forEach(mesh => {
+            //     // @ts-ignore
+            //     mesh.scaling.scaleInPlace(5);
+            // });
 
             asset.status = ResourceStatus.Loaded;
             this.resources.set(asset.id || asset.url, asset);
