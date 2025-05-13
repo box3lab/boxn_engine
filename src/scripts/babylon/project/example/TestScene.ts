@@ -99,9 +99,9 @@ export class TestScene implements IScene {
         }).then((havok) => {
             this.physicsEngine = new HavokPlugin(true,havok);
             this.scene.enablePhysics(new Vector3(0, -9.81, 0), this.physicsEngine);
-            this.createGround();
-            this.createPanel();
-            this.createCharacter();
+        this.createGround();
+        this.createPanel();
+        this.createCharacter();
         });
 
 
@@ -396,7 +396,7 @@ export class TestScene implements IScene {
         const moveBackward = InputSystem.instance.registerAction("MoveBackward", { key: "s" });
         const moveLeft = InputSystem.instance.registerAction("MoveLeft", { key: "a" });
         const moveRight = InputSystem.instance.registerAction("MoveRight", { key: "d" });
-
+        const moveTouch = InputSystem.instance.registerAction("MoveTouch", { key: "MOUSELEFT" });
         // 添加监听器
         moveForward.addListener((event: InputActionEvent) => {
             if (event.eventType === InputEventType.KEYDOWN) {
@@ -408,7 +408,10 @@ export class TestScene implements IScene {
                 // 实际移动逻辑
             }
         });
-
+        moveTouch.addListener((event: InputActionEvent) => {
+            console.log("Moving touch",event);
+            // 实际移动逻辑
+        });
         // 添加监听器
         moveBackward.addListener((event: InputActionEvent) => {
             if (event.eventType === InputEventType.KEYDOWN) {
