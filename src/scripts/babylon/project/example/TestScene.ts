@@ -37,6 +37,8 @@ import { GameEntity } from "../../framework/entity/GameEntity";
 import { SkeletonMeshComponent } from "../../framework/components/mesh/SkeletonMeshComponent";
 import { SkeletonAnimationComponent } from "../../framework/components/SkeletonAnimationComponent";
 import { CapsuleColliderComponentV2 } from "../../framework/components/collider/CapsuleColliderComponentV2";
+import { InputSystem } from "../../framework/input/InputSystem";
+import { InputEventType, type InputActionEvent } from "../../framework/input/InputAction";
 
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
@@ -388,17 +390,61 @@ export class TestScene implements IScene {
 
      
         // // Keyboard events
-        // var inputMap:any = {};
-        // //@ts-ignore
-        // this.scene.actionManager = new BABYLON.ActionManager(this.scene);
-        // //@ts-ignore
-        // this.scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, (evt) => {
-        //     inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
-        // }));
-        // //@ts-ignore
-        // this.scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, (evt) => {
-        //     inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
-        // }));
+        InputSystem.instance.init(this.scene);
+        // 注册输入动作
+        const moveForward = InputSystem.instance.registerAction("MoveForward", { key: "w" });
+        const moveBackward = InputSystem.instance.registerAction("MoveBackward", { key: "s" });
+        const moveLeft = InputSystem.instance.registerAction("MoveLeft", { key: "a" });
+        const moveRight = InputSystem.instance.registerAction("MoveRight", { key: "d" });
+
+        // 添加监听器
+        moveForward.addListener((event: InputActionEvent) => {
+            if (event.eventType === InputEventType.KEYDOWN) {
+                console.log("Moving forward");
+                // 实际移动逻辑
+            }
+           else  if (event.eventType === InputEventType.KEYUP) {
+                console.log("Moving forward released");
+                // 实际移动逻辑
+            }
+        });
+
+        // 添加监听器
+        moveBackward.addListener((event: InputActionEvent) => {
+            if (event.eventType === InputEventType.KEYDOWN) {
+                console.log("Moving backward");
+                // 实际移动逻辑
+            }
+            else  if (event.eventType === InputEventType.KEYUP) {
+                console.log("Moving backward released");
+                // 实际移动逻辑
+            }
+        });
+
+        // 添加监听器
+        moveLeft.addListener((event: InputActionEvent) => {
+            if (event.eventType === InputEventType.KEYDOWN) {
+                console.log("Moving left");
+                // 实际移动逻辑
+            }
+            else  if (event.eventType === InputEventType.KEYUP) {
+                console.log("Moving left released");
+                // 实际移动逻辑
+            }
+        });
+
+        // 添加监听器
+        moveRight.addListener((event: InputActionEvent) => {
+            if (event.eventType === InputEventType.KEYDOWN) {
+                console.log("Moving right");
+                // 实际移动逻辑
+            }
+            else  if (event.eventType === InputEventType.KEYUP) {
+                console.log("Moving right released");
+                // 实际移动逻辑
+            }
+        });
+        
 
         const entity = new GameEntity("player",this);
         entity.root.root.position = new Vector3(0, 30, 0);
