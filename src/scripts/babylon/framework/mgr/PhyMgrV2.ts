@@ -2,7 +2,7 @@ import type { PhysicsEngine } from "@babylonjs/core/Physics/v2/physicsEngine";
 import { Singleton } from "../common/Singleton";
 import { Const } from "../common/Const";
 import type { ColliderComponent } from "../components/collider/ColliderComponent";
-import { Vector3, HavokPlugin, PhysicsBody, PhysicsMotionType, type Nullable, PhysicsEventType, type IBasePhysicsCollisionEvent, } from "@babylonjs/core";
+import { Vector3, HavokPlugin, PhysicsBody, PhysicsMotionType, type Nullable, PhysicsEventType, type IBasePhysicsCollisionEvent, PhysicsShapeContainer, } from "@babylonjs/core";
 import HavokPhysics from "@babylonjs/havok";
 import { SceneMgr } from "./SceneMgr";
 import type { GameEntity } from "../entity/GameEntity";
@@ -132,14 +132,15 @@ export class PhyMgrV2 extends Singleton<PhyMgrV2>() {
             console.warn("Physics not initialized for scene:", gameEntity.scene?.id);
             return null;
         }
-    
         const scene = SceneMgr.instance.getScene(gameEntity.scene?.id);
             if(!scene)return null;
         const physicsEngine = scene.scene.getPhysicsEngine();
         if(!physicsEngine)return null;
-        const physicsBody = new PhysicsBody(gameEntity.root.root,
+        const physicsBody = new PhysicsBody(gameEntity.getRoot().root,
             motionType,startsAsleep,scene.scene);
         gameEntity.physicsBody = physicsBody;
+        const shape = new PhysicsShapeContainer(scene.scene);
+        physicsBody.shape = shape;
         return physicsBody;
     }
 
@@ -155,11 +156,11 @@ export class PhyMgrV2 extends Singleton<PhyMgrV2>() {
             console.warn("Physics not initialized for scene:", gameEntity.scene?.id);
             return;
         }           
-        if(this.colliderComponents.has(gameEntity.root.root.uniqueId)){
-            console.warn("Collider component already registered for gameEntity:", gameEntity.root.root.uniqueId);
+        if(this.colliderComponents.has(gameEntity.getRoot().root.uniqueId)){
+            console.warn("Collider component already registered for gameEntity:", gameEntity.getRoot().root.uniqueId);
             return;
         }
-        this.colliderComponents.set(gameEntity.root.root.uniqueId,collider);
+        this.colliderComponents.set(gameEntity.getRoot().root.uniqueId,collider);
     }
 
     /**
@@ -188,11 +189,11 @@ export class PhyMgrV2 extends Singleton<PhyMgrV2>() {
             console.warn("Physics not initialized for scene:", gameEntity.scene?.id);
             return;
         }
-        if(!this.colliderComponents.has(gameEntity.root.root.uniqueId)){
-            console.warn("Collider component not registered for gameEntity:", gameEntity.root.root.uniqueId);
+        if(!this.colliderComponents.has(gameEntity.getRoot().root.uniqueId)){
+            console.warn("Collider component not registered for gameEntity:", gameEntity.getRoot().root.uniqueId);
             return;
         }
-        this.colliderComponents.delete(gameEntity.root.root.uniqueId);
+        this.colliderComponents.delete(gameEntity.getRoot().root.uniqueId);
     }
 
     /**
@@ -221,6 +222,16 @@ export class PhyMgrV2 extends Singleton<PhyMgrV2>() {
             if (scene && !this.activeSceneIds.has(sceneId)) {
                 scene.scene.enablePhysics(this.gravity, this.physicsPlugin!);
                 this.activeSceneIds.add(sceneId);
+            }
+        }
+    }
+
+    public onSceneDeactivated(sceneId: string): void {
+        if (this.physicsEnabled) {
+            const scene = SceneMgr.instance.getScene(sceneId);
+            if (scene && this.activeSceneIds.has(sceneId)) {
+                scene.scene.disablePhysicsEngine();
+                this.activeSceneIds.delete(sceneId);    
             }
         }
     }

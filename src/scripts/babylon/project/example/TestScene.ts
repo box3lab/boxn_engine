@@ -36,6 +36,7 @@ import HavokPhysics from "@babylonjs/havok";
 import { GameEntity } from "../../framework/entity/GameEntity";
 import { SkeletonMeshComponent } from "../../framework/components/mesh/SkeletonMeshComponent";
 import { SkeletonAnimationComponent } from "../../framework/components/SkeletonAnimationComponent";
+import { CapsuleColliderComponentV2 } from "../../framework/components/collider/CapsuleColliderComponentV2";
 
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
@@ -220,7 +221,12 @@ export class TestScene implements IScene {
      */
     private async createCharacter(): Promise<void> {
         // this.root = new TransformNode("root", this.scene);
-        // this.root.position = new Vector3(0, 5, 0);
+        // this.root.position = new Vector3(0, 10, 0);
+
+        // const capsule = MeshBuilder.CreateCapsule("capsule", {height: 20, radius: 4}, this.scene);
+        // capsule.parent = this.root;
+        // capsule.position = new Vector3(0, 10, 0);
+
         // console.log("this.root.uniqueId",this.root.uniqueId);
         // const cube = MeshBuilder.CreateBox(
         //     "physicsCube",
@@ -381,20 +387,21 @@ export class TestScene implements IScene {
         // });
 
      
-        // Keyboard events
-        var inputMap:any = {};
-        //@ts-ignore
-        this.scene.actionManager = new BABYLON.ActionManager(this.scene);
-        //@ts-ignore
-        this.scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, (evt) => {
-            inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
-        }));
-        //@ts-ignore
-        this.scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, (evt) => {
-            inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
-        }));
+        // // Keyboard events
+        // var inputMap:any = {};
+        // //@ts-ignore
+        // this.scene.actionManager = new BABYLON.ActionManager(this.scene);
+        // //@ts-ignore
+        // this.scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyDownTrigger, (evt) => {
+        //     inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+        // }));
+        // //@ts-ignore
+        // this.scene.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnKeyUpTrigger, (evt) => {
+        //     inputMap[evt.sourceEvent.key] = evt.sourceEvent.type == "keydown";
+        // }));
 
         const entity = new GameEntity("player",this);
+        entity.root.root.position = new Vector3(0, 30, 0);
         const skeletonMeshComponent = new SkeletonMeshComponent("skeletonMeshComponent","./glb/test.glb",this.scene);
         entity.addComponent("SkeletonMeshComponent",skeletonMeshComponent);
         skeletonMeshComponent.scale = 10;
@@ -402,6 +409,12 @@ export class TestScene implements IScene {
         const skeletonAnimationComponent = new SkeletonAnimationComponent("skeletonAnimationComponent",skeletonMeshComponent);
         entity.addComponent("SkeletonAnimationComponent",skeletonAnimationComponent);
         skeletonAnimationComponent.initAnimation("Idle",true);
+
+        const capsuleColliderComponent = new CapsuleColliderComponentV2("CapsuleColliderComponentV2", 3, 18);
+        entity.addComponent("CapsuleColliderComponentV2",capsuleColliderComponent);
+        capsuleColliderComponent.IsShowDebug = false;
+
+    
      
         // BABYLON.SceneLoader.ImportMesh("", "./glb/", 
         //     //@ts-ignore

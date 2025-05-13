@@ -4,6 +4,7 @@ import { TestScene } from "../project/example/TestScene";
 import { SceneMgr } from "./mgr/SceneMgr";
 import { ResMgr } from "./mgr/ResMgr";
 import { PhyMgr } from "./mgr/PhyMgr";
+import { PhyMgrV2 } from "./mgr/PhyMgrV2";
 /**
  * BoxNextEngine - A custom engine class for Babylon.js
  * 一个用于 Babylon.js 的自定义引擎类
@@ -22,7 +23,7 @@ export class BoxNextEngine extends Singleton<BoxNextEngine>(){
      * 构造函数
      * @param canvas - 用于渲染的 HTML 画布元素
      */
-    public initialize(canvas: HTMLCanvasElement) {
+    public async initialize(canvas: HTMLCanvasElement) {
         this.canvas = canvas;
         this.engine = new Engine(canvas, true);
         // Handle browser window resize
@@ -32,6 +33,8 @@ export class BoxNextEngine extends Singleton<BoxNextEngine>(){
                 this.engine.resize();
             }
         });
+
+        await PhyMgrV2.instance.initialize();
         
         // Initialize Scene Manager
         SceneMgr.instance.initialize(this.canvas, this.engine);
@@ -39,13 +42,13 @@ export class BoxNextEngine extends Singleton<BoxNextEngine>(){
         SceneMgr.instance.registerScene(new TestScene("test", "test", this.engine, 0));
         // // Load Test Scene
         // SceneMgr.instance.loadScene("test");
-
         SceneMgr.instance.activateScene("test",true);
         // Set Scene for Resource Manager
         ResMgr.instance.setScene(SceneMgr.instance.getScene("test")?.scene as Scene);
 
         // Initialize Physics Manager
         // PhyMgr.instance.initialize();
+     
     }
 
     /**

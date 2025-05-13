@@ -25,6 +25,11 @@ export abstract class ColliderComponentV2 extends BaseComponent {
      protected observer: any;
 
      /**
+      * 偏移 / Offset
+      */
+     protected _offset: Vector3 = Vector3.Zero();
+
+     /**
       * 获取质量 / Get mass
       * @returns 质量值 / Mass value
       */
@@ -68,6 +73,25 @@ export abstract class ColliderComponentV2 extends BaseComponent {
                PhyMgrV2.instance.registerColliderComponentByMeshId(this._meshIds[i],this);
           }
      }
+
+      /**
+     * 是否显示调试
+     */
+    protected _isShowDebug: boolean = false;
+
+    /**
+     * 获取是否显示调试
+     */
+    public get IsShowDebug(): boolean {
+        return this._isShowDebug;
+    }
+
+    /**
+     * 设置是否显示调试
+     */
+    public set IsShowDebug(isShowDebug: boolean) {
+        this._isShowDebug = isShowDebug;
+    }
 
      public addMeshId(meshId: number) {
           this._meshIds.push(meshId);
@@ -156,9 +180,11 @@ export abstract class ColliderComponentV2 extends BaseComponent {
       * 设置碰撞器形状 / Set collider shape
       * @param shape 物理形状 / Physics shape
       */
-     public setShape(shape: PhysicsShape) {
+     public setShape(shape: PhysicsShape,mesh:Mesh,offset:Vector3 = Vector3.Zero()) {
           if (this.entity?.physicsBody) {
-               this.entity.physicsBody.shape = shape;
+               mesh.parent = this.entity.getRoot().root;
+               mesh.position = offset;
+               this.entity.physicsBody.shape?.addChildFromParent(this.entity.getRoot().root,shape,mesh);
           }
      }
 

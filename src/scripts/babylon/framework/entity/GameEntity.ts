@@ -36,7 +36,17 @@ export class GameEntity implements IGameEntity {
       * The physics body of the entity.
       * 实体的物理体。
       */
-     public physicsBody: PhysicsBody | undefined;
+     public get physicsBody(): PhysicsBody | undefined {
+        return this.root.root.physicsBody ?? undefined;
+     }
+
+     /**
+      * The physics body of the entity.
+      * 实体的物理体。
+      */
+     public set physicsBody(physicsBody: PhysicsBody | undefined) {
+        this.root.root.physicsBody = physicsBody ?? null;
+     }
 
     /**
      * The scene of the entity.

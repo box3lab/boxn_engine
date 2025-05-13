@@ -1,8 +1,8 @@
 import type { Mesh, Scene } from "@babylonjs/core";
-import type { IGameEntity } from "../interface/IGameEntity";
-import { BaseComponent } from "./BaseComponent";
-import { ResMgr } from "../mgr/ResMgr";
-import { GLBAsset } from "../asset/GLBAsset";
+import type { IGameEntity } from "../../interface/IGameEntity";
+import { BaseComponent } from "../BaseComponent";
+import { ResMgr } from "../../mgr/ResMgr";
+import { GLBAsset } from "../../asset/GLBAsset";
 
 /**
  * 静态网格组件 / Static Mesh Component

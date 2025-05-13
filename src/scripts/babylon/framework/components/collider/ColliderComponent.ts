@@ -50,6 +50,28 @@ export class ColliderComponent extends BaseComponent {
      */
     public isStatic: boolean = true;
 
+    /**
+     * 是否显示调试
+     */
+    public _isShowDebug: boolean = false;
+
+    /**
+     * 获取是否显示调试
+     */
+    public get IsShowDebug(): boolean {
+        return this._isShowDebug;
+    }
+
+    /**
+     * 设置是否显示调试
+     */
+    public set IsShowDebug(isShowDebug: boolean) {
+        this._isShowDebug = isShowDebug;
+        if(this.collisionMesh){
+            this.collisionMesh.isVisible = isShowDebug;
+        }
+    }
+
     // /**
     //  * 是否启用连续碰撞检测
     //  */

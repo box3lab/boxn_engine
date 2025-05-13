@@ -165,7 +165,7 @@ export class SkeletonMeshComponent extends BaseComponent {
         for(let i = 0; i < this.instancedContainer.rootNodes.length; i++){
             const node = this.instancedContainer.rootNodes[i];
             // @ts-ignore
-            node.parent = this.entity?.transform;
+            node.parent = this.entity?.getRoot().root;
         }
     }
 
