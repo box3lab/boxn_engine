@@ -1,8 +1,7 @@
 import { BaseComponent } from "../BaseComponent";
 import { Vector3, Ray, type Scene } from "@babylonjs/core";
 import type { IGameEntity } from "../../interface/IGameEntity";
-import { CapsuleColliderComponentV2 } from "../collider/CapsuleColliderComponentV2";
-import type { ColliderComponentV2 } from "../collider/ColliderComponentV2";
+import { ColliderComponentV2 } from "../collider/ColliderComponentV2";
 
 /**
  * 移动组件 / Movement Component
@@ -30,9 +29,9 @@ export class MovementComponent extends BaseComponent {
     private _moveDirection: Vector3 = Vector3.Zero();
 
     /**
-     * 胶囊体碰撞器组件 / Capsule collider component
+     * 碰撞器组件 / Collider component
      */
-    private _capsuleCollider: ColliderComponentV2 | null = null;
+    private _collider: ColliderComponentV2 | null = null;
 
     /**
      * 获取移动速度 / Get movement speed
@@ -85,10 +84,10 @@ export class MovementComponent extends BaseComponent {
         super.attachTo(gameEntity);
         
         // 获取胶囊体碰撞器组件 / Get capsule collider component
-        const collider = this.entity?.getComponentByClass(CapsuleColliderComponentV2);
-        this._capsuleCollider = collider || null;
-        if (!this._capsuleCollider) {
-            console.warn("MovementComponent requires CapsuleColliderComponentV2");
+        const collider = this.entity?.getComponentByClass(ColliderComponentV2);
+        this._collider = collider || null;
+        if (!this._collider) {
+            console.warn("MovementComponent requires ColliderComponentV2");
         }
     }
 
@@ -104,7 +103,7 @@ export class MovementComponent extends BaseComponent {
      * 跳跃 / Jump
      */
     public jump(): void {
-        if (this._isGrounded && this._capsuleCollider && this.entity?.physicsBody) {
+        if (this._isGrounded && this._collider && this.entity?.physicsBody) {
             const jumpVector = new Vector3(0, this._jumpForce, 0);
             this.entity.physicsBody.applyImpulse(jumpVector, this.entity.getRoot().root.position);
             this._isGrounded = false;
@@ -123,7 +122,7 @@ export class MovementComponent extends BaseComponent {
      * @param deltaTime 时间增量 / Delta time
      */
     public override update(deltaTime: number): void {
-        if (!this.entity?.physicsBody || !this._capsuleCollider) return;
+        if (!this.entity?.physicsBody || !this._collider) return;
 
         // 应用移动力 / Apply movement force
         if (!this._moveDirection.equals(Vector3.Zero())) {
@@ -148,7 +147,7 @@ export class MovementComponent extends BaseComponent {
      * 释放组件资源 / Dispose component resources
      */
     public override dispose(): void {
-        this._capsuleCollider = null;
+        this._collider = null;
         super.dispose();
     }
 }

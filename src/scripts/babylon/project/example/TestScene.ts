@@ -40,6 +40,7 @@ import { CapsuleColliderComponentV2 } from "../../framework/components/collider/
 import { InputSystem } from "../../framework/input/InputSystem";
 import { InputEventType, type InputActionEvent } from "../../framework/input/InputAction";
 import { MovementComponent } from "../../framework/components/movement/MovementComponent";
+import { ColliderComponentV2 } from "../../framework/components/collider/ColliderComponentV2";
 
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
