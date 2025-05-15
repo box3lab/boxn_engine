@@ -161,8 +161,13 @@ export abstract class ColliderComponentV2 extends BaseComponent {
                return;
           }
           super.attachTo(gameEntity);
-          if (PhyMgrV2.instance.addPhysicsBody(this.entity!, this.physicsMotionType, this.startsAsleep)) {
+          const characterBody = PhyMgrV2.instance.addPhysicsBody(this.entity!, this.physicsMotionType, this.startsAsleep);
+          if (characterBody) {
                PhyMgrV2.instance.registerColliderComponent(this.entity!, this);
+
+               characterBody.disablePreStep = false;
+               characterBody.setMassProperties({ inertia: Vector3.ZeroReadOnly });
+           
           }
      }
 

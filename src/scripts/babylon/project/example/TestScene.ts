@@ -35,10 +35,11 @@ import type { IScene } from "../../framework/interface/IScene";
 import HavokPhysics from "@babylonjs/havok";
 import { GameEntity } from "../../framework/entity/GameEntity";
 import { SkeletonMeshComponent } from "../../framework/components/mesh/SkeletonMeshComponent";
-import { SkeletonAnimationComponent } from "../../framework/components/SkeletonAnimationComponent";
+import { SkeletonAnimationComponent } from "../../framework/components/animation/SkeletonAnimationComponent";
 import { CapsuleColliderComponentV2 } from "../../framework/components/collider/CapsuleColliderComponentV2";
 import { InputSystem } from "../../framework/input/InputSystem";
 import { InputEventType, type InputActionEvent } from "../../framework/input/InputAction";
+import { MovementComponent } from "../../framework/components/movement/MovementComponent";
 
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
@@ -56,7 +57,7 @@ export class TestScene implements IScene {
     // private thirdPersonController: ThirdPersonComp | null = null;
     private camera: ArcRotateCamera | null = null;
 
-    private root:TransformNode | undefined;
+    private entity: GameEntity | undefined;
     
     constructor(id: string, name: string, engine: Engine, priority: number = 0) {
         this.id = id;
@@ -123,6 +124,9 @@ export class TestScene implements IScene {
     update(deltaTime: number): void {
         // Update scene components
         // if(this.root)console.log(this.root);
+        if(this.entity){
+            this.entity.update(deltaTime);
+        }
     }
     
     /**
@@ -388,6 +392,24 @@ export class TestScene implements IScene {
         //     console.log(collisionEvent);
         // });
 
+        this.entity = new GameEntity("player",this);
+        this.entity.root.root.position = new Vector3(0, 0, 0);
+        const skeletonMeshComponent = new SkeletonMeshComponent("skeletonMeshComponent","./glb/test.glb",this.scene);
+        this.entity.addComponent("SkeletonMeshComponent",skeletonMeshComponent);
+        skeletonMeshComponent.scale = 10;
+
+        const skeletonAnimationComponent = new SkeletonAnimationComponent("skeletonAnimationComponent",skeletonMeshComponent);
+        this.entity.addComponent("SkeletonAnimationComponent",skeletonAnimationComponent);
+        skeletonAnimationComponent.initAnimation("Idle",true);
+
+        const capsuleColliderComponent = new CapsuleColliderComponentV2("CapsuleColliderComponentV2", 3, 18);
+        this.entity.addComponent("CapsuleColliderComponentV2",capsuleColliderComponent);
+        capsuleColliderComponent.IsShowDebug = false;
+
+        const movementComponent = new MovementComponent("MovementComponent");
+        this.entity.addComponent("MovementComponent",movementComponent);
+        movementComponent.jumpForce = 8;
+
      
         // // Keyboard events
         InputSystem.instance.init(this.scene);
@@ -396,71 +418,93 @@ export class TestScene implements IScene {
         const moveBackward = InputSystem.instance.registerAction("MoveBackward", { key: "s" });
         const moveLeft = InputSystem.instance.registerAction("MoveLeft", { key: "a" });
         const moveRight = InputSystem.instance.registerAction("MoveRight", { key: "d" });
+        const mousedown = InputSystem.instance.registerAction("mousedown");
+        const space = InputSystem.instance.registerAction("space", { key: " " });
 
         // 添加监听器
         moveForward.addListener((event: InputActionEvent) => {
             if (event.eventType === InputEventType.KEYDOWN) {
-                console.log("Moving forward");
+                // console.log("Moving forward");
                 // 实际移动逻辑
+                movementComponent.setMoveDirection(new Vector3(0, 0, 1));
+                movementComponent.moveSpeed = 300;
+                skeletonAnimationComponent.playAnimation("Walking",true);
             }
            else  if (event.eventType === InputEventType.KEYUP) {
-                console.log("Moving forward released");
+                // console.log("Moving forward released");
                 // 实际移动逻辑
+                movementComponent.stopMove();
+                skeletonAnimationComponent.playAnimation("Idle",true);
             }
         });
 
         // 添加监听器
         moveBackward.addListener((event: InputActionEvent) => {
             if (event.eventType === InputEventType.KEYDOWN) {
-                console.log("Moving backward");
+                // console.log("Moving backward");
                 // 实际移动逻辑
+                movementComponent.setMoveDirection(new Vector3(0, 0, -1));
+                movementComponent.moveSpeed = 300;
+                skeletonAnimationComponent.playAnimation("WalkingBack",true);
             }
             else  if (event.eventType === InputEventType.KEYUP) {
-                console.log("Moving backward released");
+                // console.log("Moving backward released");
                 // 实际移动逻辑
+                movementComponent.stopMove();
+                skeletonAnimationComponent.playAnimation("Idle",true);
             }
         });
 
         // 添加监听器
         moveLeft.addListener((event: InputActionEvent) => {
             if (event.eventType === InputEventType.KEYDOWN) {
-                console.log("Moving left");
+                // console.log("Moving left");
                 // 实际移动逻辑
+                movementComponent.setMoveDirection(new Vector3(-1, 0, 0));
+                movementComponent.moveSpeed = 300;
+                skeletonAnimationComponent.playAnimation("Walking",true);
             }
             else  if (event.eventType === InputEventType.KEYUP) {
-                console.log("Moving left released");
+                // console.log("Moving left released");
                 // 实际移动逻辑
+                movementComponent.stopMove();
+                skeletonAnimationComponent.playAnimation("Idle",true);
             }
         });
 
         // 添加监听器
         moveRight.addListener((event: InputActionEvent) => {
             if (event.eventType === InputEventType.KEYDOWN) {
-                console.log("Moving right");
+                // console.log("Moving right");
                 // 实际移动逻辑
+                movementComponent.setMoveDirection(new Vector3(1, 0, 0));
+                movementComponent.moveSpeed = 300;
+                skeletonAnimationComponent.playAnimation("Walking",true);
             }
             else  if (event.eventType === InputEventType.KEYUP) {
-                console.log("Moving right released");
+                // console.log("Moving right released");
                 // 实际移动逻辑
+                movementComponent.stopMove();
+                skeletonAnimationComponent.playAnimation("Idle",true);
             }
         });
-        
 
-        const entity = new GameEntity("player",this);
-        entity.root.root.position = new Vector3(0, 30, 0);
-        const skeletonMeshComponent = new SkeletonMeshComponent("skeletonMeshComponent","./glb/test.glb",this.scene);
-        entity.addComponent("SkeletonMeshComponent",skeletonMeshComponent);
-        skeletonMeshComponent.scale = 10;
+        mousedown.addListener((event: InputActionEvent) => {
+            if (event.eventType === InputEventType.MOUSE_DOWN) {
+                console.log("mousedown",event.value);
+            }
+            else  if (event.eventType === InputEventType.MOUSE_UP) {
+                console.log("mousedown released",event.value);
+            }
+        });
 
-        const skeletonAnimationComponent = new SkeletonAnimationComponent("skeletonAnimationComponent",skeletonMeshComponent);
-        entity.addComponent("SkeletonAnimationComponent",skeletonAnimationComponent);
-        skeletonAnimationComponent.initAnimation("Idle",true);
-
-        const capsuleColliderComponent = new CapsuleColliderComponentV2("CapsuleColliderComponentV2", 3, 18);
-        entity.addComponent("CapsuleColliderComponentV2",capsuleColliderComponent);
-        capsuleColliderComponent.IsShowDebug = false;
-
-    
+        space.addListener((event: InputActionEvent) => {
+            if (event.eventType === InputEventType.KEYDOWN) {
+                console.log("space",event.value);
+                movementComponent.jump();
+            }
+        });
+      
      
         // BABYLON.SceneLoader.ImportMesh("", "./glb/", 
         //     //@ts-ignore

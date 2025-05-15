@@ -138,7 +138,7 @@ export class SkeletonMeshComponent extends BaseComponent {
                         // @ts-ignore
                         this._meshs.set(mesh.name, mesh);
                     });
-
+                    
                     this.instancedContainer.animationGroups.forEach(anim => {
                         // @ts-ignore
                         this._animationGroups.set(anim.name.replace("Clone of ",""), anim);

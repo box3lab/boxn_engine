@@ -138,6 +138,7 @@ export class InputSystem extends Singleton<InputSystem>() {
         if (!this.scene) return;
         // 键盘输入监听 / Keyboard input listener
         this.scene.onKeyboardObservable.add((kbInfo) => {
+            console.log("kbInfo",kbInfo);
             const key = kbInfo.event.key;
             if (kbInfo.type === KeyboardEventTypes.KEYDOWN) {
                 this.activeKeys.add(key);
@@ -166,7 +167,7 @@ export class InputSystem extends Singleton<InputSystem>() {
                     
                 case PointerEventTypes.POINTERDOWN:
                     // 可以添加鼠标按钮绑定 / Can add mouse button bindings
-
+                    this.actions["mousedown"]?.trigger({ eventType: InputEventType.MOUSE_DOWN, value: pointerInfo.event.button });
                     this._mousePosition.x = pointerInfo.event.clientX;
                     this._mousePosition.y = pointerInfo.event.clientY;
 
@@ -179,9 +180,11 @@ export class InputSystem extends Singleton<InputSystem>() {
                     
                 case PointerEventTypes.POINTERUP:
                     // 鼠标按钮释放 / Mouse button release
+                    this.actions["mousedown"]?.trigger({ eventType: InputEventType.MOUSE_UP, value: pointerInfo.event.button });
                     this.lastMousePosition = this.mousePosition.clone();
                     this._mouseDelta = Vector2.Zero();
                     break;
+                    
             }
         });
 
@@ -201,7 +204,8 @@ export class InputSystem extends Singleton<InputSystem>() {
     private triggerKeyAction(key: string, keyType: KeyboardEventTypes): void {
         const actionName = this.keyBindings[key];
         if (actionName && this.actions[actionName]) {
-            this.actions[actionName].trigger({ eventType: keyType === KeyboardEventTypes.KEYDOWN ? InputEventType.KEYDOWN : InputEventType.KEYUP });
+            this.actions[actionName].trigger({ eventType: keyType === KeyboardEventTypes.KEYDOWN ? 
+                InputEventType.KEYDOWN : InputEventType.KEYUP });
         }
     }
 
