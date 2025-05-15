@@ -13,6 +13,14 @@ import { RootComponent } from "../components/RootComponent";
  * 这个类表示游戏世界中的基本游戏实体，具有变换和组件。
  */
 export class GameEntity implements IGameEntity {
+
+    /**
+     * The unique identifier of the entity.
+     * 实体的唯一标识符。
+     */
+    public uuid: string | undefined;
+
+    
     /**
      * The name of the entity.
      * 实体的名称。
@@ -63,11 +71,12 @@ export class GameEntity implements IGameEntity {
      * @param scene - The scene the entity belongs to (optional)
      *                实体所属的场景（可选）
      */
-    constructor(name: string = "", scene?: IScene) {
+    constructor(name: string = "", scene: IScene) {
         this.name = name;
         this.root = new RootComponent(scene ? new TransformNode(name,scene.scene) : new TransformNode(name));
         this.addComponent("RootComponent", this.root);
         this.scene = scene;
+        // this.
     }
 
     /**

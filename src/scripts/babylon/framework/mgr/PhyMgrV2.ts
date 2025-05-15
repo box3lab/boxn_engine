@@ -2,7 +2,7 @@ import type { PhysicsEngine } from "@babylonjs/core/Physics/v2/physicsEngine";
 import { Singleton } from "../common/Singleton";
 import { Const } from "../common/Const";
 import type { ColliderComponent } from "../components/collider/ColliderComponent";
-import { Vector3, HavokPlugin, PhysicsBody, PhysicsMotionType, type Nullable, PhysicsEventType, type IBasePhysicsCollisionEvent, PhysicsShapeContainer, } from "@babylonjs/core";
+import { Vector3, HavokPlugin, PhysicsBody, PhysicsMotionType, type Nullable, PhysicsEventType, type IBasePhysicsCollisionEvent, PhysicsShapeContainer, PhysicsAggregate, PhysicsShapeType, } from "@babylonjs/core";
 import HavokPhysics from "@babylonjs/havok";
 import { SceneMgr } from "./SceneMgr";
 import type { GameEntity } from "../entity/GameEntity";
@@ -115,6 +115,46 @@ export class PhyMgrV2 extends Singleton<PhyMgrV2>() {
                 scene.scene.getPhysicsEngine()?.setGravity(gravity);
             }
         }
+    }
+
+    /**
+     * Add a physics aggregate to a game entity
+     * 为游戏实体添加物理聚合
+     * @param gameEntity The game entity to add physics aggregate to / 要添加物理聚合的游戏实体
+     * @param motionType Type of physics motion (default: DYNAMIC) / 物理运动类型（默认：动态）
+     * @param shape Type of physics shape (default: CONTAINER) / 物理形状类型（默认：容器）
+     * @param isTrigger Whether the aggregate is a trigger (default: false) / 是否为触发器（默认：否）
+     * @param startsAsleep Whether the aggregate starts in sleep state (default: false) / 是否以休眠状态开始（默认：否）
+     * @returns The created physics aggregate or null if failed / 创建的物理聚合，如果失败则返回null
+     */
+    public addPhysicsAggregate(gameEntity: GameEntity, motionType: PhysicsMotionType = PhysicsMotionType.DYNAMIC,
+        shape: PhysicsShapeType = PhysicsShapeType.CONTAINER,
+        isTrigger: boolean = false,
+            startsAsleep: boolean = false): PhysicsAggregate | null {
+        if(!this.physicsEnabled || !gameEntity.scene?.id) return null;
+        if(!this.activeSceneIds.has(gameEntity.scene?.id)){
+            console.warn("Physics not initialized for scene:", gameEntity.scene?.id);
+            return null;
+        }
+        const scene = SceneMgr.instance.getScene(gameEntity.scene?.id);
+        if(!scene)return null;
+        const physicsEngine = scene.scene.getPhysicsEngine();
+        if(!physicsEngine)return null;
+        const physicsAggregate = new PhysicsAggregate(gameEntity.getRoot().root, shape, {
+            mass: 1,
+            restitution: 0,
+            friction: 0.5
+        }, scene.scene);
+        // Use proper methods from PhysicsAggregate
+        physicsAggregate.body.setMotionType(motionType);
+        physicsAggregate.body.setMassProperties({ inertia: Vector3.ZeroReadOnly });
+        if (physicsAggregate.body.shape) {
+            physicsAggregate.body.shape.isTrigger = isTrigger;
+        }
+        if(startsAsleep) {
+            physicsAggregate.body.disablePreStep = true;
+        }
+        return physicsAggregate;
     }
 
     /**

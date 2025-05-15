@@ -138,7 +138,7 @@ export class InputSystem extends Singleton<InputSystem>() {
         if (!this.scene) return;
         // 键盘输入监听 / Keyboard input listener
         this.scene.onKeyboardObservable.add((kbInfo) => {
-            console.log("kbInfo",kbInfo);
+            // console.log("kbInfo",kbInfo);
             const key = kbInfo.event.key;
             if (kbInfo.type === KeyboardEventTypes.KEYDOWN) {
                 this.activeKeys.add(key);

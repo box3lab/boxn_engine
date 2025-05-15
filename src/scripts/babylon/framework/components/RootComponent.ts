@@ -1,4 +1,4 @@
-import type { Mesh, TransformNode } from "@babylonjs/core";
+import type { Mesh, PhysicsAggregate, TransformNode } from "@babylonjs/core";
 import type { IGameEntity } from "../interface/IGameEntity";
 import type { BaseComponent } from "./BaseComponent";
 
@@ -7,6 +7,8 @@ export class RootComponent implements BaseComponent{
     public entity: IGameEntity | undefined;
 
     public root: TransformNode | Mesh;
+
+    public physicsAggregate: PhysicsAggregate | null = null;
 
     constructor(root: TransformNode | Mesh) {
         this.root = root;

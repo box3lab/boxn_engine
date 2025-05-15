@@ -1,6 +1,6 @@
 import type { PhysicsAggregate } from "babylonjs/Physics/v2/physicsAggregate";
 import { BaseComponent } from "../BaseComponent";
-import { HavokPlugin, Mesh, PhysicsBody, PhysicsEventType, PhysicsMotionType, PhysicsShape, Vector3, type IBasePhysicsCollisionEvent, type IPhysicsCollisionEvent } from "@babylonjs/core";
+import { Mesh, PhysicsEventType, PhysicsMotionType, PhysicsShape, PhysicsShapeType, Vector3, type IBasePhysicsCollisionEvent, type IPhysicsCollisionEvent } from "@babylonjs/core";
 import type { IGameEntity } from "../../interface/IGameEntity";
 import { PhyMgrV2 } from "../../mgr/PhyMgrV2";
 
@@ -15,8 +15,8 @@ export class ColliderComponentV2 extends BaseComponent {
       * 质量 / Mass
       * 影响物理模拟中的重力效果 / Affects gravity effects in physics simulation
       */
-     protected _mass: number = 1;   
-     
+     protected _mass: number = 1;
+
      /**
       * 观察者 / Observer
       */
@@ -42,11 +42,16 @@ export class ColliderComponentV2 extends BaseComponent {
      public set mass(value: number) {
           this._mass = value;
           if (this.entity?.physicsBody) {
-               this.entity.physicsBody.setMassProperties ({
-                   mass: value,
+               this.entity.physicsBody.setMassProperties({
+                    mass: value,
                });
           }
      }
+
+     /**
+      * 是否为物理体 / Whether it's a physics body
+      */
+     protected isPhysicsBody: boolean = false;
 
      /**
       * 碰撞器对应的网格ID / The mesh ID of the collider
@@ -65,41 +70,41 @@ export class ColliderComponentV2 extends BaseComponent {
       * 设置碰撞器对应的网格ID / Set the mesh ID of the collider
       * @param value 碰撞器对应的网格ID / The mesh ID of the collider
       */
-     public set meshIds(value: Array<number>) {   
+     public set meshIds(value: Array<number>) {
           this._meshIds = value;
-          for(let i = 0; i < this._meshIds.length; i++) {
-               PhyMgrV2.instance.registerColliderComponentByMeshId(this._meshIds[i],this);
+          for (let i = 0; i < this._meshIds.length; i++) {
+               PhyMgrV2.instance.registerColliderComponentByMeshId(this._meshIds[i], this);
           }
      }
 
-      /**
-     * 是否显示调试
-     */
-    protected _isShowDebug: boolean = false;
+     /**
+    * 是否显示调试
+    */
+     protected _isShowDebug: boolean = false;
 
-    /**
-     * 获取是否显示调试
-     */
-    public get IsShowDebug(): boolean {
-        return this._isShowDebug;
-    }
+     /**
+      * 获取是否显示调试
+      */
+     public get IsShowDebug(): boolean {
+          return this._isShowDebug;
+     }
 
-    /**
-     * 设置是否显示调试
-     */
-    public set IsShowDebug(isShowDebug: boolean) {
-        this._isShowDebug = isShowDebug;
-    }
+     /**
+      * 设置是否显示调试
+      */
+     public set IsShowDebug(isShowDebug: boolean) {
+          this._isShowDebug = isShowDebug;
+     }
 
      public addMeshId(meshId: number) {
           this._meshIds.push(meshId);
-          PhyMgrV2.instance.registerColliderComponentByMeshId(meshId,this);
+          PhyMgrV2.instance.registerColliderComponentByMeshId(meshId, this);
      }
 
      public removeMeshId(meshId: number) {
-          this._meshIds.splice(this._meshIds.indexOf(meshId),1);
+          this._meshIds.splice(this._meshIds.indexOf(meshId), 1);
           PhyMgrV2.instance.unregisterColliderComponentByMeshId(meshId);
-          
+
      }
 
      public clearMeshIds() {
@@ -145,8 +150,9 @@ export class ColliderComponentV2 extends BaseComponent {
       * 构造函数 / Constructor
       * @param name 组件名称 / Component name
       */
-     constructor(name: string = "ColliderComponentV2") {
+     constructor(name: string = "ColliderComponentV2", isPhysicsBody: boolean = false) {
           super(name);
+          this.isPhysicsBody = isPhysicsBody;
      }
 
      /**
@@ -159,13 +165,24 @@ export class ColliderComponentV2 extends BaseComponent {
                return;
           }
           super.attachTo(gameEntity);
-          const characterBody = PhyMgrV2.instance.addPhysicsBody(this.entity!, this.physicsMotionType, this.startsAsleep);
-          if (characterBody) {
-               PhyMgrV2.instance.registerColliderComponent(this.entity!, this);
+          if (this.isPhysicsBody) {
+               const characterBody = PhyMgrV2.instance.addPhysicsBody(this.entity!, this.physicsMotionType, this.startsAsleep);
+               if (characterBody) {
+                    PhyMgrV2.instance.registerColliderComponent(this.entity!, this);
 
-               characterBody.disablePreStep = false;
-               characterBody.setMassProperties({ inertia: Vector3.ZeroReadOnly });
-           
+                    characterBody.disablePreStep = false;
+                    characterBody.setMassProperties({ inertia: Vector3.ZeroReadOnly });
+
+               }
+          } else {
+               const physicsAggregate = PhyMgrV2.instance.addPhysicsAggregate(this.entity!, this.physicsMotionType,
+                    PhysicsShapeType.CONTAINER,
+                    this.isTrigger,
+                    this.startsAsleep
+               );
+               if (physicsAggregate && this.entity) {
+                    this.entity.root.physicsAggregate = physicsAggregate;
+               }
           }
      }
 
@@ -183,11 +200,11 @@ export class ColliderComponentV2 extends BaseComponent {
       * 设置碰撞器形状 / Set collider shape
       * @param shape 物理形状 / Physics shape
       */
-     public setShape(shape: PhysicsShape,mesh:Mesh,offset:Vector3 = Vector3.Zero()) {
+     public setShape(shape: PhysicsShape, mesh: Mesh, offset: Vector3 = Vector3.Zero()) {
           if (this.entity?.physicsBody) {
                mesh.parent = this.entity.getRoot().root;
                mesh.position = offset;
-               this.entity.physicsBody.shape?.addChildFromParent(this.entity.getRoot().root,shape,mesh);
+               this.entity.physicsBody.shape?.addChildFromParent(this.entity.getRoot().root, shape, mesh);
           }
      }
 

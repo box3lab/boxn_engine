@@ -90,8 +90,8 @@ export class CapsuleColliderComponentV2 extends ColliderComponentV2 {
      * @param height 胶囊体高度 / Capsule height
      * @param direction 胶囊体方向 / Capsule direction
      */
-    constructor(name: string = "CapsuleColliderComponentV2", radius: number = 0.5, height: number = 2, direction: number = 0) {
-        super(name);
+    constructor(name: string = "CapsuleColliderComponentV2", radius: number = 0.5, height: number = 2, direction: number = 0, isPhysicsBody: boolean = false) {
+        super(name, isPhysicsBody);
         this._radius = radius;
         this._height = height;
         this._direction = direction;

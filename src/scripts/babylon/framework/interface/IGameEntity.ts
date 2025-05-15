@@ -14,6 +14,12 @@ import type { PhysicsBody } from "@babylonjs/core/Physics/v2";
 export interface IGameEntity {
 
     /**
+     * The unique identifier of the entity.
+     * 实体的唯一标识符。
+     */
+    uuid: string | undefined;
+
+    /**
      * The name of the entity.
      * 实体的名称。
      */
@@ -35,6 +41,12 @@ export interface IGameEntity {
      * 实体所属的场景。
      */
     scene: IScene | undefined;
+
+    /**
+     * The physics body of the entity.
+     * 实体的物理体。
+     */
+    physicsBody: PhysicsBody | undefined;
 
     /**
      * Updates the entity's state based on the elapsed time since the last frame.
@@ -87,10 +99,4 @@ export interface IGameEntity {
      * @param scene - The scene to set
      */
     setScene(scene: IScene): void;
-
-    /**
-     * The physics body of the entity.
-     * 实体的物理体。
-     */
-    physicsBody: PhysicsBody | undefined;
 }

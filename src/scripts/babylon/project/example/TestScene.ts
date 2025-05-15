@@ -59,6 +59,7 @@ export class TestScene implements IScene {
     private camera: ArcRotateCamera | null = null;
 
     private entity: GameEntity | undefined;
+    entities: any;
     
     constructor(id: string, name: string, engine: Engine, priority: number = 0) {
         this.id = id;
@@ -129,7 +130,33 @@ export class TestScene implements IScene {
             this.entity.update(deltaTime);
         }
     }
-    
+
+    /** 
+     * Add an entity to the scene
+     * 添加一个实体到场景
+     * @param entity The entity to add / 要添加的实体
+     */
+    public addEntity(entity: GameEntity): void {
+        this.entities.push(entity);
+    }
+
+    /**
+     * Remove an entity from the scene
+     * 从场景中移除一个实体
+     * @param entity The entity to remove / 要移除的实体
+     */
+    public removeEntity(entity: GameEntity): void {
+        this.entities.splice(this.entities.indexOf(entity), 1);
+    }
+
+    /**
+     * Get all entities in the scene
+     * 获取场景中的所有实体
+     * @returns An array of all entities in the scene / 场景中的所有实体数组
+     */
+    public getEntities(): GameEntity[] {
+        return this.entities;
+    }
     /**
      * Setup the camera for the scene
      */
@@ -219,7 +246,7 @@ export class TestScene implements IScene {
         panel.material = panelMaterial;
 
         const panelAggregate = new PhysicsAggregate(panel, 
-            PhysicsShapeType.BOX, { mass: 0, restitution:0.75, friction:0.5, mesh:panel}, this.scene);
+            PhysicsShapeType.BOX, { mass: 0, restitution:0.2, friction:0.5, mesh:panel}, this.scene);
         // panelAggregate.body.setEventMask(0x1);
     }
     
@@ -403,13 +430,13 @@ export class TestScene implements IScene {
         this.entity.addComponent("SkeletonAnimationComponent",skeletonAnimationComponent);
         skeletonAnimationComponent.initAnimation("Idle",true);
 
-        const capsuleColliderComponent = new CapsuleColliderComponentV2("CapsuleColliderComponentV2", 3, 18);
+        const capsuleColliderComponent = new CapsuleColliderComponentV2("CapsuleColliderComponentV2", 3, 18, 0, true);
         this.entity.addComponent("CapsuleColliderComponentV2",capsuleColliderComponent);
         capsuleColliderComponent.IsShowDebug = false;
 
         const movementComponent = new MovementComponent("MovementComponent");
         this.entity.addComponent("MovementComponent",movementComponent);
-        movementComponent.jumpForce = 8;
+        movementComponent.jumpForce = 16;
 
      
         // // Keyboard events
