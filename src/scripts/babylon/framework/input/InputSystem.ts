@@ -40,12 +40,13 @@ export class InputSystem extends Singleton<InputSystem>() {
     
     // Mouse movement delta since last frame / 自上一帧以来的鼠标移动增量
     private _mouseDelta: Vector2 = Vector2.Zero();
-    
+    // Mouse movement delta since last frame / 自上一帧以来的鼠标移动增量
+    private _mouseActive: number = 0;
     // Mouse position from the previous frame / 上一帧的鼠标位置
     private lastMousePosition: Vector2 = Vector2.Zero();
 
     // 存储多指触控状态 / Store multi-touch states
-    private _touchPoints: Map<number, { position: Vector2; delta: Vector2; lastPosition: Vector2 }> = new Map();
+    private _touchPoints: Map<number, { position: Vector2; delta: Vector2; lastPosition: Vector2}> = new Map();
 
     /**
      * Initialize the input system with a Babylon.js scene
@@ -69,7 +70,7 @@ export class InputSystem extends Singleton<InputSystem>() {
      * @returns The created InputAction instance / 返回创建的输入动作实例
      */
     public registerAction(actionName: string, options?: {
-        key?: string;
+        key?: string | string[];
         gamepadButton?: number;
         gamepadAxis?: number;
     }): InputAction {
@@ -77,7 +78,13 @@ export class InputSystem extends Singleton<InputSystem>() {
         this.actions[actionName] = action;
 
         if (options?.key) {
-            this.keyBindings[options.key] = actionName;
+            if (Array.isArray(options.key)) {
+                options.key.forEach(key => {
+                    this.keyBindings[key] = actionName;
+                });
+            } else {
+                this.keyBindings[options.key] = actionName;
+            }
         }
 
         if (options?.gamepadButton !== undefined) {
@@ -194,6 +201,7 @@ export class InputSystem extends Singleton<InputSystem>() {
                         lastPosition: new Vector2(x, y)
                     });
                     this.triggerTouchAction(inputIndex, type, pointerId, new Vector2(x, y));
+
                     break;
 
                 case PointerEventTypes.POINTERMOVE:
@@ -205,14 +213,23 @@ export class InputSystem extends Singleton<InputSystem>() {
                         tp.position.x = x;
                         tp.position.y = y;
                         tp.lastPosition = tp.position.clone();
-                        this.triggerTouchAction(inputIndex, type, pointerId, new Vector2(x, y));
                     }
+                    this.triggerTouchAction(inputIndex, type, pointerId, new Vector2(x, y));
+
                     break;
 
                 case PointerEventTypes.POINTERUP:
-                    this.triggerTouchAction(inputIndex, type, pointerId, new Vector2(x, y));
                     // 移除触控点 / Remove touch point
+                    this.triggerTouchAction(inputIndex, type, pointerId, new Vector2(x, y));
                     this._touchPoints.delete(pointerId);
+                    //if(this._mouseActive === pointerId) this._mouseActive = 0;
+                    break;
+
+                case PointerEventTypes.POINTERWHEEL:
+                    // 鼠标滚轮事件 / Mouse wheel event
+                    this.triggerTouchAction(inputIndex, type, pointerId, new Vector2(x, y));
+                    break;
+                default:
                     break;
             }
         });
@@ -239,16 +256,20 @@ export class InputSystem extends Singleton<InputSystem>() {
     }
     private triggerTouchAction(buttonid: number, touchType: number, pointerId: number, position: Vector2): void {
         const pointerInputMap: { [buttonid: number]: string } = {
-            [PointerInput.LeftClick]: "MOUSELEFT",
-            [PointerInput.MiddleClick]: "MOUSEMIDDLE", 
-            [PointerInput.RightClick]: "MOUSERIGHT",
-            [PointerInput.BrowserBack]: "BROWSERBACK",
-            [PointerInput.BrowserForward]: "BROWSERFORWARD"
+            [PointerInput.LeftClick]: "MOUSE_LEFT",
+            [PointerInput.MiddleClick]: "MOUSE_MIDDLE", 
+            [PointerInput.RightClick]: "MOUSE_RIGHT",
+            [PointerInput.BrowserBack]: "BROWSER_BACK",
+            [PointerInput.BrowserForward]: "BROWSER_FORWARD",
+            [PointerInput.Move]: "MOUSE_MOVE",
+            [PointerInput.MouseWheelX]: "MOUSE_WHEEL_X",
+            [PointerInput.MouseWheelY]: "MOUSE_WHEEL_Y",
         };
         const pointerEventTypeMap: { [touchType: number]: InputEventType } = {
             [PointerEventTypes.POINTERDOWN]: InputEventType.MOUSE_DOWN,
             [PointerEventTypes.POINTERUP]: InputEventType.MOUSE_UP,
-            [PointerEventTypes.POINTERMOVE]: InputEventType.MOUSE_MOVE
+            [PointerEventTypes.POINTERMOVE]: InputEventType.MOUSE_MOVE,
+            [PointerEventTypes.POINTERWHEEL]: InputEventType.MOUSE_WHEEL,
         };
         const key = pointerInputMap[buttonid];
         const actionName = this.keyBindings[key];

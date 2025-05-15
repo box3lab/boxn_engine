@@ -18,6 +18,7 @@ export enum InputEventType {
     MOUSE_DOWN = "mousedown", // Mouse button press / 鼠标按下
     MOUSE_UP = "mouseup",     // Mouse button release / 鼠标释放
     MOUSE_MOVE = "mousemove", // Mouse movement / 鼠标移动
+    MOUSE_WHEEL = "mousewheel", // Mouse wheel / 鼠标滚轮
     TOUCH_START = "touchstart", // Touch start / 触摸开始
     TOUCH_END = "touchend",   // Touch end / 触摸结束
     TOUCH_MOVE = "touchmove", // Touch movement / 触摸移动
@@ -38,6 +39,7 @@ export class InputAction {
     private _callbacks: InputActionCallback[] = []; // Array of callback functions / 回调函数数组
     private _eventType: InputEventType = InputEventType.KEYDOWN; // Current event type / 当前事件类型
     private _value: any = null; // Current value / 当前值
+    private _id: number | undefined = undefined; // Store the id / 存储id
 
     // Add a new callback function to the action
     // 为动作添加新的回调函数
@@ -56,7 +58,8 @@ export class InputAction {
     public trigger(event: InputActionEvent): void {
         this._eventType = event.eventType;
         this._value = event.value || null;
-        this._callbacks.forEach(cb => cb({ eventType: event.eventType, value: this._value }));
+        this._id = event.id; // Save the id / 保存id
+        this._callbacks.forEach(cb => cb({ eventType: this._eventType, value: this._value, id: this._id })); // Pass id to callbacks / 将id传递给回调
     }
 
     // Get the current event type
@@ -69,5 +72,11 @@ export class InputAction {
     // 获取当前值
     public get value(): any {
         return this._value;
+    }
+
+    // Get the current id
+    // 获取当前id
+    public get id(): number | undefined {
+        return this._id;
     }
 }
