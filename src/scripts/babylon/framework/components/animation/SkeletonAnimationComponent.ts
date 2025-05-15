@@ -1,6 +1,6 @@
-import { BaseComponent } from "./BaseComponent";
-import type { IGameEntity } from "../interface/IGameEntity";
-import type { SkeletonMeshComponent } from "./mesh/SkeletonMeshComponent";
+import { BaseComponent } from "../BaseComponent";
+import type { IGameEntity } from "../../interface/IGameEntity";
+import type { SkeletonMeshComponent } from "../mesh/SkeletonMeshComponent";
 import type { AnimationGroup, Observable, Observer, TargetedAnimation } from "@babylonjs/core";
 
 /**
@@ -16,7 +16,7 @@ export class SkeletonAnimationComponent extends BaseComponent {
     private _currentAnimationGroup: AnimationGroup | undefined = undefined;
 
     public get currentAnimationGroup(): AnimationGroup | undefined {
-        return this.currentAnimationGroup;
+        return this._currentAnimationGroup;
     }
 
     // 动画结束回调 / Animation end callback
@@ -88,6 +88,7 @@ export class SkeletonAnimationComponent extends BaseComponent {
         onEndCallback: (() => void) | null = null): void {
       
         if(!this.skeletonMeshComponent.isLoaded)return;
+        if(this.currentAnimation == animationName) return;
         this.stopAnimation();
         const animationGroup = this.skeletonMeshComponent.animationGroups.get(animationName);
         if(animationGroup){
@@ -95,6 +96,8 @@ export class SkeletonAnimationComponent extends BaseComponent {
             animationGroup.start(isLoop, speedRatio);
             this.currentAnimation = animationName;
             this._currentAnimationGroup = animationGroup;
+            console.log("this.currentAnimation",this.currentAnimation);
+            console.log("this._currentAnimationGroup",this._currentAnimationGroup);
             this.onAnimationEnd = onEndCallback;
         }
     }
@@ -124,6 +127,7 @@ export class SkeletonAnimationComponent extends BaseComponent {
      */
     public stopAnimation(): void {
         if(!this.skeletonMeshComponent.isLoaded)return;
+        console.log("this.currentAnimation",this.currentAnimation);
         if(this.currentAnimation){
             this.currentAnimationGroup?.stop();
             this.currentAnimation = null;

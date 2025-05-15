@@ -160,6 +160,7 @@ export class InputSystem extends Singleton<InputSystem>() {
         if (!this.scene) return;
         // 键盘输入监听 / Keyboard input listener
         this.scene.onKeyboardObservable.add((kbInfo) => {
+            console.log("kbInfo",kbInfo);
             const key = kbInfo.event.key;
             if (kbInfo.type === KeyboardEventTypes.KEYDOWN) {
                 this.activeKeys.add(key);
@@ -231,6 +232,7 @@ export class InputSystem extends Singleton<InputSystem>() {
                     break;
                 default:
                     break;
+                    
             }
         });
                 // 鼠标输入监听 / Mouse input listener
@@ -251,7 +253,8 @@ export class InputSystem extends Singleton<InputSystem>() {
     private triggerKeyAction(key: string, keyType: KeyboardEventTypes): void {
         const actionName = this.keyBindings[key];
         if (actionName && this.actions[actionName]) {
-            this.actions[actionName].trigger({ eventType: keyType === KeyboardEventTypes.KEYDOWN ? InputEventType.KEYDOWN : InputEventType.KEYUP });
+            this.actions[actionName].trigger({ eventType: keyType === KeyboardEventTypes.KEYDOWN ? 
+                InputEventType.KEYDOWN : InputEventType.KEYUP });
         }
     }
     private triggerTouchAction(buttonid: number, touchType: number, pointerId: number, position: Vector2): void {

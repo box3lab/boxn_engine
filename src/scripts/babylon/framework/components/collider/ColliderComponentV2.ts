@@ -3,14 +3,12 @@ import { BaseComponent } from "../BaseComponent";
 import { HavokPlugin, Mesh, PhysicsBody, PhysicsEventType, PhysicsMotionType, PhysicsShape, Vector3, type IBasePhysicsCollisionEvent, type IPhysicsCollisionEvent } from "@babylonjs/core";
 import type { IGameEntity } from "../../interface/IGameEntity";
 import { PhyMgrV2 } from "../../mgr/PhyMgrV2";
-import type { GameEntity } from "../../entity/GameEntity";
-import { SceneMgr } from "../../mgr/SceneMgr";
 
 /**
  * 碰撞器组件基类 / Base class for collider components
  * 用于处理游戏对象的物理碰撞 / Handles physical collisions for game objects
  */
-export abstract class ColliderComponentV2 extends BaseComponent {
+export class ColliderComponentV2 extends BaseComponent {
      public name: string = "ColliderComponentV2";
 
      /**
@@ -161,8 +159,13 @@ export abstract class ColliderComponentV2 extends BaseComponent {
                return;
           }
           super.attachTo(gameEntity);
-          if (PhyMgrV2.instance.addPhysicsBody(this.entity!, this.physicsMotionType, this.startsAsleep)) {
+          const characterBody = PhyMgrV2.instance.addPhysicsBody(this.entity!, this.physicsMotionType, this.startsAsleep);
+          if (characterBody) {
                PhyMgrV2.instance.registerColliderComponent(this.entity!, this);
+
+               characterBody.disablePreStep = false;
+               characterBody.setMassProperties({ inertia: Vector3.ZeroReadOnly });
+           
           }
      }
 

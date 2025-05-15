@@ -18,11 +18,7 @@ export enum InputEventType {
     MOUSE_DOWN = "mousedown", // Mouse button press / 鼠标按下
     MOUSE_UP = "mouseup",     // Mouse button release / 鼠标释放
     MOUSE_MOVE = "mousemove", // Mouse movement / 鼠标移动
-    MOUSE_WHEEL = "mousewheel", // Mouse wheel / 鼠标滚轮
-    TOUCH_START = "touchstart", // Touch start / 触摸开始
-    TOUCH_END = "touchend",   // Touch end / 触摸结束
-    TOUCH_MOVE = "touchmove", // Touch movement / 触摸移动
-
+    MOUSE_WHEEL = "mousewheel", // Mouse wheel movement / 鼠标滚轮移动
 }
 
 // Interface for input action events
