@@ -30,17 +30,18 @@ import {
     PBRMaterial
 } from "@babylonjs/core";
 import * as BABYLON from 'babylonjs';
-import * as GUI from "@babylonjs/gui";
 import 'babylonjs-loaders';
 import type { IScene } from "../../framework/interface/IScene";
 import HavokPhysics from "@babylonjs/havok";
 import { GameEntity } from "../../framework/entity/GameEntity";
 import { SkeletonMeshComponent } from "../../framework/components/mesh/SkeletonMeshComponent";
-import { SkeletonAnimationComponent } from "../../framework/components/SkeletonAnimationComponent";
+import { SkeletonAnimationComponent } from "../../framework/components/animation/SkeletonAnimationComponent";
 import { CapsuleColliderComponentV2 } from "../../framework/components/collider/CapsuleColliderComponentV2";
 import { InputSystem } from "../../framework/input/InputSystem";
 import { InputEventType, type InputActionEvent } from "../../framework/input/InputAction";
-
+import { MovementComponent } from "../../framework/components/movement/MovementComponent";
+import { ColliderComponentV2 } from "../../framework/components/collider/ColliderComponentV2";
+import * as GUI from "@babylonjs/gui";
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
  */
@@ -57,8 +58,7 @@ export class TestScene implements IScene {
     // private thirdPersonController: ThirdPersonComp | null = null;
     private camera: ArcRotateCamera | null = null;
 
-    private root:TransformNode | undefined;
-    
+    private entity: GameEntity | undefined;
     private advancedTexture: GUI.AdvancedDynamicTexture | undefined;
     // private touchCoordsText: GUI.TextBlock | undefined; // Replaced for multi-touch
     // private touchDot: GUI.Ellipse | undefined; // Replaced for multi-touch
@@ -96,44 +96,18 @@ export class TestScene implements IScene {
         shadowGenerator.useBlurExponentialShadowMap = true;
         shadowGenerator.blurKernel = 32;
         shadowGenerator.darkness = 0.4;
-
+        this.advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, this.scene);
         this.setupCamera();
         this.setupLights();
         this.setupPostProcessing();
-        // Initialize GUI
-        this.advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, this.scene);
-
-        // Create TextBlock for coordinates - Removed, will be created dynamically
-        // this.touchCoordsText = new GUI.TextBlock("touchCoordsText", "");
-        // this.touchCoordsText.color = "white";
-        // this.touchCoordsText.fontSize = 20;
-        // this.touchCoordsText.textHorizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-        // this.touchCoordsText.textVerticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
-        // this.touchCoordsText.left = "10px";
-        // this.touchCoordsText.top = "10px";
-        // this.touchCoordsText.isVisible = false; // Initially hidden
-        // this.advancedTexture.addControl(this.touchCoordsText);
-
-        // Create Ellipse for the dot - Removed, will be created dynamically
-        // this.touchDot = new GUI.Ellipse("touchDot");
-        // this.touchDot.width = "10px";
-        // this.touchDot.height = "10px";
-        // this.touchDot.color = "red";
-        // this.touchDot.background = "red";
-        // this.touchDot.thickness = 2;
-        // this.touchDot.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-        // this.touchDot.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
-        // this.touchDot.isVisible = false; // Initially hidden
-        // this.advancedTexture.addControl(this.touchDot);
-        
         HavokPhysics({
             locateFile: (fileName) => `${import.meta.env.BASE_URL}${fileName}`
         }).then((havok) => {
             this.physicsEngine = new HavokPlugin(true,havok);
             this.scene.enablePhysics(new Vector3(0, -9.81, 0), this.physicsEngine);
-        this.createGround();
-        this.createPanel();
-        this.createCharacter();
+            this.createGround();
+            this.createPanel();
+            this.createCharacter();
         });
 
 
@@ -155,6 +129,9 @@ export class TestScene implements IScene {
     update(deltaTime: number): void {
         // Update scene components
         // if(this.root)console.log(this.root);
+        if(this.entity){
+            this.entity.update(deltaTime);
+        }
     }
     
     /**
@@ -420,28 +397,36 @@ export class TestScene implements IScene {
         //     console.log(collisionEvent);
         // });
 
+        this.entity = new GameEntity("player",this);
+        this.entity.root.root.position = new Vector3(0, 0, 0);
+        const skeletonMeshComponent = new SkeletonMeshComponent("skeletonMeshComponent","./glb/test.glb",this.scene);
+        this.entity.addComponent("SkeletonMeshComponent",skeletonMeshComponent);
+        skeletonMeshComponent.scale = 10;
+
+        const skeletonAnimationComponent = new SkeletonAnimationComponent("skeletonAnimationComponent",skeletonMeshComponent);
+        this.entity.addComponent("SkeletonAnimationComponent",skeletonAnimationComponent);
+        skeletonAnimationComponent.initAnimation("Idle",true);
+
+        const capsuleColliderComponent = new CapsuleColliderComponentV2("CapsuleColliderComponentV2", 3, 18);
+        this.entity.addComponent("CapsuleColliderComponentV2",capsuleColliderComponent);
+        capsuleColliderComponent.IsShowDebug = false;
+
+        const movementComponent = new MovementComponent("MovementComponent");
+        this.entity.addComponent("MovementComponent",movementComponent);
+        movementComponent.jumpForce = 8;
+
      
         // // Keyboard events
         InputSystem.instance.init(this.scene);
         // 注册输入动作
-        const moveForward = InputSystem.instance.registerAction("MoveForward", { key: ["w","ArrowUp"] });
-        const moveBackward = InputSystem.instance.registerAction("MoveBackward", { key: ["s","ArrowDown"] });
-        const moveLeft = InputSystem.instance.registerAction("MoveLeft", { key: ["a","ArrowLeft"] });
-        const moveRight = InputSystem.instance.registerAction("MoveRight", { key: ["d","ArrowRight"] });
+        const moveForward = InputSystem.instance.registerAction("MoveForward", { key: "w" });
+        const moveBackward = InputSystem.instance.registerAction("MoveBackward", { key: "s" });
+        const moveLeft = InputSystem.instance.registerAction("MoveLeft", { key: "a" });
+        const moveRight = InputSystem.instance.registerAction("MoveRight", { key: "d" });
+        const mousedown = InputSystem.instance.registerAction("mousedown");
+        const space = InputSystem.instance.registerAction("space", { key: " " });
         const moveTouch = InputSystem.instance.registerAction("MoveTouch", { key: ["MOUSE_MOVE","MOUSE_LEFT"] });
-        // 添加监听器
-        moveForward.addListener((event: InputActionEvent) => {
-            if (event.eventType === InputEventType.KEYDOWN) {
-                console.log("Moving forward");
-                // 实际移动逻辑
-            }
-           else  if (event.eventType === InputEventType.KEYUP) {
-                console.log("Moving forward released");
-                // 实际移动逻辑
-            }
-        });
         moveTouch.addListener((event: InputActionEvent) => {
-
             const pointerId = event.id;
 
             if (pointerId === undefined) {
@@ -451,10 +436,10 @@ export class TestScene implements IScene {
 
             if (event.eventType === InputEventType.MOUSE_DOWN || event.eventType === InputEventType.MOUSE_MOVE) {
                 //console.log(`[TestScene] Event type is ${event.eventType} for pointerId: ${pointerId}`);
-                if (event.value && event.value.x !== undefined && event.value.y !== undefined) {
-                    //console.log(`[TestScene] Valid coordinates received for pointerId ${pointerId}: X=${event.value.x}, Y=${event.value.y}`);
-                    const x = event.value.x;
-                    const y = event.value.y;
+                if (event.value && event.value.position && event.value.position.x !== undefined && event.value.position.y !== undefined) {
+                    //console.log(`[TestScene] Valid coordinates received for pointerId ${pointerId}: X=${event.value.position.x}, Y=${event.value.position.y}`);
+                    const x = event.value.position.x;
+                    const y = event.value.position.y;
                     let controls = this.touchControls.get(pointerId);
 
                     if (!controls) {
@@ -498,10 +483,10 @@ export class TestScene implements IScene {
                     //console.log(`[TestScene] Dot updated for pointerId ${pointerId}: left=${controls.dot.left}, top=${controls.dot.top}, isVisible: ${controls.dot.isVisible}`);
 
                 } else {
-                    //console.warn(`[TestScene] MOUSE_DOWN/MOVE event for pointerId ${pointerId} but no valid coordinates in event.value:`, event.value);
+                    console.warn(`[TestScene] MOUSE_DOWN/MOVE event for pointerId ${pointerId} but no valid coordinates in event.value:`, event.value);
                     const controls = this.touchControls.get(pointerId);
                     if (controls) {
-                        //console.log(`[TestScene] Hiding controls for pointerId ${pointerId} due to missing coordinates on DOWN/MOVE.`);
+                        console.log(`[TestScene] Hiding controls for pointerId ${pointerId} due to missing coordinates on DOWN/MOVE.`);
                         controls.textBlock.isVisible = false;
                         controls.dot.isVisible = false;
                     }
@@ -521,61 +506,93 @@ export class TestScene implements IScene {
                     console.warn(`[TestScene] MOUSE_UP event for pointerId ${pointerId} but no controls found to remove.`);
                 }
             } else {
-                //console.log(`[TestScene] Event type ${event.eventType} for pointerId ${pointerId} not handled for display.`);
+                console.log(`[TestScene] Event type ${event.eventType} for pointerId ${pointerId} not handled for display.`);
             }
         });
         // 添加监听器
+        moveForward.addListener((event: InputActionEvent) => {
+            if (event.eventType === InputEventType.KEYDOWN) {
+                // console.log("Moving forward");
+                // 实际移动逻辑
+                movementComponent.setMoveDirection(new Vector3(0, 0, 1));
+                movementComponent.moveSpeed = 300;
+                skeletonAnimationComponent.playAnimation("Walking",true);
+            }
+           else  if (event.eventType === InputEventType.KEYUP) {
+                // console.log("Moving forward released");
+                // 实际移动逻辑
+                movementComponent.stopMove();
+                skeletonAnimationComponent.playAnimation("Idle",true);
+            }
+        });
+
+        // 添加监听器
         moveBackward.addListener((event: InputActionEvent) => {
             if (event.eventType === InputEventType.KEYDOWN) {
-                console.log("Moving backward");
+                // console.log("Moving backward");
                 // 实际移动逻辑
+                movementComponent.setMoveDirection(new Vector3(0, 0, -1));
+                movementComponent.moveSpeed = 300;
+                skeletonAnimationComponent.playAnimation("WalkingBack",true);
             }
             else  if (event.eventType === InputEventType.KEYUP) {
-                console.log("Moving backward released");
+                // console.log("Moving backward released");
                 // 实际移动逻辑
+                movementComponent.stopMove();
+                skeletonAnimationComponent.playAnimation("Idle",true);
             }
         });
 
         // 添加监听器
         moveLeft.addListener((event: InputActionEvent) => {
             if (event.eventType === InputEventType.KEYDOWN) {
-                console.log("Moving left");
+                // console.log("Moving left");
                 // 实际移动逻辑
+                movementComponent.setMoveDirection(new Vector3(-1, 0, 0));
+                movementComponent.moveSpeed = 300;
+                skeletonAnimationComponent.playAnimation("Walking",true);
             }
             else  if (event.eventType === InputEventType.KEYUP) {
-                console.log("Moving left released");
+                // console.log("Moving left released");
                 // 实际移动逻辑
+                movementComponent.stopMove();
+                skeletonAnimationComponent.playAnimation("Idle",true);
             }
         });
 
         // 添加监听器
         moveRight.addListener((event: InputActionEvent) => {
             if (event.eventType === InputEventType.KEYDOWN) {
-                console.log("Moving right");
+                // console.log("Moving right");
                 // 实际移动逻辑
+                movementComponent.setMoveDirection(new Vector3(1, 0, 0));
+                movementComponent.moveSpeed = 300;
+                skeletonAnimationComponent.playAnimation("Walking",true);
             }
             else  if (event.eventType === InputEventType.KEYUP) {
-                console.log("Moving right released");
+                // console.log("Moving right released");
                 // 实际移动逻辑
+                movementComponent.stopMove();
+                skeletonAnimationComponent.playAnimation("Idle",true);
             }
         });
-        
 
-        const entity = new GameEntity("player",this);
-        entity.root.root.position = new Vector3(0, 30, 0);
-        const skeletonMeshComponent = new SkeletonMeshComponent("skeletonMeshComponent","./glb/test.glb",this.scene);
-        entity.addComponent("SkeletonMeshComponent",skeletonMeshComponent);
-        skeletonMeshComponent.scale = 10;
+        mousedown.addListener((event: InputActionEvent) => {
+            if (event.eventType === InputEventType.MOUSE_DOWN) {
+                console.log("mousedown",event.value);
+            }
+            else  if (event.eventType === InputEventType.MOUSE_UP) {
+                console.log("mousedown released",event.value);
+            }
+        });
 
-        const skeletonAnimationComponent = new SkeletonAnimationComponent("skeletonAnimationComponent",skeletonMeshComponent);
-        entity.addComponent("SkeletonAnimationComponent",skeletonAnimationComponent);
-        skeletonAnimationComponent.initAnimation("Idle",true);
-
-        const capsuleColliderComponent = new CapsuleColliderComponentV2("CapsuleColliderComponentV2", 3, 18);
-        entity.addComponent("CapsuleColliderComponentV2",capsuleColliderComponent);
-        capsuleColliderComponent.IsShowDebug = false;
-
-    
+        space.addListener((event: InputActionEvent) => {
+            if (event.eventType === InputEventType.KEYDOWN) {
+                console.log("space",event.value);
+                movementComponent.jump();
+            }
+        });
+      
      
         // BABYLON.SceneLoader.ImportMesh("", "./glb/", 
         //     //@ts-ignore
@@ -673,19 +690,6 @@ export class TestScene implements IScene {
     public dispose(): void {
         // Dispose ThirdPersonComp controller
         
-        // Dispose GUI
-        if (this.advancedTexture) {
-            // Dispose any remaining touch controls
-            this.touchControls.forEach(controls => {
-                this.advancedTexture?.removeControl(controls.textBlock);
-                this.advancedTexture?.removeControl(controls.dot);
-                controls.textBlock.dispose();
-                controls.dot.dispose();
-            });
-            this.touchControls.clear();
-            this.advancedTexture.dispose();
-        }
-
         // Stop the render loop
         this.engine.stopRenderLoop();
         

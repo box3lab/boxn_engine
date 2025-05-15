@@ -220,10 +220,13 @@ export class InputSystem extends Singleton<InputSystem>() {
                     break;
 
                 case PointerEventTypes.POINTERUP:
-                    // 移除触控点 / Remove touch point
+                    // 鼠标按钮释放 / Mouse button release
+                    // 恢复调用 triggerTouchAction 以便分发 MOUSE_UP 事件
                     this.triggerTouchAction(inputIndex, type, pointerId, new Vector2(x, y));
+                    // 恢复移除触控点
                     this._touchPoints.delete(pointerId);
-                    //if(this._mouseActive === pointerId) this._mouseActive = 0;
+                    this.lastMousePosition = this._mousePosition.clone(); // Use _mousePosition which is updated
+                    this._mouseDelta = Vector2.Zero();
                     break;
 
                 case PointerEventTypes.POINTERWHEEL:
@@ -232,7 +235,6 @@ export class InputSystem extends Singleton<InputSystem>() {
                     break;
                 default:
                     break;
-                    
             }
         });
                 // 鼠标输入监听 / Mouse input listener
@@ -277,7 +279,7 @@ export class InputSystem extends Singleton<InputSystem>() {
         const key = pointerInputMap[buttonid];
         const actionName = this.keyBindings[key];
         if (actionName && this.actions[actionName]) {
-            this.actions[actionName].trigger({ eventType: (pointerEventTypeMap[touchType]), value: position, id: pointerId });
+            this.actions[actionName].trigger({ eventType: (pointerEventTypeMap[touchType]), value: {position:position, key:key}, id: pointerId });
         }
     }
     /**
