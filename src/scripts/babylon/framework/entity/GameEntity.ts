@@ -76,7 +76,7 @@ export class GameEntity implements IGameEntity {
         this.root = new RootComponent(scene ? new TransformNode(name,scene.scene) : new TransformNode(name));
         this.addComponent("RootComponent", this.root);
         this.scene = scene;
-        // this.
+        this.scene?.addEntity(this);
     }
 
     /**
