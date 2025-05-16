@@ -26,6 +26,7 @@ export enum InputEventType {
 export interface InputActionEvent {
     eventType: InputEventType; // Type of the input event / 输入事件类型
     value?: any;              // Optional value associated with the event / 事件相关的可选值
+    id?: number;              // Optional id associated with the event / 事件相关的可选id
 }
 
 // Class representing an input action that can be triggered by various input events
@@ -34,6 +35,7 @@ export class InputAction {
     private _callbacks: InputActionCallback[] = []; // Array of callback functions / 回调函数数组
     private _eventType: InputEventType = InputEventType.KEYDOWN; // Current event type / 当前事件类型
     private _value: any = null; // Current value / 当前值
+    private _id: number | undefined = undefined; // Store the id / 存储id
 
     // Add a new callback function to the action
     // 为动作添加新的回调函数
@@ -52,7 +54,8 @@ export class InputAction {
     public trigger(event: InputActionEvent): void {
         this._eventType = event.eventType;
         this._value = event.value || null;
-        this._callbacks.forEach(cb => cb({ eventType: event.eventType, value: this._value }));
+        this._id = event.id; // Save the id / 保存id
+        this._callbacks.forEach(cb => cb({ eventType: this._eventType, value: this._value, id: this._id })); // Pass id to callbacks / 将id传递给回调
     }
 
     // Get the current event type
@@ -65,5 +68,11 @@ export class InputAction {
     // 获取当前值
     public get value(): any {
         return this._value;
+    }
+
+    // Get the current id
+    // 获取当前id
+    public get id(): number | undefined {
+        return this._id;
     }
 }

@@ -3,7 +3,6 @@ import { Singleton } from "./common/Singleton";
 import { TestScene } from "../project/example/TestScene";
 import { SceneMgr } from "./mgr/SceneMgr";
 import { ResMgr } from "./mgr/ResMgr";
-import { PhyMgr } from "./mgr/PhyMgr";
 import { PhyMgrV2 } from "./mgr/PhyMgrV2";
 /**
  * BoxNextEngine - A custom engine class for Babylon.js
