@@ -41,18 +41,13 @@ import { InputSystem } from "../../framework/input/InputSystem";
 import { InputEventType, type InputActionEvent } from "../../framework/input/InputAction";
 import { MovementComponent } from "../../framework/components/movement/MovementComponent";
 import { ColliderComponentV2 } from "../../framework/components/collider/ColliderComponentV2";
-
+import * as GUI from "@babylonjs/gui";
+import { BaseScene } from "../../framework/scene/BaseScene";
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
  */
-export class TestScene implements IScene {
-    id: string;                      // Unique identifier / 唯一标识符
-    name: string;                    // Display name / 显示名称
-    scene: Scene;                    // Babylon.js Scene / Babylon.js 场景
-    isActive: boolean = false;       // Whether scene is active / 场景是否处于活动状态
-    isLoaded: boolean = false;       // Whether scene is loaded / 场景是否已加载
-    priority: number = 0;            // Render priority / 渲染优先级（较低的优先渲染）
-    private engine: Engine;
+export class TestScene extends BaseScene {
+
     private physicsEngine: HavokPlugin | undefined;
     // private character: Mesh | null = null;
     // private thirdPersonController: ThirdPersonComp | null = null;
@@ -60,13 +55,13 @@ export class TestScene implements IScene {
 
     private entity: GameEntity | undefined;
     entities: any;
+    private advancedTexture: GUI.AdvancedDynamicTexture | undefined;
+    // private touchCoordsText: GUI.TextBlock | undefined; // Replaced for multi-touch
+    // private touchDot: GUI.Ellipse | undefined; // Replaced for multi-touch
+    private touchControls: Map<number, { textBlock: GUI.TextBlock; dot: GUI.Ellipse }> = new Map();
     
     constructor(id: string, name: string, engine: Engine, priority: number = 0) {
-        this.id = id;
-        this.name = name;
-        this.engine = engine;
-        this.priority = priority;
-        this.scene = new Scene(this.engine);
+        super(id, name, engine, priority);
         
         // 设置场景背景色
         this.scene.clearColor = new Color4(0.1, 0.1, 0.1, 1);
@@ -93,7 +88,7 @@ export class TestScene implements IScene {
         shadowGenerator.useBlurExponentialShadowMap = true;
         shadowGenerator.blurKernel = 32;
         shadowGenerator.darkness = 0.4;
-
+        this.advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, this.scene);
         this.setupCamera();
         this.setupLights();
         this.setupPostProcessing();
@@ -131,24 +126,7 @@ export class TestScene implements IScene {
         }
     }
 
-    /** 
-     * Add an entity to the scene
-     * 添加一个实体到场景
-     * @param entity The entity to add / 要添加的实体
-     */
-    public addEntity(entity: GameEntity): void {
-        this.entities.push(entity);
-    }
-
-    /**
-     * Remove an entity from the scene
-     * 从场景中移除一个实体
-     * @param entity The entity to remove / 要移除的实体
-     */
-    public removeEntity(entity: GameEntity): void {
-        this.entities.splice(this.entities.indexOf(entity), 1);
-    }
-
+  
     /**
      * Get all entities in the scene
      * 获取场景中的所有实体
@@ -448,7 +426,90 @@ export class TestScene implements IScene {
         const moveRight = InputSystem.instance.registerAction("MoveRight", { key: "d" });
         const mousedown = InputSystem.instance.registerAction("mousedown");
         const space = InputSystem.instance.registerAction("space", { key: " " });
+        const moveTouch = InputSystem.instance.registerAction("MoveTouch", { key: ["MOUSE_MOVE","MOUSE_LEFT"] });
+        moveTouch.addListener((event: InputActionEvent) => {
+            const pointerId = event.id;
 
+            if (pointerId === undefined) {
+                console.warn("[TestScene] MoveTouch event received without a pointerId.");
+                return;
+            }
+
+            if (event.eventType === InputEventType.MOUSE_DOWN || event.eventType === InputEventType.MOUSE_MOVE) {
+                //console.log(`[TestScene] Event type is ${event.eventType} for pointerId: ${pointerId}`);
+                if (event.value && event.value.position && event.value.position.x !== undefined && event.value.position.y !== undefined) {
+                    //console.log(`[TestScene] Valid coordinates received for pointerId ${pointerId}: X=${event.value.position.x}, Y=${event.value.position.y}`);
+                    const x = event.value.position.x;
+                    const y = event.value.position.y;
+                    let controls = this.touchControls.get(pointerId);
+
+                    if (!controls) {
+                        //console.log(`[TestScene] Creating new controls for pointerId: ${pointerId}`);
+                        // Create new controls for this pointerId
+                        const textBlock = new GUI.TextBlock(`coords_${pointerId}`, "");
+                        textBlock.color = "white";
+                        textBlock.fontSize = 18;
+                        textBlock.textHorizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+                        textBlock.textVerticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+                        // Offset multiple touch displays slightly to avoid overlap
+                        textBlock.top = `${10 + pointerId * 25}px`; 
+                        textBlock.left = "10px";
+                        this.advancedTexture?.addControl(textBlock);
+
+                        const dot = new GUI.Ellipse(`dot_${pointerId}`);
+                        dot.width = "10px";
+                        dot.height = "10px";
+                        dot.color = "red";
+                        dot.background = "red";
+                        dot.thickness = 2;
+                        dot.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+                        dot.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+                        this.advancedTexture?.addControl(dot);
+
+                        controls = { textBlock, dot };
+                        this.touchControls.set(pointerId, controls);
+                        //console.log(`[TestScene] Controls created and stored for pointerId: ${pointerId}`);
+                    } else {
+                        //console.log(`[TestScene] Reusing existing controls for pointerId: ${pointerId}`);
+                    }
+
+                    // Update controls
+                    controls.textBlock.text = `ID: ${pointerId} - X: ${x.toFixed(0)}, Y: ${y.toFixed(0)}`;
+                    controls.textBlock.isVisible = true;
+                    //console.log(`[TestScene] TextBlock updated for pointerId ${pointerId}: ${controls.textBlock.text}, isVisible: ${controls.textBlock.isVisible}`);
+
+                    controls.dot.left = `${x - 5}px`; // Adjust for dot size to center it
+                    controls.dot.top = `${y - 5}px`;  // Adjust for dot size to center it
+                    controls.dot.isVisible = true;
+                    //console.log(`[TestScene] Dot updated for pointerId ${pointerId}: left=${controls.dot.left}, top=${controls.dot.top}, isVisible: ${controls.dot.isVisible}`);
+
+                } else {
+                    console.warn(`[TestScene] MOUSE_DOWN/MOVE event for pointerId ${pointerId} but no valid coordinates in event.value:`, event.value);
+                    const controls = this.touchControls.get(pointerId);
+                    if (controls) {
+                        console.log(`[TestScene] Hiding controls for pointerId ${pointerId} due to missing coordinates on DOWN/MOVE.`);
+                        controls.textBlock.isVisible = false;
+                        controls.dot.isVisible = false;
+                    }
+                }
+            } else if (event.eventType === InputEventType.MOUSE_UP) {
+                console.log(`[TestScene] Event type is MOUSE_UP for pointerId: ${pointerId}`);
+                const controls = this.touchControls.get(pointerId);
+                if (controls) {
+                    console.log(`[TestScene] Removing controls for pointerId: ${pointerId}`);
+                    this.advancedTexture?.removeControl(controls.textBlock);
+                    this.advancedTexture?.removeControl(controls.dot);
+                    controls.textBlock.dispose();
+                    controls.dot.dispose();
+                    this.touchControls.delete(pointerId);
+                    console.log(`[TestScene] Controls removed and disposed for pointerId: ${pointerId}`);
+                } else {
+                    console.warn(`[TestScene] MOUSE_UP event for pointerId ${pointerId} but no controls found to remove.`);
+                }
+            } else {
+                console.log(`[TestScene] Event type ${event.eventType} for pointerId ${pointerId} not handled for display.`);
+            }
+        });
         // 添加监听器
         moveForward.addListener((event: InputActionEvent) => {
             if (event.eventType === InputEventType.KEYDOWN) {
