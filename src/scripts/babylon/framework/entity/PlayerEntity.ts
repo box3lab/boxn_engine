@@ -32,11 +32,11 @@ export class PlayerEntity extends GameEntity {
 
         this._charactorColliderComponent = new CharactorColliderComponent("CharactorColliderComponent", 3, 18, 0, true);
         this.addComponent("CharactorColliderComponent",this._charactorColliderComponent);
-        this._charactorColliderComponent.IsShowDebug = true;
+        this._charactorColliderComponent.IsShowDebug = false;
 
         this._movementComponent = new MovementComponent("MovementComponent");
         this.addComponent("MovementComponent",this._movementComponent);
-        this._movementComponent.jumpForce = 15;
+        this._movementComponent.jumpForce = 20;
         this._movementComponent.maxMoveSpeed = 30;
         this._movementComponent.acceleration = 5;
 

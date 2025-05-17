@@ -229,7 +229,7 @@ export class TestScene extends BaseScene {
         panel.material = panelMaterial;
 
         const panelAggregate = new PhysicsAggregate(panel, 
-            PhysicsShapeType.BOX, { mass: 0, restitution:0, friction:0.0, mesh:panel}, this.scene);
+            PhysicsShapeType.BOX, { mass: 0, restitution:0.1, friction:0.7, mesh:panel}, this.scene);
         // panelAggregate.body.setEventMask(0x1);
     }
     
@@ -405,289 +405,49 @@ export class TestScene extends BaseScene {
 
         this.entity = new PlayerEntity("player",this);
         this.entity.root.root.position = new Vector3(0, 0, 0);
-        // const skeletonMeshComponent = new SkeletonMeshComponent("skeletonMeshComponent","./glb/test.glb",this.scene);
-        // this.entity.addComponent("SkeletonMeshComponent",skeletonMeshComponent);
-        // skeletonMeshComponent.scale = 10;
 
-        // const skeletonAnimationComponent = new SkeletonAnimationComponent("skeletonAnimationComponent",skeletonMeshComponent);
-        // this.entity.addComponent("SkeletonAnimationComponent",skeletonAnimationComponent);
-        // skeletonAnimationComponent.initAnimation("Idle",true);
-
-        // const capsuleColliderComponent = new CapsuleColliderComponentV2("CapsuleColliderComponentV2", 3, 18, 0, true);
-        // this.entity.addComponent("CapsuleColliderComponentV2",capsuleColliderComponent);
-        // capsuleColliderComponent.IsShowDebug = false;
-
-        // const movementComponent = new MovementComponent("MovementComponent");
-        // this.entity.addComponent("MovementComponent",movementComponent);
-        // movementComponent.jumpForce = 16;
-
-        // const playerInputComponent = new PlayerInputComponent("PlayerInputComponent");
-        // this.entity.addComponent("PlayerInputComponent",playerInputComponent);
-
-        // // 注册输入动作
-        // const moveForward = InputSystem.instance.registerAction("MoveForward", { key: "w" });
-        // const moveBackward = InputSystem.instance.registerAction("MoveBackward", { key: "s" });
-        // const moveLeft = InputSystem.instance.registerAction("MoveLeft", { key: "a" });
-        // const moveRight = InputSystem.instance.registerAction("MoveRight", { key: "d" });
-        // const mousedown = InputSystem.instance.registerAction("mousedown");
-        // const space = InputSystem.instance.registerAction("space", { key: " " });
-        // const moveTouch = InputSystem.instance.registerAction("MoveTouch", { key: ["MOUSE_MOVE","MOUSE_LEFT"] });
-        // moveTouch.addListener((event: InputActionEvent) => {
-        //     const pointerId = event.id;
-
-        //     if (pointerId === undefined) {
-        //         console.warn("[TestScene] MoveTouch event received without a pointerId.");
-        //         return;
-        //     }
-
-        //     if (event.eventType === InputEventType.MOUSE_DOWN || event.eventType === InputEventType.MOUSE_MOVE) {
-        //         //console.log(`[TestScene] Event type is ${event.eventType} for pointerId: ${pointerId}`);
-        //         if (event.value && event.value.position && event.value.position.x !== undefined && event.value.position.y !== undefined) {
-        //             //console.log(`[TestScene] Valid coordinates received for pointerId ${pointerId}: X=${event.value.position.x}, Y=${event.value.position.y}`);
-        //             const x = event.value.position.x;
-        //             const y = event.value.position.y;
-        //             let controls = this.touchControls.get(pointerId);
-
-        //             if (!controls) {
-        //                 //console.log(`[TestScene] Creating new controls for pointerId: ${pointerId}`);
-        //                 // Create new controls for this pointerId
-        //                 const textBlock = new GUI.TextBlock(`coords_${pointerId}`, "");
-        //                 textBlock.color = "white";
-        //                 textBlock.fontSize = 18;
-        //                 textBlock.textHorizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-        //                 textBlock.textVerticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
-        //                 // Offset multiple touch displays slightly to avoid overlap
-        //                 textBlock.top = `${10 + pointerId * 25}px`; 
-        //                 textBlock.left = "10px";
-        //                 this.advancedTexture?.addControl(textBlock);
-
-        //                 const dot = new GUI.Ellipse(`dot_${pointerId}`);
-        //                 dot.width = "10px";
-        //                 dot.height = "10px";
-        //                 dot.color = "red";
-        //                 dot.background = "red";
-        //                 dot.thickness = 2;
-        //                 dot.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-        //                 dot.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
-        //                 this.advancedTexture?.addControl(dot);
-
-        //                 controls = { textBlock, dot };
-        //                 this.touchControls.set(pointerId, controls);
-        //                 //console.log(`[TestScene] Controls created and stored for pointerId: ${pointerId}`);
-        //             } else {
-        //                 //console.log(`[TestScene] Reusing existing controls for pointerId: ${pointerId}`);
-        //             }
-
-        //             // Update controls
-        //             controls.textBlock.text = `ID: ${pointerId} - X: ${x.toFixed(0)}, Y: ${y.toFixed(0)}`;
-        //             controls.textBlock.isVisible = true;
-        //             //console.log(`[TestScene] TextBlock updated for pointerId ${pointerId}: ${controls.textBlock.text}, isVisible: ${controls.textBlock.isVisible}`);
-
-        //             controls.dot.left = `${x - 5}px`; // Adjust for dot size to center it
-        //             controls.dot.top = `${y - 5}px`;  // Adjust for dot size to center it
-        //             controls.dot.isVisible = true;
-        //             //console.log(`[TestScene] Dot updated for pointerId ${pointerId}: left=${controls.dot.left}, top=${controls.dot.top}, isVisible: ${controls.dot.isVisible}`);
-
-        //         } else {
-        //             console.warn(`[TestScene] MOUSE_DOWN/MOVE event for pointerId ${pointerId} but no valid coordinates in event.value:`, event.value);
-        //             const controls = this.touchControls.get(pointerId);
-        //             if (controls) {
-        //                 console.log(`[TestScene] Hiding controls for pointerId ${pointerId} due to missing coordinates on DOWN/MOVE.`);
-        //                 controls.textBlock.isVisible = false;
-        //                 controls.dot.isVisible = false;
-        //             }
-        //         }
-        //     } else if (event.eventType === InputEventType.MOUSE_UP) {
-        //         console.log(`[TestScene] Event type is MOUSE_UP for pointerId: ${pointerId}`);
-        //         const controls = this.touchControls.get(pointerId);
-        //         if (controls) {
-        //             console.log(`[TestScene] Removing controls for pointerId: ${pointerId}`);
-        //             this.advancedTexture?.removeControl(controls.textBlock);
-        //             this.advancedTexture?.removeControl(controls.dot);
-        //             controls.textBlock.dispose();
-        //             controls.dot.dispose();
-        //             this.touchControls.delete(pointerId);
-        //             console.log(`[TestScene] Controls removed and disposed for pointerId: ${pointerId}`);
-        //         } else {
-        //             console.warn(`[TestScene] MOUSE_UP event for pointerId ${pointerId} but no controls found to remove.`);
-        //         }
-        //     } else {
-        //         console.log(`[TestScene] Event type ${event.eventType} for pointerId ${pointerId} not handled for display.`);
-        //     }
-        // });
-        // // 添加监听器
-        // moveForward.addListener((event: InputActionEvent) => {
-        //     if (event.eventType === InputEventType.KEYDOWN) {
-        //         // console.log("Moving forward");
-        //         // 实际移动逻辑
-        //         movementComponent.setMoveDirection(new Vector3(0, 0, 1));
-        //         movementComponent.moveSpeed = 300;
-        //         skeletonAnimationComponent.playAnimation("Walking",true);
-        //     }
-        //    else  if (event.eventType === InputEventType.KEYUP) {
-        //         // console.log("Moving forward released");
-        //         // 实际移动逻辑
-        //         movementComponent.stopMove();
-        //         skeletonAnimationComponent.playAnimation("Idle",true);
-        //     }
-        // });
-
-        // // 添加监听器
-        // moveBackward.addListener((event: InputActionEvent) => {
-        //     if (event.eventType === InputEventType.KEYDOWN) {
-        //         // console.log("Moving backward");
-        //         // 实际移动逻辑
-        //         movementComponent.setMoveDirection(new Vector3(0, 0, -1));
-        //         movementComponent.moveSpeed = 300;
-        //         skeletonAnimationComponent.playAnimation("WalkingBack",true);
-        //     }
-        //     else  if (event.eventType === InputEventType.KEYUP) {
-        //         // console.log("Moving backward released");
-        //         // 实际移动逻辑
-        //         movementComponent.stopMove();
-        //         skeletonAnimationComponent.playAnimation("Idle",true);
-        //     }
-        // });
-
-        // // 添加监听器
-        // moveLeft.addListener((event: InputActionEvent) => {
-        //     if (event.eventType === InputEventType.KEYDOWN) {
-        //         // console.log("Moving left");
-        //         // 实际移动逻辑
-        //         movementComponent.setMoveDirection(new Vector3(-1, 0, 0));
-        //         movementComponent.moveSpeed = 300;
-        //         skeletonAnimationComponent.playAnimation("Walking",true);
-        //     }
-        //     else  if (event.eventType === InputEventType.KEYUP) {
-        //         // console.log("Moving left released");
-        //         // 实际移动逻辑
-        //         movementComponent.stopMove();
-        //         skeletonAnimationComponent.playAnimation("Idle",true);
-        //     }
-        // });
-
-        // // 添加监听器
-        // moveRight.addListener((event: InputActionEvent) => {
-        //     if (event.eventType === InputEventType.KEYDOWN) {
-        //         // console.log("Moving right");
-        //         // 实际移动逻辑
-        //         movementComponent.setMoveDirection(new Vector3(1, 0, 0));
-        //         movementComponent.moveSpeed = 300;
-        //         skeletonAnimationComponent.playAnimation("Walking",true);
-        //     }
-        //     else  if (event.eventType === InputEventType.KEYUP) {
-        //         // console.log("Moving right released");
-        //         // 实际移动逻辑
-        //         movementComponent.stopMove();
-        //         skeletonAnimationComponent.playAnimation("Idle",true);
-        //     }
-        // });
-
-        // mousedown.addListener((event: InputActionEvent) => {
-        //     if (event.eventType === InputEventType.MOUSE_DOWN) {
-        //         console.log("mousedown",event.value);
-        //     }
-        //     else  if (event.eventType === InputEventType.MOUSE_UP) {
-        //         console.log("mousedown released",event.value);
-        //     }
-        // });
-
-        // space.addListener((event: InputActionEvent) => {
-        //     if (event.eventType === InputEventType.KEYDOWN) {
-        //         console.log("space",event.value);
-        //         movementComponent.jump();
-        //     }
-        // });
+        const cubeMaterial = new StandardMaterial("cubeMaterial3", this.scene);
+        cubeMaterial.diffuseColor = new Color3(1,0,0);
       
-     
-        // BABYLON.SceneLoader.ImportMesh("", "./glb/", 
-        //     //@ts-ignore
-        //     "test.glb", this.scene, (newMeshes, particleSystems, skeletons, animationGroups) => {
-        //     var hero = newMeshes[0];
+        const cube1 = MeshBuilder.CreateBox("cube1",{width:10,height:10,depth:10},this.scene);
+        cube1.position = new Vector3(10,5,10);
+        cube1.material = cubeMaterial;
 
-        //     //Scale the model down        
-        //     hero.scaling.scaleInPlace(10);
+        const cube1Aggregate = new PhysicsAggregate(cube1, 
+            PhysicsShapeType.BOX, { mass: 1, restitution:0.5, friction:0.7, mesh:cube1}, this.scene);
 
-        //     //Lock camera on the character 
-        //     // camera1.target = hero;
-        //     //Hero character variables 
-        //     var heroSpeed = 0.03;
-        //     var heroSpeedBackwards = 0.01;
-        //     var heroRotationSpeed = 0.01;
+        const cube2 = MeshBuilder.CreateBox("cube2",{width:10,height:10,depth:10},this.scene);
+        cube2.position = new Vector3(-10,5,10);
+        cube2.material = cubeMaterial;
 
-        //     var animating = true;
-        //     console.log("newMeshes",newMeshes);
-        //     // console.log("particleSystems",particleSystems);
-        //     console.log("skeletons",skeletons);
-        //     console.log("animationGroups",animationGroups);
+        const cube2Aggregate = new PhysicsAggregate(cube2, 
+            PhysicsShapeType.BOX, { mass: 1, restitution:0.5, friction:0.7, mesh:cube2}, this.scene);
 
-        //     const walkAnim = animationGroups.find(anim => anim.name === "Walking");
-        //     const walkBackAnim = animationGroups.find(anim => anim.name === "WalkingBack");
-        //     const idleAnim = animationGroups.find(anim => anim.name === "Idle");
-        //     // const sambaAnim = this.scene.getAnimationGroupByName("Samba");
 
-            
+        const cube3 = MeshBuilder.CreateBox("cube3",{width:10,height:10,depth:10},this.scene);
+        cube3.position = new Vector3(0,5,10);
+        cube3.material = cubeMaterial;
 
-        //     //Rendering loop (executed for everyframe)
-        //     this.scene.onBeforeRenderObservable.add(() => {
-        //         var keydown = false;
-        //         //Manage the movements of the character (e.g. position, direction)
-        //         if (inputMap["w"]) {
-        //             hero.moveWithCollisions(hero.forward.scaleInPlace(heroSpeed));
-        //             keydown = true;
-        //         }
-        //         if (inputMap["s"]) {
-        //             hero.moveWithCollisions(hero.forward.scaleInPlace(-heroSpeedBackwards));
-        //             keydown = true;
-        //         }
-        //         if (inputMap["a"]) {
-        //             hero.rotate(BABYLON.Vector3.Up(), -heroRotationSpeed);
-        //             keydown = true;
-        //         }
-        //         if (inputMap["d"]) {
-        //             hero.rotate(BABYLON.Vector3.Up(), heroRotationSpeed);
-        //             keydown = true;
-        //         }
-        //         if (inputMap["b"]) {
-        //             keydown = true;
-        //         }
+        const cube3Aggregate = new PhysicsAggregate(cube3, 
+            PhysicsShapeType.BOX, { mass: 1, restitution:0, friction:0.7, mesh:cube3}, this.scene);
 
-        //         //Manage animations to be played  
-        //         if (keydown) {
-        //             if (!animating) {
-        //                 animating = true;
-        //                 if (inputMap["s"]) {
-        //                     //Walk backwards
-        //                     walkBackAnim?.start(true, 1.0, walkBackAnim.from, walkBackAnim.to, false);
-        //                 }
-        //                 else if
-        //                     (inputMap["b"]) {
-        //                     //Samba!
-        //                     // sambaAnim?.start(true, 1.0, sambaAnim.from, sambaAnim.to, false);
-        //                 }
-        //                 else {
-        //                     //Walk
-        //                     walkAnim?.start(true, 1.0, walkAnim.from, walkAnim.to, false);
-        //                 }
-        //             }
-        //         }
-        //         else {
+        const cube4 = MeshBuilder.CreateBox("cube4",{width:10,height:10,depth:10},this.scene);
+        cube4.position = new Vector3(0,15,10);
+        cube4.material = cubeMaterial;
 
-        //             if (animating) {
-        //                 //Default animation is idle when no key is down     
-        //                 idleAnim?.start(true, 1.0, idleAnim.from, idleAnim.to, false);
+        const cube4Aggregate = new PhysicsAggregate(cube4, 
+            PhysicsShapeType.BOX, { mass: 1, restitution:0, friction:0.7, mesh:cube4}, this.scene);
+        
+        const cubeMaterial2 = new StandardMaterial("cubeMaterial3", this.scene);
+        cubeMaterial2.diffuseColor = new Color3(0,1,0);
 
-        //                 //Stop all animations besides Idle Anim when no key is down
-        //                 // sambaAnim?.stop();
-        //                 walkAnim?.stop();
-        //                 walkBackAnim?.stop();
-
-        //                 //Ensure animation are played only once per rendering loop
-        //                 animating = false;
-        //             }
-        //         }
-        //     });
-        // });
+        const cube5 = MeshBuilder.CreateBox("cube5",{width:10,height:10,depth:10},this.scene);
+        cube5.position = new Vector3(20,5,15);
+        cube5.material = cubeMaterial2;
+        
+        const cube5Aggregate = new PhysicsAggregate(cube5, 
+            PhysicsShapeType.BOX, { mass: 1, restitution:0, friction:0.7, mesh:cube5}, this.scene); 
+        cube5Aggregate.body.setMotionType(PhysicsMotionType.STATIC);
     }
     
     /**
