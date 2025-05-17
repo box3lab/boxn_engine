@@ -147,7 +147,7 @@ export class PhyMgrV2 extends Singleton<PhyMgrV2>() {
         }, scene.scene);
         // Use proper methods from PhysicsAggregate
         physicsAggregate.body.setMotionType(motionType);
-        physicsAggregate.body.setMassProperties({ inertia: Vector3.ZeroReadOnly });
+        // physicsAggregate.body.setMassProperties({ inertia: Vector3.ZeroReadOnly });
         if (physicsAggregate.body.shape) {
             physicsAggregate.body.shape.isTrigger = isTrigger;
         }

@@ -100,7 +100,7 @@ export class MovementComponent extends BaseComponent {
     }
 
     /**
-     * 跳跃 / Jump
+     * 跳跃 / Jump  
      */
     public jump(): void {
         if (this._isGrounded && this._collider && this.entity?.physicsBody) {
@@ -110,6 +110,9 @@ export class MovementComponent extends BaseComponent {
         }
     }
 
+    /**
+     * 停止移动 / Stop movement
+     */
     public stopMove(): void {
         this._moveDirection = Vector3.Zero();
         if (this.entity?.physicsBody) {

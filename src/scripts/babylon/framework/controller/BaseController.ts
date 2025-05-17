@@ -14,4 +14,8 @@ export class BaseController {
     public update(deltaTime: number): void {
         // TODO: Implement update logic
     }
+
+    public dispose(): void {
+        // TODO: Implement dispose logic
+    }
 }

@@ -43,6 +43,8 @@ import { MovementComponent } from "../../framework/components/movement/MovementC
 import { ColliderComponentV2 } from "../../framework/components/collider/ColliderComponentV2";
 import * as GUI from "@babylonjs/gui";
 import { BaseScene } from "../../framework/scene/BaseScene";
+import { PlayerInputComponent } from "../../framework/components/input/PlayerInputComponent";
+import { PlayerEntity } from "../../framework/entity/PlayerEntity";
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
  */
@@ -116,6 +118,8 @@ export class TestScene extends BaseScene {
     }
     initialize(): Promise<void> {
         // Initialize scene resources
+        // Keyboard events
+        InputSystem.instance.init(this.scene);
         return Promise.resolve();
     }
     update(deltaTime: number): void {
@@ -398,7 +402,7 @@ export class TestScene extends BaseScene {
         //     console.log(collisionEvent);
         // });
 
-        this.entity = new GameEntity("player",this);
+        this.entity = new PlayerEntity("player",this);
         this.entity.root.root.position = new Vector3(0, 0, 0);
         const skeletonMeshComponent = new SkeletonMeshComponent("skeletonMeshComponent","./glb/test.glb",this.scene);
         this.entity.addComponent("SkeletonMeshComponent",skeletonMeshComponent);
@@ -416,183 +420,183 @@ export class TestScene extends BaseScene {
         this.entity.addComponent("MovementComponent",movementComponent);
         movementComponent.jumpForce = 16;
 
-     
-        // // Keyboard events
-        InputSystem.instance.init(this.scene);
-        // 注册输入动作
-        const moveForward = InputSystem.instance.registerAction("MoveForward", { key: "w" });
-        const moveBackward = InputSystem.instance.registerAction("MoveBackward", { key: "s" });
-        const moveLeft = InputSystem.instance.registerAction("MoveLeft", { key: "a" });
-        const moveRight = InputSystem.instance.registerAction("MoveRight", { key: "d" });
-        const mousedown = InputSystem.instance.registerAction("mousedown");
-        const space = InputSystem.instance.registerAction("space", { key: " " });
-        const moveTouch = InputSystem.instance.registerAction("MoveTouch", { key: ["MOUSE_MOVE","MOUSE_LEFT"] });
-        moveTouch.addListener((event: InputActionEvent) => {
-            const pointerId = event.id;
+        const playerInputComponent = new PlayerInputComponent("PlayerInputComponent");
+        this.entity.addComponent("PlayerInputComponent",playerInputComponent);
 
-            if (pointerId === undefined) {
-                console.warn("[TestScene] MoveTouch event received without a pointerId.");
-                return;
-            }
+        // // 注册输入动作
+        // const moveForward = InputSystem.instance.registerAction("MoveForward", { key: "w" });
+        // const moveBackward = InputSystem.instance.registerAction("MoveBackward", { key: "s" });
+        // const moveLeft = InputSystem.instance.registerAction("MoveLeft", { key: "a" });
+        // const moveRight = InputSystem.instance.registerAction("MoveRight", { key: "d" });
+        // const mousedown = InputSystem.instance.registerAction("mousedown");
+        // const space = InputSystem.instance.registerAction("space", { key: " " });
+        // const moveTouch = InputSystem.instance.registerAction("MoveTouch", { key: ["MOUSE_MOVE","MOUSE_LEFT"] });
+        // moveTouch.addListener((event: InputActionEvent) => {
+        //     const pointerId = event.id;
 
-            if (event.eventType === InputEventType.MOUSE_DOWN || event.eventType === InputEventType.MOUSE_MOVE) {
-                //console.log(`[TestScene] Event type is ${event.eventType} for pointerId: ${pointerId}`);
-                if (event.value && event.value.position && event.value.position.x !== undefined && event.value.position.y !== undefined) {
-                    //console.log(`[TestScene] Valid coordinates received for pointerId ${pointerId}: X=${event.value.position.x}, Y=${event.value.position.y}`);
-                    const x = event.value.position.x;
-                    const y = event.value.position.y;
-                    let controls = this.touchControls.get(pointerId);
+        //     if (pointerId === undefined) {
+        //         console.warn("[TestScene] MoveTouch event received without a pointerId.");
+        //         return;
+        //     }
 
-                    if (!controls) {
-                        //console.log(`[TestScene] Creating new controls for pointerId: ${pointerId}`);
-                        // Create new controls for this pointerId
-                        const textBlock = new GUI.TextBlock(`coords_${pointerId}`, "");
-                        textBlock.color = "white";
-                        textBlock.fontSize = 18;
-                        textBlock.textHorizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-                        textBlock.textVerticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
-                        // Offset multiple touch displays slightly to avoid overlap
-                        textBlock.top = `${10 + pointerId * 25}px`; 
-                        textBlock.left = "10px";
-                        this.advancedTexture?.addControl(textBlock);
+        //     if (event.eventType === InputEventType.MOUSE_DOWN || event.eventType === InputEventType.MOUSE_MOVE) {
+        //         //console.log(`[TestScene] Event type is ${event.eventType} for pointerId: ${pointerId}`);
+        //         if (event.value && event.value.position && event.value.position.x !== undefined && event.value.position.y !== undefined) {
+        //             //console.log(`[TestScene] Valid coordinates received for pointerId ${pointerId}: X=${event.value.position.x}, Y=${event.value.position.y}`);
+        //             const x = event.value.position.x;
+        //             const y = event.value.position.y;
+        //             let controls = this.touchControls.get(pointerId);
 
-                        const dot = new GUI.Ellipse(`dot_${pointerId}`);
-                        dot.width = "10px";
-                        dot.height = "10px";
-                        dot.color = "red";
-                        dot.background = "red";
-                        dot.thickness = 2;
-                        dot.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-                        dot.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
-                        this.advancedTexture?.addControl(dot);
+        //             if (!controls) {
+        //                 //console.log(`[TestScene] Creating new controls for pointerId: ${pointerId}`);
+        //                 // Create new controls for this pointerId
+        //                 const textBlock = new GUI.TextBlock(`coords_${pointerId}`, "");
+        //                 textBlock.color = "white";
+        //                 textBlock.fontSize = 18;
+        //                 textBlock.textHorizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+        //                 textBlock.textVerticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+        //                 // Offset multiple touch displays slightly to avoid overlap
+        //                 textBlock.top = `${10 + pointerId * 25}px`; 
+        //                 textBlock.left = "10px";
+        //                 this.advancedTexture?.addControl(textBlock);
 
-                        controls = { textBlock, dot };
-                        this.touchControls.set(pointerId, controls);
-                        //console.log(`[TestScene] Controls created and stored for pointerId: ${pointerId}`);
-                    } else {
-                        //console.log(`[TestScene] Reusing existing controls for pointerId: ${pointerId}`);
-                    }
+        //                 const dot = new GUI.Ellipse(`dot_${pointerId}`);
+        //                 dot.width = "10px";
+        //                 dot.height = "10px";
+        //                 dot.color = "red";
+        //                 dot.background = "red";
+        //                 dot.thickness = 2;
+        //                 dot.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+        //                 dot.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+        //                 this.advancedTexture?.addControl(dot);
 
-                    // Update controls
-                    controls.textBlock.text = `ID: ${pointerId} - X: ${x.toFixed(0)}, Y: ${y.toFixed(0)}`;
-                    controls.textBlock.isVisible = true;
-                    //console.log(`[TestScene] TextBlock updated for pointerId ${pointerId}: ${controls.textBlock.text}, isVisible: ${controls.textBlock.isVisible}`);
+        //                 controls = { textBlock, dot };
+        //                 this.touchControls.set(pointerId, controls);
+        //                 //console.log(`[TestScene] Controls created and stored for pointerId: ${pointerId}`);
+        //             } else {
+        //                 //console.log(`[TestScene] Reusing existing controls for pointerId: ${pointerId}`);
+        //             }
 
-                    controls.dot.left = `${x - 5}px`; // Adjust for dot size to center it
-                    controls.dot.top = `${y - 5}px`;  // Adjust for dot size to center it
-                    controls.dot.isVisible = true;
-                    //console.log(`[TestScene] Dot updated for pointerId ${pointerId}: left=${controls.dot.left}, top=${controls.dot.top}, isVisible: ${controls.dot.isVisible}`);
+        //             // Update controls
+        //             controls.textBlock.text = `ID: ${pointerId} - X: ${x.toFixed(0)}, Y: ${y.toFixed(0)}`;
+        //             controls.textBlock.isVisible = true;
+        //             //console.log(`[TestScene] TextBlock updated for pointerId ${pointerId}: ${controls.textBlock.text}, isVisible: ${controls.textBlock.isVisible}`);
 
-                } else {
-                    console.warn(`[TestScene] MOUSE_DOWN/MOVE event for pointerId ${pointerId} but no valid coordinates in event.value:`, event.value);
-                    const controls = this.touchControls.get(pointerId);
-                    if (controls) {
-                        console.log(`[TestScene] Hiding controls for pointerId ${pointerId} due to missing coordinates on DOWN/MOVE.`);
-                        controls.textBlock.isVisible = false;
-                        controls.dot.isVisible = false;
-                    }
-                }
-            } else if (event.eventType === InputEventType.MOUSE_UP) {
-                console.log(`[TestScene] Event type is MOUSE_UP for pointerId: ${pointerId}`);
-                const controls = this.touchControls.get(pointerId);
-                if (controls) {
-                    console.log(`[TestScene] Removing controls for pointerId: ${pointerId}`);
-                    this.advancedTexture?.removeControl(controls.textBlock);
-                    this.advancedTexture?.removeControl(controls.dot);
-                    controls.textBlock.dispose();
-                    controls.dot.dispose();
-                    this.touchControls.delete(pointerId);
-                    console.log(`[TestScene] Controls removed and disposed for pointerId: ${pointerId}`);
-                } else {
-                    console.warn(`[TestScene] MOUSE_UP event for pointerId ${pointerId} but no controls found to remove.`);
-                }
-            } else {
-                console.log(`[TestScene] Event type ${event.eventType} for pointerId ${pointerId} not handled for display.`);
-            }
-        });
-        // 添加监听器
-        moveForward.addListener((event: InputActionEvent) => {
-            if (event.eventType === InputEventType.KEYDOWN) {
-                // console.log("Moving forward");
-                // 实际移动逻辑
-                movementComponent.setMoveDirection(new Vector3(0, 0, 1));
-                movementComponent.moveSpeed = 300;
-                skeletonAnimationComponent.playAnimation("Walking",true);
-            }
-           else  if (event.eventType === InputEventType.KEYUP) {
-                // console.log("Moving forward released");
-                // 实际移动逻辑
-                movementComponent.stopMove();
-                skeletonAnimationComponent.playAnimation("Idle",true);
-            }
-        });
+        //             controls.dot.left = `${x - 5}px`; // Adjust for dot size to center it
+        //             controls.dot.top = `${y - 5}px`;  // Adjust for dot size to center it
+        //             controls.dot.isVisible = true;
+        //             //console.log(`[TestScene] Dot updated for pointerId ${pointerId}: left=${controls.dot.left}, top=${controls.dot.top}, isVisible: ${controls.dot.isVisible}`);
 
-        // 添加监听器
-        moveBackward.addListener((event: InputActionEvent) => {
-            if (event.eventType === InputEventType.KEYDOWN) {
-                // console.log("Moving backward");
-                // 实际移动逻辑
-                movementComponent.setMoveDirection(new Vector3(0, 0, -1));
-                movementComponent.moveSpeed = 300;
-                skeletonAnimationComponent.playAnimation("WalkingBack",true);
-            }
-            else  if (event.eventType === InputEventType.KEYUP) {
-                // console.log("Moving backward released");
-                // 实际移动逻辑
-                movementComponent.stopMove();
-                skeletonAnimationComponent.playAnimation("Idle",true);
-            }
-        });
+        //         } else {
+        //             console.warn(`[TestScene] MOUSE_DOWN/MOVE event for pointerId ${pointerId} but no valid coordinates in event.value:`, event.value);
+        //             const controls = this.touchControls.get(pointerId);
+        //             if (controls) {
+        //                 console.log(`[TestScene] Hiding controls for pointerId ${pointerId} due to missing coordinates on DOWN/MOVE.`);
+        //                 controls.textBlock.isVisible = false;
+        //                 controls.dot.isVisible = false;
+        //             }
+        //         }
+        //     } else if (event.eventType === InputEventType.MOUSE_UP) {
+        //         console.log(`[TestScene] Event type is MOUSE_UP for pointerId: ${pointerId}`);
+        //         const controls = this.touchControls.get(pointerId);
+        //         if (controls) {
+        //             console.log(`[TestScene] Removing controls for pointerId: ${pointerId}`);
+        //             this.advancedTexture?.removeControl(controls.textBlock);
+        //             this.advancedTexture?.removeControl(controls.dot);
+        //             controls.textBlock.dispose();
+        //             controls.dot.dispose();
+        //             this.touchControls.delete(pointerId);
+        //             console.log(`[TestScene] Controls removed and disposed for pointerId: ${pointerId}`);
+        //         } else {
+        //             console.warn(`[TestScene] MOUSE_UP event for pointerId ${pointerId} but no controls found to remove.`);
+        //         }
+        //     } else {
+        //         console.log(`[TestScene] Event type ${event.eventType} for pointerId ${pointerId} not handled for display.`);
+        //     }
+        // });
+        // // 添加监听器
+        // moveForward.addListener((event: InputActionEvent) => {
+        //     if (event.eventType === InputEventType.KEYDOWN) {
+        //         // console.log("Moving forward");
+        //         // 实际移动逻辑
+        //         movementComponent.setMoveDirection(new Vector3(0, 0, 1));
+        //         movementComponent.moveSpeed = 300;
+        //         skeletonAnimationComponent.playAnimation("Walking",true);
+        //     }
+        //    else  if (event.eventType === InputEventType.KEYUP) {
+        //         // console.log("Moving forward released");
+        //         // 实际移动逻辑
+        //         movementComponent.stopMove();
+        //         skeletonAnimationComponent.playAnimation("Idle",true);
+        //     }
+        // });
 
-        // 添加监听器
-        moveLeft.addListener((event: InputActionEvent) => {
-            if (event.eventType === InputEventType.KEYDOWN) {
-                // console.log("Moving left");
-                // 实际移动逻辑
-                movementComponent.setMoveDirection(new Vector3(-1, 0, 0));
-                movementComponent.moveSpeed = 300;
-                skeletonAnimationComponent.playAnimation("Walking",true);
-            }
-            else  if (event.eventType === InputEventType.KEYUP) {
-                // console.log("Moving left released");
-                // 实际移动逻辑
-                movementComponent.stopMove();
-                skeletonAnimationComponent.playAnimation("Idle",true);
-            }
-        });
+        // // 添加监听器
+        // moveBackward.addListener((event: InputActionEvent) => {
+        //     if (event.eventType === InputEventType.KEYDOWN) {
+        //         // console.log("Moving backward");
+        //         // 实际移动逻辑
+        //         movementComponent.setMoveDirection(new Vector3(0, 0, -1));
+        //         movementComponent.moveSpeed = 300;
+        //         skeletonAnimationComponent.playAnimation("WalkingBack",true);
+        //     }
+        //     else  if (event.eventType === InputEventType.KEYUP) {
+        //         // console.log("Moving backward released");
+        //         // 实际移动逻辑
+        //         movementComponent.stopMove();
+        //         skeletonAnimationComponent.playAnimation("Idle",true);
+        //     }
+        // });
 
-        // 添加监听器
-        moveRight.addListener((event: InputActionEvent) => {
-            if (event.eventType === InputEventType.KEYDOWN) {
-                // console.log("Moving right");
-                // 实际移动逻辑
-                movementComponent.setMoveDirection(new Vector3(1, 0, 0));
-                movementComponent.moveSpeed = 300;
-                skeletonAnimationComponent.playAnimation("Walking",true);
-            }
-            else  if (event.eventType === InputEventType.KEYUP) {
-                // console.log("Moving right released");
-                // 实际移动逻辑
-                movementComponent.stopMove();
-                skeletonAnimationComponent.playAnimation("Idle",true);
-            }
-        });
+        // // 添加监听器
+        // moveLeft.addListener((event: InputActionEvent) => {
+        //     if (event.eventType === InputEventType.KEYDOWN) {
+        //         // console.log("Moving left");
+        //         // 实际移动逻辑
+        //         movementComponent.setMoveDirection(new Vector3(-1, 0, 0));
+        //         movementComponent.moveSpeed = 300;
+        //         skeletonAnimationComponent.playAnimation("Walking",true);
+        //     }
+        //     else  if (event.eventType === InputEventType.KEYUP) {
+        //         // console.log("Moving left released");
+        //         // 实际移动逻辑
+        //         movementComponent.stopMove();
+        //         skeletonAnimationComponent.playAnimation("Idle",true);
+        //     }
+        // });
 
-        mousedown.addListener((event: InputActionEvent) => {
-            if (event.eventType === InputEventType.MOUSE_DOWN) {
-                console.log("mousedown",event.value);
-            }
-            else  if (event.eventType === InputEventType.MOUSE_UP) {
-                console.log("mousedown released",event.value);
-            }
-        });
+        // // 添加监听器
+        // moveRight.addListener((event: InputActionEvent) => {
+        //     if (event.eventType === InputEventType.KEYDOWN) {
+        //         // console.log("Moving right");
+        //         // 实际移动逻辑
+        //         movementComponent.setMoveDirection(new Vector3(1, 0, 0));
+        //         movementComponent.moveSpeed = 300;
+        //         skeletonAnimationComponent.playAnimation("Walking",true);
+        //     }
+        //     else  if (event.eventType === InputEventType.KEYUP) {
+        //         // console.log("Moving right released");
+        //         // 实际移动逻辑
+        //         movementComponent.stopMove();
+        //         skeletonAnimationComponent.playAnimation("Idle",true);
+        //     }
+        // });
 
-        space.addListener((event: InputActionEvent) => {
-            if (event.eventType === InputEventType.KEYDOWN) {
-                console.log("space",event.value);
-                movementComponent.jump();
-            }
-        });
+        // mousedown.addListener((event: InputActionEvent) => {
+        //     if (event.eventType === InputEventType.MOUSE_DOWN) {
+        //         console.log("mousedown",event.value);
+        //     }
+        //     else  if (event.eventType === InputEventType.MOUSE_UP) {
+        //         console.log("mousedown released",event.value);
+        //     }
+        // });
+
+        // space.addListener((event: InputActionEvent) => {
+        //     if (event.eventType === InputEventType.KEYDOWN) {
+        //         console.log("space",event.value);
+        //         movementComponent.jump();
+        //     }
+        // });
       
      
         // BABYLON.SceneLoader.ImportMesh("", "./glb/", 

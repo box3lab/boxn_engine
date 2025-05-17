@@ -1,6 +1,6 @@
 import type { PhysicsAggregate } from "babylonjs/Physics/v2/physicsAggregate";
 import { BaseComponent } from "../BaseComponent";
-import { Mesh, PhysicsEventType, PhysicsMotionType, PhysicsShape, PhysicsShapeType, Vector3, type IBasePhysicsCollisionEvent, type IPhysicsCollisionEvent } from "@babylonjs/core";
+import { Mesh, PhysicsEventType, PhysicsMotionType, PhysicsShape, PhysicsShapeType, Vector3, type IBasePhysicsCollisionEvent, type IPhysicsCollisionEvent, type PhysicsMassProperties } from "@babylonjs/core";
 import type { IGameEntity } from "../../interface/IGameEntity";
 import { PhyMgrV2 } from "../../mgr/PhyMgrV2";
 
@@ -171,7 +171,7 @@ export class ColliderComponentV2 extends BaseComponent {
                     PhyMgrV2.instance.registerColliderComponent(this.entity!, this);
 
                     characterBody.disablePreStep = false;
-                    characterBody.setMassProperties({ inertia: Vector3.ZeroReadOnly });
+                    // characterBody.setMassProperties({ inertia: Vector3.ZeroReadOnly });
 
                }
           } else {
@@ -242,6 +242,9 @@ export class ColliderComponentV2 extends BaseComponent {
           }
      }
 
+     /**
+      * 解绑碰撞事件 / Unbind collision events
+      */
      public unbindEvent() {
           if (this.isTrigger) {
                PhyMgrV2.instance.unbindTriggerEvent(this.entity?.physicsBody?.transformNode.uniqueId!);
@@ -252,6 +255,29 @@ export class ColliderComponentV2 extends BaseComponent {
                if (!observable) return;
                observable.remove(this.observer);
                this.observer = null;
+          }
+     }
+
+     /**
+      * 设置质量属性 / Set mass properties
+      * @param massProperties 质量属性 / Mass properties
+      */
+     public setMassProperties(massProperties: PhysicsMassProperties) {
+          if (this.entity?.physicsBody) {
+               this.entity.physicsBody.setMassProperties(massProperties);
+          }else if (this.entity?.root.physicsAggregate) {
+               this.entity.root.physicsAggregate.body.setMassProperties(massProperties);
+          }
+     }
+
+     /**
+      * 设置质量属性为零 / Set mass properties to zero
+      */
+     public setMassPropertiesToZero() {
+          if (this.entity?.physicsBody) {
+               this.entity.physicsBody.setMassProperties({ inertia: Vector3.ZeroReadOnly });
+          }else if (this.entity?.root.physicsAggregate) {
+               this.entity.root.physicsAggregate.body.setMassProperties({ inertia: Vector3.ZeroReadOnly });
           }
      }
 
