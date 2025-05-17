@@ -78,6 +78,7 @@ export class PlayerInputComponent extends InputComponent {
      */
     public override update(deltaTime: number): void {
         super.update(deltaTime);
+        this.calculateMovement();
     }
 
     /**
@@ -168,6 +169,7 @@ export class PlayerInputComponent extends InputComponent {
     protected jump(options: InputActionEvent): void {
         if (options.eventType === InputEventType.KEYDOWN) {
             this.isJump = true;
+            this._movementComponent?.jump();
         } else if (options.eventType === InputEventType.KEYUP) {
             this.isJump = false;
         }
@@ -180,10 +182,10 @@ export class PlayerInputComponent extends InputComponent {
     protected calculateMovement(): void {
         let direction = Vector3.Zero();
         if (this.isForward) {
-            direction.z -= 1;
+            direction.z += 1;
         }
         else if (this.isBackward) {
-            direction.z += 1;
+            direction.z -= 1;
         }
         if (this.isLeft) {
             direction.x -= 1;
@@ -191,6 +193,6 @@ export class PlayerInputComponent extends InputComponent {
         else if (this.isRight) {
             direction.x += 1;
         }
-        this._movementComponent?.setMoveDirection(direction);
+        this._movementComponent?.setMoveDirection(direction.normalize());
     }
 }

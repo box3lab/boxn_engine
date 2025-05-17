@@ -1,4 +1,3 @@
-import type { PhysicsAggregate } from "babylonjs/Physics/v2/physicsAggregate";
 import { BaseComponent } from "../BaseComponent";
 import { Mesh, PhysicsEventType, PhysicsMotionType, PhysicsShape, PhysicsShapeType, Vector3, type IBasePhysicsCollisionEvent, type IPhysicsCollisionEvent, type PhysicsMassProperties } from "@babylonjs/core";
 import type { IGameEntity } from "../../interface/IGameEntity";

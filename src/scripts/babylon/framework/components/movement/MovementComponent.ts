@@ -9,9 +9,24 @@ import { ColliderComponentV2 } from "../collider/ColliderComponentV2";
  */
 export class MovementComponent extends BaseComponent {
     /**
-     * 移动速度 / Movement speed
+     * 当前移动速度 / Current movement speed
      */
-    private _moveSpeed: number = 5.0;
+    private _moveSpeed: number = 0.0;
+
+    /**
+     * 最大移动速度 / Maximum movement speed
+     */
+    private _maxMoveSpeed: number = 5.0;
+
+    /**
+     * 加速度 / Acceleration
+     */
+    private _acceleration: number = 10.0;
+
+    /**
+     * 减速度 / Deceleration
+     */
+    private _deceleration: number = 15.0;
 
     /**
      * 跳跃力度 / Jump force
@@ -34,17 +49,59 @@ export class MovementComponent extends BaseComponent {
     private _collider: ColliderComponentV2 | null = null;
 
     /**
-     * 获取移动速度 / Get movement speed
+     * 获取当前移动速度 / Get current movement speed
      */
     public get moveSpeed(): number {
         return this._moveSpeed;
     }
 
     /**
-     * 设置移动速度 / Set movement speed
+     * 设置当前移动速度 / Set current movement speed
      */
     public set moveSpeed(value: number) {
         this._moveSpeed = value;
+    }
+
+    /**
+     * 获取最大移动速度 / Get maximum movement speed
+     */
+    public get maxMoveSpeed(): number {
+        return this._maxMoveSpeed;
+    }
+
+    /**
+     * 设置最大移动速度 / Set maximum movement speed
+     */
+    public set maxMoveSpeed(value: number) {
+        this._maxMoveSpeed = value;
+    }
+
+    /**
+     * 获取加速度 / Get acceleration
+     */
+    public get acceleration(): number {
+        return this._acceleration;
+    }
+
+    /**
+     * 设置加速度 / Set acceleration
+     */
+    public set acceleration(value: number) {
+        this._acceleration = value;
+    }
+
+    /**
+     * 获取减速度 / Get deceleration
+     */
+    public get deceleration(): number {
+        return this._deceleration;
+    }
+
+    /**
+     * 设置减速度 / Set deceleration
+     */
+    public set deceleration(value: number) {
+        this._deceleration = value;
     }
 
     /**
@@ -105,7 +162,12 @@ export class MovementComponent extends BaseComponent {
     public jump(): void {
         if (this._isGrounded && this._collider && this.entity?.physicsBody) {
             const jumpVector = new Vector3(0, this._jumpForce, 0);
-            this.entity.physicsBody.applyImpulse(jumpVector, this.entity.getRoot().root.position);
+            // this.entity.physicsBody.applyImpulse(jumpVector, this.entity.getRoot().root.position);
+            this.entity.physicsBody.setLinearVelocity(new Vector3(
+                this.entity.physicsBody.getLinearVelocity().x,
+                this._jumpForce,
+                this.entity.physicsBody.getLinearVelocity().z
+            ));
             this._isGrounded = false;
         }
     }
@@ -115,8 +177,10 @@ export class MovementComponent extends BaseComponent {
      */
     public stopMove(): void {
         this._moveDirection = Vector3.Zero();
+        this._moveSpeed = 0;
         if (this.entity?.physicsBody) {
-            this.entity.physicsBody.setLinearVelocity(new Vector3(0, this.entity.physicsBody.getLinearVelocity().y, 0));
+            this.entity.physicsBody.setLinearVelocity(
+                new Vector3(0, this.entity.physicsBody.getLinearVelocity().y, 0));
         }
     }
 
@@ -129,10 +193,26 @@ export class MovementComponent extends BaseComponent {
 
         // 应用移动力 / Apply movement force
         if (!this._moveDirection.equals(Vector3.Zero())) {
-            const moveVector = this._moveDirection.scale(this._moveSpeed * deltaTime);
+            // 加速 / Accelerate
+            this._moveSpeed = Math.min(
+                this._moveSpeed + this._acceleration * deltaTime,
+                this._maxMoveSpeed
+            );
+        } 
+        else {
+            // 减速 / Decelerate
+            this._moveSpeed = Math.max(
+                this._moveSpeed - this._deceleration * deltaTime,
+                0
+            );
+        }
+
+        // 应用速度 / Apply velocity
+        if (this._moveSpeed > 0) {
+            const moveVector = this._moveDirection.scale(this._moveSpeed);
             this.entity.physicsBody.setLinearVelocity(new Vector3(
                 moveVector.x,
-                this.entity.physicsBody.getLinearVelocity().y, // 保持当前的Y轴速度 / Keep current Y-axis velocity
+                this.entity.physicsBody.getLinearVelocity().y,
                 moveVector.z
             ));
         }

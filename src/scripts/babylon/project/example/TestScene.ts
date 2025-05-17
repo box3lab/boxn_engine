@@ -102,6 +102,7 @@ export class TestScene extends BaseScene {
             this.createGround();
             this.createPanel();
             this.createCharacter();
+            this.camera?.dispose();
         });
 
 
@@ -157,7 +158,7 @@ export class TestScene extends BaseScene {
         this.camera.lowerRadiusLimit = 100;
         this.camera.upperRadiusLimit = 100;
         this.camera.wheelDeltaPercentage = 0.01;
-        // this.camera.position = new Vector3(500, 200, 200);
+        this.camera.position = new Vector3(0, 50, -50);
     }
     
     /**
@@ -210,7 +211,7 @@ export class TestScene extends BaseScene {
         // Create a panel
         const panel = MeshBuilder.CreateBox(
             "panel", 
-            { width: 50, height: 1, depth: 50 }, 
+            { width: 500, height: 1, depth: 500 }, 
             this.scene
         );
         
@@ -228,7 +229,7 @@ export class TestScene extends BaseScene {
         panel.material = panelMaterial;
 
         const panelAggregate = new PhysicsAggregate(panel, 
-            PhysicsShapeType.BOX, { mass: 0, restitution:0.2, friction:0.5, mesh:panel}, this.scene);
+            PhysicsShapeType.BOX, { mass: 0, restitution:0, friction:0.0, mesh:panel}, this.scene);
         // panelAggregate.body.setEventMask(0x1);
     }
     
@@ -404,24 +405,24 @@ export class TestScene extends BaseScene {
 
         this.entity = new PlayerEntity("player",this);
         this.entity.root.root.position = new Vector3(0, 0, 0);
-        const skeletonMeshComponent = new SkeletonMeshComponent("skeletonMeshComponent","./glb/test.glb",this.scene);
-        this.entity.addComponent("SkeletonMeshComponent",skeletonMeshComponent);
-        skeletonMeshComponent.scale = 10;
+        // const skeletonMeshComponent = new SkeletonMeshComponent("skeletonMeshComponent","./glb/test.glb",this.scene);
+        // this.entity.addComponent("SkeletonMeshComponent",skeletonMeshComponent);
+        // skeletonMeshComponent.scale = 10;
 
-        const skeletonAnimationComponent = new SkeletonAnimationComponent("skeletonAnimationComponent",skeletonMeshComponent);
-        this.entity.addComponent("SkeletonAnimationComponent",skeletonAnimationComponent);
-        skeletonAnimationComponent.initAnimation("Idle",true);
+        // const skeletonAnimationComponent = new SkeletonAnimationComponent("skeletonAnimationComponent",skeletonMeshComponent);
+        // this.entity.addComponent("SkeletonAnimationComponent",skeletonAnimationComponent);
+        // skeletonAnimationComponent.initAnimation("Idle",true);
 
-        const capsuleColliderComponent = new CapsuleColliderComponentV2("CapsuleColliderComponentV2", 3, 18, 0, true);
-        this.entity.addComponent("CapsuleColliderComponentV2",capsuleColliderComponent);
-        capsuleColliderComponent.IsShowDebug = false;
+        // const capsuleColliderComponent = new CapsuleColliderComponentV2("CapsuleColliderComponentV2", 3, 18, 0, true);
+        // this.entity.addComponent("CapsuleColliderComponentV2",capsuleColliderComponent);
+        // capsuleColliderComponent.IsShowDebug = false;
 
-        const movementComponent = new MovementComponent("MovementComponent");
-        this.entity.addComponent("MovementComponent",movementComponent);
-        movementComponent.jumpForce = 16;
+        // const movementComponent = new MovementComponent("MovementComponent");
+        // this.entity.addComponent("MovementComponent",movementComponent);
+        // movementComponent.jumpForce = 16;
 
-        const playerInputComponent = new PlayerInputComponent("PlayerInputComponent");
-        this.entity.addComponent("PlayerInputComponent",playerInputComponent);
+        // const playerInputComponent = new PlayerInputComponent("PlayerInputComponent");
+        // this.entity.addComponent("PlayerInputComponent",playerInputComponent);
 
         // // 注册输入动作
         // const moveForward = InputSystem.instance.registerAction("MoveForward", { key: "w" });

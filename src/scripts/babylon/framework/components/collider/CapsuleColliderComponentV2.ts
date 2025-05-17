@@ -12,12 +12,12 @@ export class CapsuleColliderComponentV2 extends ColliderComponentV2 {
     /**
      * 胶囊体半径 / Capsule radius
      */
-    private _radius: number = 0.5;
+    protected _radius: number = 0.5;
 
     /**
      * 胶囊体高度 / Capsule height
      */
-    private _height: number = 1;
+    protected _height: number = 1;
 
     /**
      * 胶囊体方向 / Capsule direction
@@ -25,12 +25,16 @@ export class CapsuleColliderComponentV2 extends ColliderComponentV2 {
      * 1: X轴 / X-axis
      * 2: Z轴 / Z-axis
      */
-    private _direction: number = 0;
+    protected _direction: number = 0;
 
     /**
      * 碰撞器网格 / Collider mesh
      */
-    private _colliderMesh: Mesh | null = null;
+    protected _colliderMesh: Mesh | null = null;
+    
+    public get colliderMesh(): Mesh | null {
+        return this._colliderMesh;
+    }
 
     /**
      * 获取胶囊体半径 / Get capsule radius
@@ -112,7 +116,7 @@ export class CapsuleColliderComponentV2 extends ColliderComponentV2 {
     /**
      * 创建碰撞器网格 / Create collider mesh
      */
-    private createColliderMesh(): void {
+    protected createColliderMesh(): void {
         if (!this.entity?.scene?.scene) return;
 
         // 根据方向设置胶囊体朝向 / Set capsule orientation based on direction
@@ -151,7 +155,7 @@ export class CapsuleColliderComponentV2 extends ColliderComponentV2 {
     /**
      * 更新碰撞器形状 / Update collider shape
      */
-    private updateShape(): void {
+    protected updateShape(): void {
         if (!this.entity?.physicsBody || !this.entity.scene?.scene || !this._colliderMesh) return;
 
         const shape = new PhysicsShapeCapsule( new Vector3(0, this._height / 2 - this._radius, 0),

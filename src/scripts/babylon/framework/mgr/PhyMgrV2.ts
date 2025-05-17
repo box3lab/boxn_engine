@@ -143,7 +143,7 @@ export class PhyMgrV2 extends Singleton<PhyMgrV2>() {
         const physicsAggregate = new PhysicsAggregate(gameEntity.getRoot().root, shape, {
             mass: 1,
             restitution: 0,
-            friction: 0.1
+            friction: 0
         }, scene.scene);
         // Use proper methods from PhysicsAggregate
         physicsAggregate.body.setMotionType(motionType);
