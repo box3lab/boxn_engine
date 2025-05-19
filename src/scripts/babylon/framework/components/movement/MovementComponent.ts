@@ -1,7 +1,8 @@
 import { BaseComponent } from "../BaseComponent";
-import { Vector3, Ray, type Scene } from "@babylonjs/core";
+import { Vector3, Ray, type Scene, ShapeCastResult } from "@babylonjs/core";
 import type { IGameEntity } from "../../interface/IGameEntity";
 import { ColliderComponentV2 } from "../collider/ColliderComponentV2";
+import { PhyMgrV2 } from "../../mgr/PhyMgrV2";
 
 /**
  * 移动组件 / Movement Component
@@ -16,22 +17,22 @@ export class MovementComponent extends BaseComponent {
     /**
      * 最大移动速度 / Maximum movement speed
      */
-    private _maxMoveSpeed: number = 5.0;
+    private _maxMoveSpeed: number = 6.0;
 
     /**
      * 加速度 / Acceleration
      */
-    private _acceleration: number = 10.0;
+    private _acceleration: number = 2.0;
 
     /**
      * 减速度 / Deceleration
      */
-    private _deceleration: number = 15.0;
+    private _deceleration: number = 3.0;
 
     /**
      * 跳跃力度 / Jump force
      */
-    private _jumpForce: number = 8.0;
+    private _jumpForce: number = 6.0;
 
     /**
      * 是否在地面上 / Whether on ground
@@ -161,7 +162,7 @@ export class MovementComponent extends BaseComponent {
      */
     public jump(): void {
         if (this._isGrounded && this._collider && this.entity?.physicsBody) {
-            const jumpVector = new Vector3(0, this._jumpForce, 0);
+            // const jumpVector = new Vector3(0, this._jumpForce, 0);
             // this.entity.physicsBody.applyImpulse(jumpVector, this.entity.getRoot().root.position);
             this.entity.physicsBody.setLinearVelocity(new Vector3(
                 this.entity.physicsBody.getLinearVelocity().x,
@@ -191,13 +192,39 @@ export class MovementComponent extends BaseComponent {
     public override update(deltaTime: number): void {
         if (!this.entity?.physicsBody || !this._collider) return;
 
+        // // 检测是否在地面上 / Check if on ground
+        // const rayStart = this.entity.getRoot().root.position;
+        // const rayDirection = new Vector3(0, -1, 0);
+        // const ray = new Ray(rayStart, rayDirection, 1);
+        
+        // const raycastHit = this.entity.scene?.scene?.pickWithRay(ray);
+        // this._isGrounded = raycastHit?.hit ?? false;
+
+        const hitWorldResult = new ShapeCastResult();
+        const shapeLocalResult = new ShapeCastResult();
+        PhyMgrV2.instance.getPhysicsPlugin().shapeCast({shape: this.entity.physicsBody.shape!,
+            rotation: this.entity.root.root.rotationQuaternion!,
+            startPosition: this.entity.root.root.position,
+            endPosition: new Vector3(this.entity.root.root.position.x, 
+                this.entity.root.root.position.y-1, this.entity.root.root.position.z),
+            shouldHitTriggers: false,
+        }, shapeLocalResult, hitWorldResult);
+
+        this._isGrounded = (this.entity.root.root.position.y - hitWorldResult.hitPoint.y) < 0.05; // 0.9 + little margin
+
+
         // 应用移动力 / Apply movement force
         if (!this._moveDirection.equals(Vector3.Zero())) {
-            // 加速 / Accelerate
-            this._moveSpeed = Math.min(
-                this._moveSpeed + this._acceleration * deltaTime,
-                this._maxMoveSpeed
-            );
+            if(this._isGrounded){   
+                // 加速 / Accelerate
+                this._moveSpeed = Math.min(
+                    this._moveSpeed + this._acceleration * deltaTime,
+                    this._maxMoveSpeed
+                );
+            }else{
+                // 减速 / Decelerate
+                this._moveSpeed *= 0.99;
+            }
         } 
         else {
             // 减速 / Decelerate
@@ -207,6 +234,7 @@ export class MovementComponent extends BaseComponent {
             );
         }
 
+        
         // 应用速度 / Apply velocity
         if (this._moveSpeed > 0) {
             const moveVector = this._moveDirection.scale(this._moveSpeed);
@@ -217,13 +245,8 @@ export class MovementComponent extends BaseComponent {
             ));
         }
 
-        // 检测是否在地面上 / Check if on ground
-        const rayStart = this.entity.getRoot().root.position;
-        const rayDirection = new Vector3(0, -1, 0);
-        const ray = new Ray(rayStart, rayDirection, 1.1);
-        
-        const raycastHit = this.entity.scene?.scene?.pickWithRay(ray);
-        this._isGrounded = raycastHit?.hit ?? false;
+ 
+
     }
 
     /**

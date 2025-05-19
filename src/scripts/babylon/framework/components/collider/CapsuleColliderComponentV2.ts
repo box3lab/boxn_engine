@@ -19,6 +19,10 @@ export class CapsuleColliderComponentV2 extends ColliderComponentV2 {
      */
     protected _height: number = 1;
 
+    public get height(): number {
+        return this._height;
+    }
+
     /**
      * 胶囊体方向 / Capsule direction
      * 0: Y轴 / Y-axis
@@ -54,7 +58,7 @@ export class CapsuleColliderComponentV2 extends ColliderComponentV2 {
     /**
      * 获取胶囊体高度 / Get capsule height
      */
-    public get height(): number {
+    public get capsuleHeight(): number {
         return this._height;
     }
 

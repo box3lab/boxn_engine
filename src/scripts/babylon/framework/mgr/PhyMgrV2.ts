@@ -343,4 +343,8 @@ export class PhyMgrV2 extends Singleton<PhyMgrV2>() {
         this.triggerEnterEventMap.delete(uniqueId);
         this.triggerExitEventMap.delete(uniqueId);
     }
+
+    public getPhysicsPlugin():HavokPlugin{
+        return this.physicsPlugin!;
+    }
 }

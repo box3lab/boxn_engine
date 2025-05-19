@@ -27,9 +27,11 @@ import {
     Color4,
     DirectionalLight,
     ShadowGenerator,
-    PBRMaterial
+    PBRMaterial,
+    PhysicsCharacterController,
+    CapsuleBuilder,
+    PhysicsShapeCapsule
 } from "@babylonjs/core";
-import * as BABYLON from 'babylonjs';
 import 'babylonjs-loaders';
 import type { IScene } from "../../framework/interface/IScene";
 import HavokPhysics from "@babylonjs/havok";
@@ -229,7 +231,7 @@ export class TestScene extends BaseScene {
         panel.material = panelMaterial;
 
         const panelAggregate = new PhysicsAggregate(panel, 
-            PhysicsShapeType.BOX, { mass: 0, restitution:0.1, friction:0.7, mesh:panel}, this.scene);
+            PhysicsShapeType.BOX, { mass: 0, restitution:0.1, friction:2, mesh:panel}, this.scene);
         // panelAggregate.body.setEventMask(0x1);
     }
     
@@ -405,48 +407,58 @@ export class TestScene extends BaseScene {
 
         this.entity = new PlayerEntity("player",this);
         this.entity.root.root.position = new Vector3(0, 0, 0);
+    
+        // this.camera?.attachControl(displayCapsule, false);
+
+        // characterController.keepDistance = 10;
+        // characterController.keepContactTolerance = 0.01;
+        // characterController.maxSlopeCosine = 0.5;
+        // characterController.maxCharacterSpeedForSolver = 10;
+        // characterController.characterStrength = 10;
+        // characterController.acceleration = 10;
+        // characterController.maxAcceleration = 10;
 
         const cubeMaterial = new StandardMaterial("cubeMaterial3", this.scene);
         cubeMaterial.diffuseColor = new Color3(1,0,0);
       
-        const cube1 = MeshBuilder.CreateBox("cube1",{width:10,height:10,depth:10},this.scene);
-        cube1.position = new Vector3(10,5,10);
+        const cube1 = MeshBuilder.CreateBox("cube1",{width:1,height:1,depth:1},this.scene);
+        cube1.position = new Vector3(1,0.5,1);
         cube1.material = cubeMaterial;
 
         const cube1Aggregate = new PhysicsAggregate(cube1, 
-            PhysicsShapeType.BOX, { mass: 1, restitution:0.5, friction:0.7, mesh:cube1}, this.scene);
+            PhysicsShapeType.BOX, { mass: 100, restitution:0.5, friction:0.7,startAsleep:false, mesh:cube1}, this.scene);
 
-        const cube2 = MeshBuilder.CreateBox("cube2",{width:10,height:10,depth:10},this.scene);
-        cube2.position = new Vector3(-10,5,10);
+        const cube2 = MeshBuilder.CreateBox("cube2",{width:1,height:1,depth:1},this.scene);
+        cube2.position = new Vector3(-1,0.5,1);
         cube2.material = cubeMaterial;
 
         const cube2Aggregate = new PhysicsAggregate(cube2, 
-            PhysicsShapeType.BOX, { mass: 1, restitution:0.5, friction:0.7, mesh:cube2}, this.scene);
+            PhysicsShapeType.BOX, { mass: 100, restitution:0.5, friction:0.7,startAsleep:false, mesh:cube2}, this.scene);
 
 
-        const cube3 = MeshBuilder.CreateBox("cube3",{width:10,height:10,depth:10},this.scene);
-        cube3.position = new Vector3(0,5,10);
+        const cube3 = MeshBuilder.CreateBox("cube3",{width:1,height:1,depth:1},this.scene);
+        cube3.position = new Vector3(0,0.5,1);
         cube3.material = cubeMaterial;
 
         const cube3Aggregate = new PhysicsAggregate(cube3, 
-            PhysicsShapeType.BOX, { mass: 1, restitution:0, friction:0.7, mesh:cube3}, this.scene);
+            PhysicsShapeType.BOX, { mass: 100, restitution:0, friction:0.7,startAsleep:false, mesh:cube3}, this.scene);
 
-        const cube4 = MeshBuilder.CreateBox("cube4",{width:10,height:10,depth:10},this.scene);
-        cube4.position = new Vector3(0,15,10);
+        const cube4 = MeshBuilder.CreateBox("cube4",{width:1,height:1,depth:1},this.scene);
+        cube4.position = new Vector3(0,1.5,1);
         cube4.material = cubeMaterial;
 
         const cube4Aggregate = new PhysicsAggregate(cube4, 
-            PhysicsShapeType.BOX, { mass: 1, restitution:0, friction:0.7, mesh:cube4}, this.scene);
+            PhysicsShapeType.BOX, { mass: 100, restitution:0, friction:0.7,startAsleep:false, mesh:cube4}, this.scene);
         
         const cubeMaterial2 = new StandardMaterial("cubeMaterial3", this.scene);
         cubeMaterial2.diffuseColor = new Color3(0,1,0);
 
-        const cube5 = MeshBuilder.CreateBox("cube5",{width:10,height:10,depth:10},this.scene);
-        cube5.position = new Vector3(20,5,15);
+        const cube5 = MeshBuilder.CreateBox("cube5",{width:1,height:1,depth:1},this.scene);
+        cube5.position = new Vector3(2,1,1);
         cube5.material = cubeMaterial2;
         
         const cube5Aggregate = new PhysicsAggregate(cube5, 
-            PhysicsShapeType.BOX, { mass: 1, restitution:0, friction:0.7, mesh:cube5}, this.scene); 
+            PhysicsShapeType.BOX, { mass: 100, restitution:0, friction:0.1,startAsleep:false, mesh:cube5}, this.scene); 
         cube5Aggregate.body.setMotionType(PhysicsMotionType.STATIC);
     }
     

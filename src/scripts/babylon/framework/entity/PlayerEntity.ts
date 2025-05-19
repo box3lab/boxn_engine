@@ -24,21 +24,21 @@ export class PlayerEntity extends GameEntity {
         super(name, scene);
         this._skeletonMeshComponent = new SkeletonMeshComponent("skeletonMeshComponent",meshUrl,scene.scene);
         this.addComponent("SkeletonMeshComponent",this._skeletonMeshComponent);
-        this._skeletonMeshComponent.scale = 10;
+        this._skeletonMeshComponent.scale = 1;
 
         this._skeletonAnimationComponent = new SkeletonAnimationComponent("skeletonAnimationComponent",this._skeletonMeshComponent);
         this.addComponent("SkeletonAnimationComponent",this._skeletonAnimationComponent);
         this._skeletonAnimationComponent.initAnimation("Idle",true);
 
-        this._charactorColliderComponent = new CharactorColliderComponent("CharactorColliderComponent", 3, 18, 0, true);
+        this._charactorColliderComponent = new CharactorColliderComponent("CharactorColliderComponent", 0.5, 2, 0, true);
         this.addComponent("CharactorColliderComponent",this._charactorColliderComponent);
         this._charactorColliderComponent.IsShowDebug = false;
 
         this._movementComponent = new MovementComponent("MovementComponent");
         this.addComponent("MovementComponent",this._movementComponent);
-        this._movementComponent.jumpForce = 20;
-        this._movementComponent.maxMoveSpeed = 30;
-        this._movementComponent.acceleration = 5;
+        // this._movementComponent.jumpForce = 20;
+        // this._movementComponent.maxMoveSpeed = 30;
+        // this._movementComponent.acceleration = 5;
 
         this._playerInputComponent = new PlayerInputComponent("PlayerInputComponent");
         this.addComponent("PlayerInputComponent",this._playerInputComponent);
@@ -46,8 +46,8 @@ export class PlayerEntity extends GameEntity {
         const followCameraComponent = new FollowCameraComponent("FollowCameraComponent");
         this.addComponent("FollowCameraComponent",followCameraComponent);
         followCameraComponent.setTarget(this._charactorColliderComponent.colliderMesh!);
-        followCameraComponent.setRadius(-80);
-        followCameraComponent.setHeight(30);
+        followCameraComponent.setRadius(-8);
+        followCameraComponent.setHeight(3);
         this._cameraComponent = followCameraComponent;
 
         this._playerController = new PlayerController(this);
