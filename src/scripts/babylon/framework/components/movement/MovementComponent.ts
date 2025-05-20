@@ -158,6 +158,13 @@ export class MovementComponent extends BaseComponent {
     }
 
     /**
+     * 获取移动方向 / Get movement direction
+     */
+    public getMoveDirection(): Vector3 {
+        return this._moveDirection;
+    }
+
+    /**
      * 跳跃 / Jump  
      */
     public jump(): void {

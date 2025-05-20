@@ -79,19 +79,19 @@ export class StateMachine {
   /**
    * Map of all registered states - 所有注册状态的映射
    */
-  private states: Map<string, IState>;
+  protected states: Map<string, IState>;
 
   /**
    * Current active state - 当前激活的状态
    */
-  private currentState: IState | null;
+  protected currentState: IState | null;
 
   /**
    * State configuration - 状态配置
    */
-  private config: IStateConfig;
+  protected config: IStateConfig;
 
-  private _curPossibleTransitions: {
+  protected _curPossibleTransitions: {
     targetState: string;
     conditions: ITransitionCondition[];
   }[] = [];
@@ -116,7 +116,6 @@ export class StateMachine {
       return;
     }
     this.states.set(state.name, state);
-
     // Initialize with initial state if this is the first state added
     // 如果这是第一个添加的状态，则使用初始状态进行初始化
     if (this.states.size === 1 && state.name === this.config.initialState) {
@@ -128,9 +127,10 @@ export class StateMachine {
   /**
    * Transition to a new state - 转换到新状态
    * @param newStateName Name of the state to transition to - 要转换到的状态名称
+   * @param isSkipCheck Whether to skip the check for allowed transitions - 是否跳过允许的转换检查
    * @returns boolean indicating if transition was successful - 布尔值表示转换是否成功
    */
-  public transitionTo(newStateName: string): boolean {
+  public transitionTo(newStateName: string, isSkipCheck: boolean = false): boolean {
     // Check if the new state exists
     const newState = this.states.get(newStateName);
     if (!newState) {
@@ -139,7 +139,7 @@ export class StateMachine {
     }
 
     // Check if transition is allowed
-    if (this.currentState) {
+    if (!isSkipCheck && this.currentState) {
       const allowedTransitions = this.config.transitions[this.currentState.name];
       if (!allowedTransitions || !(newStateName in allowedTransitions)) {
         console.error(`Transition from ${this.currentState.name} to ${newStateName} is not allowed`);
@@ -152,13 +152,14 @@ export class StateMachine {
     this.currentState?.onExit?.(newStateName);
     this.currentState = newState;
     this.currentState.onEnter?.(prevStateName);
+    this._curPossibleTransitions = [];
     const currentStateTransitions = this.config.transitions[this.currentState.name];
-    this._curPossibleTransitions = Object.entries(currentStateTransitions)
+    currentStateTransitions && (this._curPossibleTransitions = Object.entries(currentStateTransitions)
       .map(([targetState, conditions]) => ({
         targetState,
         conditions: conditions.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
       }))
-      .filter(transition => transition.conditions.length > 0);
+      .filter(transition => transition.conditions.length > 0));
     return true;
   }
 
@@ -168,6 +169,7 @@ export class StateMachine {
    */
   public update(deltaTime: number): void {
     this.currentState?.onUpdate?.(deltaTime);
+    this.checkTransitions();
   }
 
   /**

@@ -202,17 +202,17 @@ export class PlayerInputComponent extends InputComponent {
             direction.x += 1;
         }
 
-        if (direction.length() <= 0) {
-            this.skeletonAnimationComponent?.playAnimation("Idle",true);
-        }
-        else {
-            if (direction.z > 0) {
-                this.skeletonAnimationComponent?.playAnimation("Walking",true);
-            }
-            else {
-                this.skeletonAnimationComponent?.playAnimation("WalkingBack",true);
-            }
-        }
+        // if (direction.length() <= 0) {
+        //     this.skeletonAnimationComponent?.playAnimation("Idle",true);
+        // }
+        // else {
+        //     if (direction.z > 0) {
+        //         this.skeletonAnimationComponent?.playAnimation("Walking",true);
+        //     }
+        //     else {
+        //         this.skeletonAnimationComponent?.playAnimation("WalkingBack",true);
+        //     }
+        // }
         this._movementComponent?.setMoveDirection(direction.normalize());
     }
 }

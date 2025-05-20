@@ -1,56 +1,76 @@
 import { CharactorColliderComponent } from "../components/collider/CharactorColliderComponent";
 import { PlayerInputComponent } from "../components/input/PlayerInputComponent";
-import { SkeletonAnimationComponent } from "../components/animation/SkeletonAnimationComponent";
 import { SkeletonMeshComponent } from "../components/mesh/SkeletonMeshComponent";
 import { MovementComponent } from "../components/movement/MovementComponent";
 import { PlayerController } from "../controller/PlayerController";
 import type { IScene } from "../interface/IScene";
 import { GameEntity } from "./GameEntity";
 import { CameraComponent } from "../components/camera/CameraComponent";
-import { FollowBehavior } from "babylonjs";
 import { FollowCameraComponent } from "../components/camera/FollowCameraComponent";
+import { AnimatorComponent } from "../components/animation/AnimatorComponent";
 
 export class PlayerEntity extends GameEntity {
-
-    private _playerController: PlayerController | null = null;
-    private _skeletonMeshComponent: SkeletonMeshComponent | null = null;
-    private _skeletonAnimationComponent: SkeletonAnimationComponent | null = null;
-    private _charactorColliderComponent: CharactorColliderComponent | null = null;
-    private _movementComponent: MovementComponent | null = null;
-    private _playerInputComponent: PlayerInputComponent | null = null;
-    private _cameraComponent: CameraComponent | null = null;
+    /**
+     * 玩家控制器 / Player controller
+     */
+    public playerController: PlayerController | null = null;
+    /**
+     * 骨骼网格组件 / Skeleton mesh component
+     */
+    public skeletonMeshComponent: SkeletonMeshComponent | null = null;
+    /**
+     * 动画组件 / Animator component
+     */
+    public animatorComponent: AnimatorComponent | null = null;
+    /**
+     * 角色碰撞器组件 / Character collider component
+     */
+    public charactorColliderComponent: CharactorColliderComponent | null = null;
+    /**
+     * 移动组件 / Movement component
+     */
+    public movementComponent: MovementComponent | null = null;
+    /**
+     * 玩家输入组件 / Player input component
+     */
+    public playerInputComponent: PlayerInputComponent | null = null;
+    /**
+     * 相机组件 / Camera component
+     */
+    public cameraComponent: CameraComponent | null = null;
 
     constructor(name: string, scene: IScene,meshUrl: string = "./glb/test.glb") {
         super(name, scene);
-        this._skeletonMeshComponent = new SkeletonMeshComponent("skeletonMeshComponent",meshUrl,scene.scene);
-        this.addComponent("SkeletonMeshComponent",this._skeletonMeshComponent);
-        this._skeletonMeshComponent.scale = 1;
+        this.skeletonMeshComponent = new SkeletonMeshComponent("skeletonMeshComponent",meshUrl,scene.scene);
+        this.addComponent("SkeletonMeshComponent",this.skeletonMeshComponent);
+        this.skeletonMeshComponent.scale = 1;
 
-        this._skeletonAnimationComponent = new SkeletonAnimationComponent("skeletonAnimationComponent",this._skeletonMeshComponent);
-        this.addComponent("SkeletonAnimationComponent",this._skeletonAnimationComponent);
-        this._skeletonAnimationComponent.initAnimation("Idle",true);
+        this.animatorComponent = new AnimatorComponent("animatorComponent");
+        this.addComponent("AnimatorComponent",this.animatorComponent);
+        this.animatorComponent.setSkeletonMeshComponent(this.skeletonMeshComponent);
 
-        this._charactorColliderComponent = new CharactorColliderComponent("CharactorColliderComponent", 0.5, 2, 0, true);
-        this.addComponent("CharactorColliderComponent",this._charactorColliderComponent);
-        this._charactorColliderComponent.IsShowDebug = false;
+        this.charactorColliderComponent = new CharactorColliderComponent("CharactorColliderComponent", 0.5, 2, 0, true);
+        this.addComponent("CharactorColliderComponent",this.charactorColliderComponent);
+        this.charactorColliderComponent.IsShowDebug = false;
 
-        this._movementComponent = new MovementComponent("MovementComponent");
-        this.addComponent("MovementComponent",this._movementComponent);
+        this.movementComponent = new MovementComponent("MovementComponent");
+        this.addComponent("MovementComponent",this.movementComponent);
         // this._movementComponent.jumpForce = 20;
         // this._movementComponent.maxMoveSpeed = 30;
         // this._movementComponent.acceleration = 5;
 
-        this._playerInputComponent = new PlayerInputComponent("PlayerInputComponent");
-        this.addComponent("PlayerInputComponent",this._playerInputComponent);
+        this.playerInputComponent = new PlayerInputComponent("PlayerInputComponent");
+        this.addComponent("PlayerInputComponent",this.playerInputComponent);
 
         const followCameraComponent = new FollowCameraComponent("FollowCameraComponent");
         this.addComponent("FollowCameraComponent",followCameraComponent);
-        followCameraComponent.setTarget(this._charactorColliderComponent.colliderMesh!);
+        followCameraComponent.setTarget(this.charactorColliderComponent!.colliderMesh!);
         followCameraComponent.setRadius(-8);
         followCameraComponent.setHeight(3);
-        this._cameraComponent = followCameraComponent;
+        this.cameraComponent = followCameraComponent;
 
-        this._playerController = new PlayerController(this);
+        this.playerController = new PlayerController(this);
+        this.playerController.initialize();
     }
 
     public override dispose(): void {
@@ -59,5 +79,6 @@ export class PlayerEntity extends GameEntity {
 
     public override update(deltaTime: number): void {
         super.update(deltaTime);
+        this.playerController?.update(deltaTime);
     }
 }
