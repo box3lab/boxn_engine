@@ -39,7 +39,7 @@ export interface ITransitionCondition {
    * 返回true时表示应该进行转换的条件函数
    */
   check: () => boolean;
-  
+
   /**
    * Priority of this condition (higher number = higher priority)
    * 条件的优先级（数字越大优先级越高）
@@ -63,7 +63,7 @@ export interface IStateConfig {
    * Key: Current state, Value: Map of target states and their conditions
    * 键：当前状态，值：目标状态及其条件的映射
    */
-  transitions: { 
+  transitions: {
     [key: string]: {
       [targetState: string]: ITransitionCondition[];
     }
@@ -120,6 +120,7 @@ export class StateMachine {
     // 如果这是第一个添加的状态，则使用初始状态进行初始化
     if (this.states.size === 1 && state.name === this.config.initialState) {
       this.currentState = state;
+      this.updateCurPossibleTransitions();
       this.currentState.onEnter?.(this.config.initialState);
     }
   }
@@ -146,20 +147,13 @@ export class StateMachine {
         return false;
       }
     }
-
+    console.log("transitionTo",newStateName);
     // Perform the transition
     const prevStateName = this.currentState?.name ?? '';
     this.currentState?.onExit?.(newStateName);
     this.currentState = newState;
     this.currentState.onEnter?.(prevStateName);
-    this._curPossibleTransitions = [];
-    const currentStateTransitions = this.config.transitions[this.currentState.name];
-    currentStateTransitions && (this._curPossibleTransitions = Object.entries(currentStateTransitions)
-      .map(([targetState, conditions]) => ({
-        targetState,
-        conditions: conditions.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
-      }))
-      .filter(transition => transition.conditions.length > 0));
+    this.updateCurPossibleTransitions();
     return true;
   }
 
@@ -170,6 +164,19 @@ export class StateMachine {
   public update(deltaTime: number): void {
     this.currentState?.onUpdate?.(deltaTime);
     this.checkTransitions();
+  }
+
+  public updateCurPossibleTransitions(): void {
+    this._curPossibleTransitions = [];
+    if(this.currentState){
+      const currentStateTransitions = this.config.transitions[this.currentState.name];
+      currentStateTransitions && (this._curPossibleTransitions = Object.entries(currentStateTransitions)
+      .map(([targetState, conditions]) => ({
+        targetState,
+        conditions: conditions.sort((a, b) => (b.priority ?? 0) - (a.priority ?? 0))
+      }))
+      .filter(transition => transition.conditions.length > 0));
+    }
   }
 
   /**
@@ -204,7 +211,6 @@ export class StateMachine {
    */
   public checkTransitions(): boolean {
     if (!this.currentState) return false;
-
     // Check conditions in priority order
     // 按优先级顺序检查条件
     for (const transition of this._curPossibleTransitions) {

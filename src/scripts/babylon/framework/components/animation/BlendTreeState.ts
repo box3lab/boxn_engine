@@ -121,14 +121,20 @@ export class BlendTreeState extends BaseAnimState {
         blendTree: IBlendTree1D | IBlendTree2D,
         skeletonMeshComponent: SkeletonMeshComponent,
         is1D: boolean = true,
-        isHasExitTime: boolean = false
+        isHasExitTime: boolean = false,
+        exitTime: number = 0
     ) {
-        super(name, skeletonMeshComponent, isHasExitTime);
+        super(name, skeletonMeshComponent, isHasExitTime, exitTime);
         this.name = name;
         this.blendTree = blendTree;
         this.skeletonMeshComponent = skeletonMeshComponent;
         this.is1D = is1D;
         
+      
+    }
+
+    public onEnter(prevState: string): void {
+        super.onEnter(prevState);
         if (!this.skeletonMeshComponent.isLoaded) {
             this.skeletonMeshComponent.onLoaded(() => {
                 this.initializeBlendTree();
@@ -136,17 +142,16 @@ export class BlendTreeState extends BaseAnimState {
         } else {
             this.initializeBlendTree();
         }
-    }
-
-    public onEnter(prevState: string): void {
         this.updateBlendWeights();
     }
 
     public onExit(nextState: string): void {
+        super.onExit(nextState);
         this.stopAllAnimations();
     }
 
     public onUpdate(deltaTime: number): void {
+        super.onUpdate(deltaTime);
         this.updateBlendWeights();
     }
 

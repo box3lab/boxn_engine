@@ -37,8 +37,9 @@ export class AnimatorComponent extends BaseComponent {
      * @param clip 动画片段名称 / Animation clip name
      * @returns 动画状态 / Animation state
      */
-    public addAnimationState(name: string, clip: string): AnimationState {
-        const state = new AnimationState(name, clip, this.skeletonMeshComponent);
+    public addAnimationState(name: string, clip: string,speed: number = 1,isLoop: boolean = true,
+        isHasExitTime: boolean = false, exitTime: number = 0): AnimationState {
+        const state = new AnimationState(name, clip, this.skeletonMeshComponent,speed,isLoop,isHasExitTime,exitTime);
         this.stateMachine && this.stateMachine.addState(state);
 
         return state;
@@ -51,8 +52,8 @@ export class AnimatorComponent extends BaseComponent {
      * @returns 混合树状态 / Blend tree state
      */
     public addBlendTreeState(name: string, blendTree: any,
-        is1D: boolean = false,isHasExitTime: boolean = false): BlendTreeState {
-        const state = new BlendTreeState(name, blendTree, this.skeletonMeshComponent,is1D,isHasExitTime);
+        is1D: boolean = false,isHasExitTime: boolean = false, exitTime: number = 0): BlendTreeState {
+        const state = new BlendTreeState(name, blendTree, this.skeletonMeshComponent,is1D,isHasExitTime,exitTime);
         this.stateMachine && this.stateMachine.addState(state);
 
         return state;

@@ -50,6 +50,15 @@ export class MovementComponent extends BaseComponent {
     private _collider: ColliderComponentV2 | null = null;
 
     /**
+     * 地面距离 / Ground distance
+     */
+    private _groundDistance: number = 0;
+
+    public get groundDistance(): number {
+        return this._groundDistance;
+    }
+
+    /**
      * 获取当前移动速度 / Get current movement speed
      */
     public get moveSpeed(): number {
@@ -164,6 +173,10 @@ export class MovementComponent extends BaseComponent {
         return this._moveDirection;
     }
 
+    public getLinearVelocity(): Vector3 {
+        return this.entity?.physicsBody?.getLinearVelocity() ?? Vector3.Zero();
+    }
+
     /**
      * 跳跃 / Jump  
      */
@@ -217,7 +230,8 @@ export class MovementComponent extends BaseComponent {
             shouldHitTriggers: false,
         }, shapeLocalResult, hitWorldResult);
 
-        this._isGrounded = (this.entity.root.root.position.y - hitWorldResult.hitPoint.y) < 0.05; // 0.9 + little margin
+        this._groundDistance = this.entity.root.root.position.y - hitWorldResult.hitPoint.y;
+        this._isGrounded = this._groundDistance < 0.05; // 0.9 + little margin
 
 
         // 应用移动力 / Apply movement force
@@ -230,7 +244,7 @@ export class MovementComponent extends BaseComponent {
                 );
             }else{
                 // 减速 / Decelerate
-                this._moveSpeed *= 0.9;
+                this._moveSpeed *= 0.99;
             }
         } 
         else {

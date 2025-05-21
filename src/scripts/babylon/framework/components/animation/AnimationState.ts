@@ -17,9 +17,10 @@ export class AnimationState extends BaseAnimState {
         skeletonMeshComponent: SkeletonMeshComponent,
         speed: number = 1.0,
         isLoop: boolean = true,
-        isHasExitTime: boolean = false
+        isHasExitTime: boolean = false,
+        exitTime: number = 0
     ) {
-        super(name, skeletonMeshComponent, isHasExitTime);
+        super(name, skeletonMeshComponent, isHasExitTime, exitTime);
         this.clip = clip;
         this.speed = speed;
         this.isLoop = isLoop;
@@ -27,6 +28,7 @@ export class AnimationState extends BaseAnimState {
     }
 
     public onEnter(prevState: string): void {
+        super.onEnter(prevState);
         if (!this.skeletonMeshComponent.isLoaded) {
             this.skeletonMeshComponent.onLoaded(() => {
                 this.playAnimation();
@@ -37,10 +39,12 @@ export class AnimationState extends BaseAnimState {
     }
 
     public onExit(nextState: string): void {
+        super.onExit(nextState);
         this.stopAnimation();
     }
 
     public onUpdate(deltaTime: number): void {
+        super.onUpdate(deltaTime);
         // 可以在这里添加每帧的动画更新逻辑 / Add per-frame animation update logic here
     }
 

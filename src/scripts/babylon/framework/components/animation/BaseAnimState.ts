@@ -9,10 +9,11 @@ export class BaseAnimState implements IState {
     public exitTimeCounter: number = 0;
 
     constructor(name: string, skeletonMeshComponent: SkeletonMeshComponent, 
-        isHasExitTime: boolean = false) {
+        isHasExitTime: boolean = false, exitTime: number = 0) {
         this.name = name;
         this.skeletonMeshComponent = skeletonMeshComponent;
         this.isHasExitTime = isHasExitTime;
+        this.exitTime = exitTime;
     }
 
     public onEnter(prevState: string): void {

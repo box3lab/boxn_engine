@@ -4,7 +4,7 @@ import type { BlendTreeState, IBlendTree2D } from "../components/animation/Blend
 import type { PlayerEntity } from "../entity/PlayerEntity";
 import type { IGameEntity } from "../interface/IGameEntity";
 import { BaseController } from "./BaseController";
-
+import { AnimationState } from "../components/animation/AnimationState";
 /**
  * 玩家控制器 / Player controller
  */
@@ -12,6 +12,10 @@ export class PlayerController extends BaseController {
 
     private playerEntity: PlayerEntity;
     private motionState: BlendTreeState | undefined;
+    private jumpUpState: AnimationState | undefined;
+    private jumpDownState: AnimationState | undefined;
+    private jumpFloatingState: AnimationState | undefined;
+
     /**
      * 旋转速度 / Rotation speed
      */
@@ -43,46 +47,85 @@ export class PlayerController extends BaseController {
      * 初始化动画器 / Initialize animator
      */
     public initAnimator(): void {
-        // const motionBlendTree: IBlendTree2D = {
-        //     name: "motion",
-        //     nodes: [
-        //         { name: "Idle", clip: "Idle", position2D: { x: 0, y: 0 } ,weight: 0,influenceRadius: 0.2},
-        //         { name: "Walking", clip: "Walking", position2D: { x: 1, y: 0 } ,weight: 0,influenceRadius: 0.2},
-        //         { name: "WalkingBack", clip: "WalkingBack", position2D: { x: -1, y: 0 } ,weight: 0,influenceRadius: 0.2}
-        //     ],
-        //     xMinValue: -1,
-        //     xMaxValue: 1,
-        //     yMinValue: -1,
-        //     yMaxValue: 1
-        // }
-        // this.playerEntity.animatorComponent?.initStateMachine({
-        //     initialState: "motion",
-        //     transitions: {
-        //         motion: {
-        //             Idle: [{ check: () => true, priority: 1 }],
-        //         }
-        //     }
-        // });
-        // this.motionState = this.playerEntity.animatorComponent?.addBlendTreeState("motion", motionBlendTree, false);
+        this.playerEntity.animatorComponent?.initStateMachine({
+            initialState: "motion",
+            transitions: {
+                "motion": {
+                    "jumpUp": [{
+                        check: () => {
+                            const linearVelocity = this.playerEntity.movementComponent?.getLinearVelocity();
+                            if(linearVelocity){
+                                return linearVelocity._y > 3;
+                            }
+                            return false;
+                        }
+                    }],
+                    "jumpFloating": [{
+                        check: () => {
+                            const linearVelocity = this.playerEntity.movementComponent?.getLinearVelocity();
+                            if(linearVelocity){
+                                return linearVelocity._y < -15;
+                            }
+                            return false;
+                        }
+                    }]
+                },
+                "jumpUp": {
+                    // "jumpDown": [
+                    //     {
+                    //         check: () => {
+                    //             return this.playerEntity.movementComponent?.isGrounded!;
+                    //         }
+                    //     }
+                    // ],
+                    "jumpFloating": [
+                        {
+                            check: () => {
+                                return  this.jumpUpState?.exitTimeCounter! >= this.jumpUpState?.exitTime!;
+                            }
+                        },
+                        {
+                            check: () => {
+                                const linearVelocity = this.playerEntity.movementComponent?.getLinearVelocity();
+                                if(linearVelocity){
+                                return linearVelocity._y < -1;   
+                            }
+                            return false;
+                        }
+                    }]
+                },
+                "jumpFloating": {
+                    "jumpDown": [{
+                        check: () => {
+                            return this.playerEntity.movementComponent?.groundDistance! <= 0.2;
+                        }
+                    }]
+                },
+                "jumpDown": {
+                    "motion": [{
+                        check: () => {
+                            return this.playerEntity.movementComponent?.isGrounded!;
+                        }
+                    }]
+                }
+            }
+        });
+
         const motionBlendTree: IBlendTree1D = {
             name: "motion",
             nodes: [
                 { name: "Idle", clip: "Idle", position: 0 ,weight: 0,influenceRadius: 0},
                 { name: "Walking", clip: "Walking", position: 0.1 ,weight: 0,influenceRadius: 0.1},
-                { name: "Running", clip: "Running", position: 0.6 ,weight: 0,influenceRadius: 0}
+                { name: "Running", clip: "Running", position: 0.6 ,weight: 0,influenceRadius: 0.2}
             ],
             minValue: 0,
             maxValue: 1
         }
-        this.playerEntity.animatorComponent?.initStateMachine({
-            initialState: "motion",
-            transitions: {
-                motion: {
-                }
 
-            }
-        });
         this.motionState = this.playerEntity.animatorComponent?.addBlendTreeState("motion", motionBlendTree, true);
+        this.jumpUpState = this.playerEntity.animatorComponent?.addAnimationState("jumpUp", "JumpUp",2,false,true,0.2);
+        this.jumpDownState = this.playerEntity.animatorComponent?.addAnimationState("jumpDown", "JumpDown",1,false,true,0.2);
+        this.jumpFloatingState = this.playerEntity.animatorComponent?.addAnimationState("jumpFloating", "JumpFloating");   
     }
     public updateMesh(deltaTime: number): void {
         const movementComponent = this.playerEntity.movementComponent;
