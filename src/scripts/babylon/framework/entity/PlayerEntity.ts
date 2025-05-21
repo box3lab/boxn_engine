@@ -39,7 +39,7 @@ export class PlayerEntity extends GameEntity {
      */
     public cameraComponent: CameraComponent | null = null;
 
-    constructor(name: string, scene: IScene,meshUrl: string = "./glb/test.glb") {
+    constructor(name: string, scene: IScene,meshUrl: string = "./glb/test1.glb") {
         super(name, scene);
         this.skeletonMeshComponent = new SkeletonMeshComponent("skeletonMeshComponent",meshUrl,scene.scene);
         this.addComponent("SkeletonMeshComponent",this.skeletonMeshComponent);

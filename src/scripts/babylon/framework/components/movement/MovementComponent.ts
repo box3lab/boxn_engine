@@ -27,7 +27,7 @@ export class MovementComponent extends BaseComponent {
     /**
      * 减速度 / Deceleration
      */
-    private _deceleration: number = 3.0;
+    private _deceleration: number = 5.0;
 
     /**
      * 跳跃力度 / Jump force
@@ -230,7 +230,7 @@ export class MovementComponent extends BaseComponent {
                 );
             }else{
                 // 减速 / Decelerate
-                this._moveSpeed *= 0.99;
+                this._moveSpeed *= 0.9;
             }
         } 
         else {

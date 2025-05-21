@@ -111,6 +111,10 @@ export class BlendTreeState extends BaseAnimState {
      * 混合参数2D / Blend Parameter 2D
      */
     public blendParameter2D: Vector2 = new Vector2(0, 0);
+    /**
+     * 是否循环 / Whether to loop
+     */
+    private isLoop: boolean = true;
 
     constructor(
         name: string,
@@ -154,7 +158,7 @@ export class BlendTreeState extends BaseAnimState {
             for (const node of this.blendTree.nodes) {
                 const animationGroup = this.skeletonMeshComponent.animationGroups.get(node.name);
                 animationGroup && this.activeAnimations.set(node.name, animationGroup);
-                animationGroup && animationGroup.play(true);
+                animationGroup && animationGroup.play(this.isLoop);
             }
         }
     }
@@ -229,11 +233,12 @@ export class BlendTreeState extends BaseAnimState {
         const upperNode = nodes[upperIndex];
         const segmentLength = upperNode.position! - lowerNode.position!;
         const segmentProgress = (scaledValue - lowerNode.position!) / segmentLength;
-    
+
         lowerNode.weight = 1 - segmentProgress;
         upperNode.weight = segmentProgress;
 
-        this.normalizeWeights2D(nodes);
+        this.normalizeWeights(nodes);
+        this.updateActiveClips(blendTree.nodes);
     }
 
     /**

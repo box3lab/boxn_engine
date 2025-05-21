@@ -1,4 +1,4 @@
-import type { AnimationGroup, Mesh, Scene, Skeleton, TransformNode, Vector3 } from "@babylonjs/core";
+import { TransformNode, type AnimationGroup, type Mesh, type Scene, type Skeleton, Vector3 } from "@babylonjs/core";
 import type { IGameEntity } from "../../interface/IGameEntity";
 import { BaseComponent } from "../BaseComponent";
 import { ResMgr } from "../../mgr/ResMgr";
@@ -24,6 +24,11 @@ export class SkeletonMeshComponent extends BaseComponent {
     public get isLoaded(): boolean {
         return this._isLoaded;
     }
+
+    /**
+     * 网格根节点 / Mesh root node
+     */
+    public meshRoot: TransformNode | undefined;
 
     private _meshs: Map<string, TransformNode> = new Map();
     // 获取网格 / Get meshes
@@ -70,6 +75,7 @@ export class SkeletonMeshComponent extends BaseComponent {
 
     constructor(name: string, url?: string, scene?: Scene) {
         super(name);
+        this.meshRoot = new TransformNode(name, scene);
         if(url && scene){
             this.addMesh(url, scene);
         }
@@ -161,11 +167,16 @@ export class SkeletonMeshComponent extends BaseComponent {
      * 绑定网格到实体 / Bind mesh to entity
      */
     private bindMesh(){
-        if(!this.instancedContainer) return;
-        for(let i = 0; i < this.instancedContainer.rootNodes.length; i++){
-            const node = this.instancedContainer.rootNodes[i];
-            // @ts-ignore
-            node.parent = this.entity?.getRoot().root;
+        if(!this.instancedContainer || !this.entity) return;
+        const entityRoot = this.entity.getRoot().root;
+        if(entityRoot){
+            this.meshRoot!.parent = entityRoot;
+            this.meshRoot!.position = Vector3.Zero();
+            for(let i = 0; i < this.instancedContainer.rootNodes.length; i++){
+                const node = this.instancedContainer.rootNodes[i];
+                //@ts-ignore
+                node.parent = this.meshRoot;
+            }
         }
     }
 
