@@ -47,6 +47,8 @@ import * as GUI from "@babylonjs/gui";
 import { BaseScene } from "../../framework/scene/BaseScene";
 import { PlayerInputComponent } from "../../framework/components/input/PlayerInputComponent";
 import { PlayerEntity } from "../../framework/entity/PlayerEntity";
+import { ResMgr } from "../../framework/mgr/ResMgr";
+import { GLBAsset } from "../../framework/asset/GLBAsset";
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
  */
@@ -407,7 +409,46 @@ export class TestScene extends BaseScene {
 
         this.entity = new PlayerEntity("player",this);
         this.entity.root.root.position = new Vector3(0, 0, 0);
-    
+
+        // const mesh = await ResMgr.instance.loadResource("./glb/test1.glb", GLBAsset, 
+        //     {
+        //         onProgress: (progress) => {
+        //             console.log("progress",progress);
+        //             if(progress === 1){
+        //                 // const root = new TransformNode("root",this.scene);
+                       
+        //                 // // @ts-ignore
+        //                 // mesh.data?.addAllToScene(this.scene);
+        //                 // root.position = new Vector3(5, 0, 0);
+        //             }
+        //         }
+        //     },this.scene);
+        // const root = new TransformNode("root",this.scene);
+        // mesh.data?.meshes.forEach((item) => {
+        //     console.log("item",item);
+        //     if(item.name === "Alpha_Surface" || item.name === "Alpha_Joints"){
+        //         item.isVisible = false;
+        //     }
+        // });
+        // const model = mesh.data?.instantiateModelsToScene();
+        // model?.rootNodes.forEach((item) => {
+        //     console.log("item",item);
+        //     // @ts-ignore
+        //     item.setParent(root);
+        // });
+        // root.position = new Vector3(5, 0.5, 0);
+        // if (model) {
+        //     model.animationGroups?.forEach((item) => {
+        //         if(item.name.replace("Clone of ","") === "Running"){
+        //             console.log("item",item.name);
+        //             item.play(true);
+        //         }
+        //         // else{
+        //         //     item.stop();
+        //         // }
+        //     });
+        //     console.log("model",model.animationGroups);
+        // }
         // this.camera?.attachControl(displayCapsule, false);
 
         // characterController.keepDistance = 10;

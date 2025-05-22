@@ -4,6 +4,7 @@ import type { MovementComponent } from "../movement/MovementComponent";
 import { type InputActionEvent, InputEventType } from "../../input/InputAction";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 import type { SkeletonAnimationComponent } from "../animation/SkeletonAnimationComponent";
+import { EventEmitter } from "../../common/EventEmitter";
 /**
  * Player Input Component - 玩家输入组件
  * Handles player input and movement
@@ -51,12 +52,8 @@ export class PlayerInputComponent extends InputComponent {
      * 跳跃输入动作
      */
     private isJump: boolean = false;
+    
 
-    /**
-     * The skeleton animation component of the player entity
-     * 玩家实体的骨骼动画组件(临时使用)
-     */
-    private skeletonAnimationComponent: SkeletonAnimationComponent | null = null;
     
 
     /**
@@ -75,7 +72,6 @@ export class PlayerInputComponent extends InputComponent {
     public attachTo(gameEntity: PlayerEntity): void {
         this._gameEntity = gameEntity;
         this._movementComponent = gameEntity.getComponent("MovementComponent") as MovementComponent;
-        this.skeletonAnimationComponent = gameEntity.getComponent("SkeletonAnimationComponent") as SkeletonAnimationComponent;
         this.bindInput();
     }
 
@@ -108,6 +104,8 @@ export class PlayerInputComponent extends InputComponent {
         this.registerAction("MoveLeft", { key: "a" }, (options) => this.moveLeft(options));
         this.registerAction("MoveRight", { key: "d" }, (options) => this.moveRight(options));
         this.registerAction("Jump", { key: " " }, (options) => this.jump(options));
+        this.registerAction("Attack1", { key: "MOUSE_LEFT" }, (options) => this.mouseLeft(options));
+        this.registerAction("Attack2", { key: "MOUSE_RIGHT" }, (options) => this.mouseRight(options));
     }
 
     /**
@@ -120,6 +118,8 @@ export class PlayerInputComponent extends InputComponent {
         this.unregisterAction("MoveLeft");
         this.unregisterAction("MoveRight");
         this.unregisterAction("Jump");
+        this.unregisterAction("Attack1");
+        this.unregisterAction("Attack2");
     }
 
     /**
@@ -201,18 +201,14 @@ export class PlayerInputComponent extends InputComponent {
         else if (this.isRight) {
             direction.x += 1;
         }
-
-        // if (direction.length() <= 0) {
-        //     this.skeletonAnimationComponent?.playAnimation("Idle",true);
-        // }
-        // else {
-        //     if (direction.z > 0) {
-        //         this.skeletonAnimationComponent?.playAnimation("Walking",true);
-        //     }
-        //     else {
-        //         this.skeletonAnimationComponent?.playAnimation("WalkingBack",true);
-        //     }
-        // }
         this._movementComponent?.setMoveDirection(direction.normalize());
+    }
+
+    protected mouseLeft(options: InputActionEvent): void {
+        EventEmitter.instance.emit("MouseLeft", options.eventType);
+    }
+
+    protected mouseRight(options: InputActionEvent): void {
+        EventEmitter.instance.emit("MouseRight", options.eventType);
     }
 }

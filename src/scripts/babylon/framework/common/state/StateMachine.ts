@@ -147,7 +147,7 @@ export class StateMachine {
         return false;
       }
     }
-    console.log("transitionTo",newStateName);
+    // console.log("transitionTo",newStateName);
     // Perform the transition
     const prevStateName = this.currentState?.name ?? '';
     this.currentState?.onExit?.(newStateName);

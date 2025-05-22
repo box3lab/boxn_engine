@@ -1,3 +1,5 @@
+import { Singleton } from "./Singleton";
+
 // 定义事件类型 / Define event type
 type EventType = string | symbol;
 
@@ -16,7 +18,7 @@ interface EventHandlerMap {
  * 用于实现发布-订阅模式，允许对象之间进行松耦合的通信
  * Implements the publish-subscribe pattern, allowing loose coupling between objects
  */
-export class EventEmitter {
+export class EventEmitter extends Singleton<EventEmitter>() {
   private handlers: EventHandlerMap = {};
 
   /**

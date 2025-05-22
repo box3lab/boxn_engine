@@ -259,6 +259,17 @@ export class InputSystem extends Singleton<InputSystem>() {
                 InputEventType.KEYDOWN : InputEventType.KEYUP });
         }
     }
+
+    /**
+     * Trigger an action based on touch event state
+     * 根据触控事件状态触发动作
+     * 
+     * @param buttonid - The button ID of the touch event / 触控事件的按钮ID
+     * @param touchType - The type of touch event (POINTERDOWN/POINTERUP/POINTERMOVE/POINTERWHEEL) / 触控事件类型（按下/释放/移动/滚轮）
+     * @param pointerId - The ID of the pointer (mouse/touch) / 指针的ID（鼠标/触控）
+     * @param position - The position of the touch event / 触控事件的位置
+     */
+
     private triggerTouchAction(buttonid: number, touchType: number, pointerId: number, position: Vector2): void {
         const pointerInputMap: { [buttonid: number]: string } = {
             [PointerInput.LeftClick]: "MOUSE_LEFT",
@@ -282,6 +293,7 @@ export class InputSystem extends Singleton<InputSystem>() {
             this.actions[actionName].trigger({ eventType: (pointerEventTypeMap[touchType]), value: {position:position, key:key}, id: pointerId });
         }
     }
+    
     /**
      * Check for key combinations (e.g., Shift + W for running)
      * 检查按键组合（例如：Shift + W 用于奔跑）
