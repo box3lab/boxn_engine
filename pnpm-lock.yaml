@@ -35,6 +35,9 @@ importers:
       cannon-es:
         specifier: ^0.20.0
         version: 0.20.0
+      uuid:
+        specifier: ^11.1.0
+        version: 11.1.0
       vue:
         specifier: ^3.5.13
         version: 3.5.13(typescript@5.7.3)
@@ -534,6 +537,10 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
+  uuid@11.1.0:
+    resolution: {integrity: sha512-0/A9rDy9P7cJ+8w1c9WD9V//9Wj15Ce2MPz8Ri6032usz+NfePxx5AcN3bN+r6ZL6jEo066/yNYB3tn4pQEx+A==}
+    hasBin: true
+
   vite@6.3.3:
     resolution: {integrity: sha512-5nXH+QsELbFKhsEfWLkHrvgRpTdGJzqOZ+utSdmPTvwHmvU6ITTm3xx+mRusihkcI8GeC7lCDyn3kDtiki9scw==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
@@ -986,6 +993,8 @@ snapshots:
       picomatch: 4.0.2
 
   typescript@5.7.3: {}
+
+  uuid@11.1.0: {}
 
   vite@6.3.3:
     dependencies:
