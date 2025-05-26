@@ -51,6 +51,7 @@ import { ResMgr } from "../../framework/mgr/ResMgr";
 import { GLBAsset } from "../../framework/asset/GLBAsset";
 import { UINode } from "../../framework/ui/UINode";
 import { Control, TextBlock } from "@babylonjs/gui";
+import { UIPanel } from "../../framework/ui/UIPanel";
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
  */
@@ -503,6 +504,11 @@ export class TestScene extends BaseScene {
         const cube5Aggregate = new PhysicsAggregate(cube5, 
             PhysicsShapeType.BOX, { mass: 100, restitution:0, friction:0.1,startAsleep:false, mesh:cube5}, this.scene); 
         cube5Aggregate.body.setMotionType(PhysicsMotionType.STATIC);
+
+        const basePanel = new UIPanel(this.scene,"basePanel");
+        basePanel.setPosition(0,0);
+        basePanel.setSize(100,100);
+        basePanel.setBackgroundColor(new Color4(1,0,0,0.5));
     }
     
     /**
