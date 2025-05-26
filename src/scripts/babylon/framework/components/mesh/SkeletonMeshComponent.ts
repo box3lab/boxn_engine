@@ -73,11 +73,18 @@ export class SkeletonMeshComponent extends BaseComponent {
         }
     }
 
-    constructor(name: string, url?: string, scene?: Scene) {
+    /**
+     * 构造函数 / Constructor
+     * @param name 名称 / Name
+     * @param url 模型资源URL / Model resource URL
+     * @param scene 场景引用 / Scene reference
+     * @param hideOriginalMesh 是否隐藏原始网格(用于mixamo模型) / Whether to hide the original mesh(for mixamo model)
+     */ 
+    constructor(name: string, url?: string, scene?: Scene, hideOriginalMesh:boolean = false) {
         super(name);
         this.meshRoot = new TransformNode(name, scene);
         if(url && scene){
-            this.addMesh(url, scene);
+            this.addMesh(url, scene, hideOriginalMesh);
         }
     }
 
@@ -124,15 +131,24 @@ export class SkeletonMeshComponent extends BaseComponent {
      * @param url 模型资源URL / Model resource URL
      * @param scene 场景引用 / Scene reference
      */
-    public addMesh(url:string, scene:Scene){
+    public addMesh(url:string, scene:Scene,hideOriginalMesh:boolean = false){
         ResMgr.instance.loadResource(url, GLBAsset,undefined,scene).then((mesh: GLBAsset) => {
                 if(!mesh) return;
                 this.meshAssets = mesh;
                 const container = this.meshAssets.data;
-                //      this.meshAssets.data?.meshes.forEach(mesh => {
-                //        mesh.scaling.scaleInPlace(10);
-                //     }); 
+                if(hideOriginalMesh && container){
+                    container.meshes.forEach((item) => {
+                        if(item.name === "Alpha_Surface" || item.name === "Alpha_Joints"){
+                            item.isVisible = false;
+                        }
+                    });
+                }
                 if(container){
+                    container.meshes.forEach(mesh => {
+                        // @ts-ignore
+                        mesh.scaling.scaleInPlace(10);
+                    });
+
                     this.instancedContainer = container.instantiateModelsToScene();
                     this.meshAssets.refCount++;
                     if(this.entity){

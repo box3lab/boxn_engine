@@ -49,6 +49,8 @@ import { PlayerInputComponent } from "../../framework/components/input/PlayerInp
 import { PlayerEntity } from "../../framework/entity/PlayerEntity";
 import { ResMgr } from "../../framework/mgr/ResMgr";
 import { GLBAsset } from "../../framework/asset/GLBAsset";
+import { UINode } from "../../framework/ui/UINode";
+import { Control, TextBlock } from "@babylonjs/gui";
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
  */
