@@ -30,7 +30,8 @@ import {
     PBRMaterial,
     PhysicsCharacterController,
     CapsuleBuilder,
-    PhysicsShapeCapsule
+    PhysicsShapeCapsule,
+    Vector2
 } from "@babylonjs/core";
 import 'babylonjs-loaders';
 import type { IScene } from "../../framework/interface/IScene";
@@ -52,6 +53,10 @@ import { GLBAsset } from "../../framework/asset/GLBAsset";
 import { UINode } from "../../framework/ui/UINode";
 import { Control, TextBlock } from "@babylonjs/gui";
 import { UIPanel } from "../../framework/ui/UIPanel";
+import { UIText } from "../../framework/ui/UIText";
+import { UIButton } from "../../framework/ui/UIButton";
+import { UIMgr } from "../../framework/mgr/UIMgr";
+import { UIImage } from "../../framework/ui/UIImage";
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
  */
@@ -238,7 +243,21 @@ export class TestScene extends BaseScene {
         const panelAggregate = new PhysicsAggregate(panel, 
             PhysicsShapeType.BOX, { mass: 0, restitution:0.1, friction:2, mesh:panel}, this.scene);
         // panelAggregate.body.setEventMask(0x1);
+
+        const image = new GUI.Image("testImage", "./images/test1.png");
+        // Set image properties
+        image.width = "200px";
+        image.height = "200px";
+        image.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+        image.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+        
+        // Add the image to the advanced texture
+        this.advancedTexture?.addControl(image);
     }
+
+    /**
+     * Creates and displays a test image using GUI
+     */
     
     /**
      * Create character and setup third person controller
@@ -505,10 +524,32 @@ export class TestScene extends BaseScene {
             PhysicsShapeType.BOX, { mass: 100, restitution:0, friction:0.1,startAsleep:false, mesh:cube5}, this.scene); 
         cube5Aggregate.body.setMotionType(PhysicsMotionType.STATIC);
 
-        const basePanel = new UIPanel(this.scene,"basePanel");
-        basePanel.setPosition(0,0);
-        basePanel.setSize(100,100);
-        basePanel.setBackgroundColor(new Color4(1,0,0,0.5));
+        // const basePanel = new UIPanel(this.scene,"basePanel");
+        // basePanel.setPosition(0,0);
+        // basePanel.setWidth("1000px");
+        // basePanel.setHeight("600px");
+        // basePanel.isDebug = true;
+
+        // UIMgr.instance.initializeForScene(this.scene);
+
+        // // 创建主面板
+        // const mainPanel = new UIPanel("MainPanel", "300px", "200px");
+        // mainPanel.position = new Vector2(0, 0);
+        // mainPanel.background = "#2c3e50";
+        // mainPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
+        // mainPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+
+        // UIMgr.instance.addElement(mainPanel,this.scene);
+
+        // const image = new GUI.Image("testImage", "./images/test1.png");
+        // // Set image properties
+        // image.width = "200px";
+        // image.height = "200px";
+        // image.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+        // image.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+        
+        // // Add the image to the advanced texture
+        // this.advancedTexture?.addControl(image);
     }
     
     /**
