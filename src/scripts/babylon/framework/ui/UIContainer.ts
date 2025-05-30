@@ -28,25 +28,7 @@ export class UIContainer extends UINode {
         
         this._children.push(child);
         (child as any)._parent = this;
-        if(child instanceof UIImage){
-            // const image = new GUI.Image("testImage", "./images/test1.png");
-        
-            // // Set image properties
-            // image.width = "200px";
-            // image.height = "200px";
-            // image.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
-            // image.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
-            
-            // Add the image to the advanced texture
-            
-            const state = UIMgr.instance.getSceneUIState(this._scene) ;
-            if(state && child.control){
-                state.advancedTexture.addControl(child.control);
-                // state.advancedTexture.addControl(image);
-                // console.log("image2",image);
-            }
-        }
-        else if (child.control) {
+        if (child.control) {
             this._containerControl.addControl(child.control);
         }
         this.onChildAdded(child);

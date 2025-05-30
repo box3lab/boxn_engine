@@ -11,7 +11,7 @@ export class UIImage extends UINode {
         this._imageControl = new Image(name);
         this._control = this._imageControl;
         if(source){
-            this._source = source;
+            this.source = source;
         }
     }
 

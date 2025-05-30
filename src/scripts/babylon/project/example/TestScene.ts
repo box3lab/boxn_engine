@@ -69,7 +69,7 @@ export class TestScene extends BaseScene {
 
     private entity: GameEntity | undefined;
     entities: any;
-    private advancedTexture: GUI.AdvancedDynamicTexture | undefined;
+    // private advancedTexture: GUI.AdvancedDynamicTexture | undefined;
     // private touchCoordsText: GUI.TextBlock | undefined; // Replaced for multi-touch
     // private touchDot: GUI.Ellipse | undefined; // Replaced for multi-touch
     private touchControls: Map<number, { textBlock: GUI.TextBlock; dot: GUI.Ellipse }> = new Map();
@@ -102,7 +102,7 @@ export class TestScene extends BaseScene {
         shadowGenerator.useBlurExponentialShadowMap = true;
         shadowGenerator.blurKernel = 32;
         shadowGenerator.darkness = 0.4;
-        this.advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, this.scene);
+        // this.advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, this.scene);
         this.setupCamera();
         this.setupLights();
         this.setupPostProcessing();
@@ -244,15 +244,15 @@ export class TestScene extends BaseScene {
             PhysicsShapeType.BOX, { mass: 0, restitution:0.1, friction:2, mesh:panel}, this.scene);
         // panelAggregate.body.setEventMask(0x1);
 
-        const image = new GUI.Image("testImage", "./images/test1.png");
-        // Set image properties
-        image.width = "200px";
-        image.height = "200px";
-        image.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-        image.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+        // const image = new GUI.Image("testImage", "./images/test1.png");
+        // // Set image properties
+        // image.width = "200px";
+        // image.height = "200px";
+        // image.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+        // image.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
         
-        // Add the image to the advanced texture
-        this.advancedTexture?.addControl(image);
+        // // Add the image to the advanced texture
+        // this.advancedTexture?.addControl(image);
     }
 
     /**
@@ -530,26 +530,35 @@ export class TestScene extends BaseScene {
         // basePanel.setHeight("600px");
         // basePanel.isDebug = true;
 
-        // UIMgr.instance.initializeForScene(this.scene);
+        UIMgr.instance.initializeForScene(this.scene);
 
-        // // 创建主面板
-        // const mainPanel = new UIPanel("MainPanel", "300px", "200px");
-        // mainPanel.position = new Vector2(0, 0);
-        // mainPanel.background = "#2c3e50";
-        // mainPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_CENTER;
-        // mainPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_CENTER;
+        // 创建主面板
+        const mainPanel = new UIPanel("MainPanel", this.scene, 1, 1);
+        mainPanel.position = new Vector2(0, 0);
+        // mainPanel.background = "#2c3e5070";
+        mainPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+        mainPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
 
-        // UIMgr.instance.addElement(mainPanel,this.scene);
-
-        // const image = new GUI.Image("testImage", "./images/test1.png");
-        // // Set image properties
-        // image.width = "200px";
-        // image.height = "200px";
-        // image.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
-        // image.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+        UIMgr.instance.addElement(mainPanel,this.scene);
         
-        // // Add the image to the advanced texture
-        // this.advancedTexture?.addControl(image);
+        const image = new UIImage("testImage", "./images/test1.png");
+        mainPanel.addChild(image);
+        image.width = "100px";
+        image.height = "100px";
+        image.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+        image.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
+        image.position = new Vector2(0,0);
+    
+        const test = new UIText("text","AMC");
+        mainPanel.addChild(test);
+        test.fontSize = 22;
+        test.color = "white";
+        test.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+        test.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
+        test.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+        test.textVerticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
+        test.position = new Vector2(0,128);
+   
     }
     
     /**

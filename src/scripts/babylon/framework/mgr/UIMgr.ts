@@ -31,7 +31,8 @@ export class UIMgr extends Singleton<UIMgr>(){
         if (this._sceneStates.has(scene)) return;
         
         // 创建全屏UI / Create fullscreen UI
-        const advancedTexture = AdvancedDynamicTexture.CreateFullscreenUI("UI_" + scene.uid, true, scene);
+        const advancedTexture = 
+            AdvancedDynamicTexture.CreateFullscreenUI("UI_" + scene.uid, true, scene);
         const rootContainer = new UIContainer("RootContainer_" + scene.uid, scene);
         if (rootContainer.control) {
             advancedTexture.addControl(rootContainer.control);
