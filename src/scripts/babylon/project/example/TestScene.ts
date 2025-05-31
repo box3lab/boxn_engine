@@ -57,6 +57,7 @@ import { UIText } from "../../framework/ui/UIText";
 import { UIButton } from "../../framework/ui/UIButton";
 import { UIMgr } from "../../framework/mgr/UIMgr";
 import { UIImage } from "../../framework/ui/UIImage";
+import { UIScrollView } from "../../framework/ui/UIScrollView";
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
  */
@@ -558,7 +559,14 @@ export class TestScene extends BaseScene {
         test.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
         test.textVerticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
         test.position = new Vector2(0,128);
-   
+        
+        const scrollView = new UIScrollView("scrollView",1,1);
+        mainPanel.addChild(scrollView);
+        scrollView.width = "500px";
+        scrollView.height = "500px";
+        scrollView.position = new Vector2(0,128);
+        scrollView.contentRectWidth = "900px";
+        scrollView.contentRectHeight = "1200px";
     }
     
     /**
