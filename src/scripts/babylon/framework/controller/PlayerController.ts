@@ -7,6 +7,7 @@ import { BaseController } from "./BaseController";
 import { AnimationState } from "../components/animation/AnimationState";
 import { EventEmitter } from "../common/EventEmitter";
 import { InputEventType } from "../input/InputAction";
+import type { FollowCameraComponent } from "../components/camera/FollowCameraComponent";
 /**
  * 玩家控制器 / Player controller
  */
@@ -34,6 +35,7 @@ export class PlayerController extends BaseController {
         super.update(deltaTime);
         this.updateMesh(deltaTime);
         this.updateAnimator();
+        this.updateMovement();
     }
     
     public dispose(): void {
@@ -225,6 +227,11 @@ export class PlayerController extends BaseController {
         EventEmitter.instance.on("MouseRight", (eventType) => {
             this.onMouseRight(eventType);
         });
+        EventEmitter.instance.on("MouseMove", (event) => {
+          if(!event) return;
+          const delta = event.delta as Vector2;
+          (this.playerEntity.cameraComponent as FollowCameraComponent).updateCameraForward(delta);
+        })
     }
 
     /**
@@ -233,6 +240,7 @@ export class PlayerController extends BaseController {
     public unbindEvent(): void {
         EventEmitter.instance.off("MouseLeft");
         EventEmitter.instance.off("MouseRight");
+        EventEmitter.instance.off("MouseMove");
     }
 
     /**
@@ -263,7 +271,8 @@ export class PlayerController extends BaseController {
                 this.playerEntity.skeletonMeshComponent.meshRoot.rotation.y += rotationStep;
                 
                 // 规范化旋转角度到-π到π范围
-                this.playerEntity.skeletonMeshComponent.meshRoot.rotation.y = ((this.playerEntity.skeletonMeshComponent.meshRoot.rotation.y + Math.PI) % (2 * Math.PI)) - Math.PI;
+                this.playerEntity.skeletonMeshComponent.meshRoot.rotation.y = 
+                    ((this.playerEntity.skeletonMeshComponent.meshRoot.rotation.y + Math.PI) % (2 * Math.PI)) - Math.PI;
             }
         }
     }
@@ -276,6 +285,19 @@ export class PlayerController extends BaseController {
         if (this.motionState && movementComponent) {
             this.motionState.blendParameter = (movementComponent.moveSpeed / movementComponent.maxMoveSpeed) * 
                 movementComponent.getMoveDirection().length();
+        }
+    }
+
+    /**
+     * 更新移动 / Update movement
+     */
+    public updateMovement(): void {
+        const direction = this.playerEntity.playerInputComponent?.inputDirection;
+        const camera = this.playerEntity.cameraComponent?.getCamera();
+        if(camera && direction){
+            const moveDirection = camera.getDirection(Vector3.Forward()).scale(direction.z).add
+                (camera.getDirection(Vector3.Right()).scale(direction.x));
+            this.playerEntity.movementComponent?.setMoveDirection(moveDirection.normalize());
         }
     }
 }

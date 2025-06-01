@@ -8,6 +8,12 @@ import type { Vector2 } from 'babylonjs';
  * 实现一个跟随目标物体的相机 / Implements a camera that follows a target object
  */
 export class FollowCameraComponent extends CameraComponent {
+
+  /**
+   * 跟随相机 / Follow camera
+   */
+  private _followCamera: FollowCamera | null = null;
+
   /**
    * 目标实体 / Target entity
    */
@@ -67,31 +73,31 @@ export class FollowCameraComponent extends CameraComponent {
     if (!this._target || !this.entity?.scene?.scene) return;
 
     // 创建跟随相机 / Create follow camera
-    const camera = new FollowCamera(
+    this._followCamera = new FollowCamera(
       `${this.name}_camera`,
       new Vector3(0, this._height, -this._radius),
       this.entity.scene.scene
     );
 
     // 设置相机参数 / Set camera parameters
-    camera.heightOffset = this._heightOffset;
-    camera.radius = this._radius;
-    camera.rotationOffset = 0;
-    camera.cameraAcceleration = 0.5;
-    camera.maxCameraSpeed = 10;
+    this._followCamera.heightOffset = this._heightOffset;
+    this._followCamera.radius = this._radius;
+    this._followCamera.rotationOffset = 0;
+    this._followCamera.cameraAcceleration = 0.5;
+    this._followCamera.maxCameraSpeed = 10;
 
     // 检查目标是否为Mesh / Check if target is a Mesh
-    camera.lockedTarget = this._target;
+    this._followCamera.lockedTarget = this._target;
 
     // 设置相机 / Set camera
-    this.setCamera(camera);
+    this.setCamera(this._followCamera);
 
-    // 监听鼠标位置改变 / Listen to mouse position changes
-    EventEmitter.instance.on("MouseMove", (event) => {
-        if(!event) return;
-        const delta = event.delta as Vector2;
-        this.updateCameraPosition(delta);
-    })
+      // // 监听鼠标位置改变 / Listen to mouse position changes
+      // EventEmitter.instance.on("MouseMove", (event) => {
+      //     if(!event) return;
+      //     const delta = event.delta as Vector2;
+      //     this.updateCameraPosition(delta);
+      // })
   }
 
   /**
@@ -110,17 +116,22 @@ export class FollowCameraComponent extends CameraComponent {
     // }
   }
 
-  public updateCameraPosition(delta: Vector2){
+  /**
+   * 更新相机朝向 / Update camera forward
+   * @param delta 鼠标移动增量 / Mouse movement delta
+   */
+  public updateCameraForward(delta: Vector2){
     this.pitch += -delta.y * this._rotationSpeed;
     this.yaw += delta.x * this._rotationSpeed;
 
     this.pitch = Math.max(0.01 - Math.PI / 2, Math.min(Math.PI / 2 - 0.01, this.pitch));
     this.yaw = this.yaw % (2 * Math.PI);
 
-    const camera = this._camera as FollowCamera;
-    camera.radius = Math.cos(this.pitch) * this._radius;
-    camera.heightOffset = Math.sin(this.pitch) * this._radius;
-    camera.rotationOffset = this.yaw / Math.PI * 180;
+    if(this._followCamera){
+      this._followCamera.radius = Math.cos(this.pitch) * this._radius;
+      this._followCamera.heightOffset = Math.sin(this.pitch) * this._radius;
+      this._followCamera.rotationOffset = this.yaw / Math.PI * 180;
+    }
   }
 
   /**

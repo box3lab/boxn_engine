@@ -55,9 +55,12 @@ export class PlayerInputComponent extends InputComponent {
      * 跳跃输入动作
      */
     private isJump: boolean = false;
-    
 
-    
+    /**
+     * The input direction
+     * 输入方向
+     */
+    public inputDirection: Vector3 = Vector3.Zero();
 
     /**
      * Constructor
@@ -197,20 +200,21 @@ export class PlayerInputComponent extends InputComponent {
      * 计算移动方向
      */
     protected calculateMovement(): void {
-        let direction = Vector3.Zero();
+        this.inputDirection = Vector3.Zero();
+        
         if (this.isForward) {
-            direction.z += 1;
+            this.inputDirection.z = 1;
         }
         else if (this.isBackward) {
-            direction.z -= 1;
+            this.inputDirection.z = -1;
         }
         if (this.isLeft) {
-            direction.x -= 1;
+            this.inputDirection.x -= 1;
         }
         else if (this.isRight) {
-            direction.x += 1;
+            this.inputDirection.x += 1;
         }
-        this._movementComponent?.setMoveDirection(direction.normalize());
+        // this._movementComponent?.setMoveDirection(direction.normalize());
     }
 
     protected mouseLeft(options: InputActionEvent): void {
