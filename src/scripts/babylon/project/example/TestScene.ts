@@ -30,7 +30,8 @@ import {
     PBRMaterial,
     PhysicsCharacterController,
     CapsuleBuilder,
-    PhysicsShapeCapsule
+    PhysicsShapeCapsule,
+    Vector2
 } from "@babylonjs/core";
 import 'babylonjs-loaders';
 import type { IScene } from "../../framework/interface/IScene";
@@ -47,6 +48,16 @@ import * as GUI from "@babylonjs/gui";
 import { BaseScene } from "../../framework/scene/BaseScene";
 import { PlayerInputComponent } from "../../framework/components/input/PlayerInputComponent";
 import { PlayerEntity } from "../../framework/entity/PlayerEntity";
+import { ResMgr } from "../../framework/mgr/ResMgr";
+import { GLBAsset } from "../../framework/asset/GLBAsset";
+import { UINode } from "../../framework/ui/UINode";
+import { Control, TextBlock } from "@babylonjs/gui";
+import { UIPanel } from "../../framework/ui/UIPanel";
+import { UIText } from "../../framework/ui/UIText";
+import { UIButton } from "../../framework/ui/UIButton";
+import { UIMgr } from "../../framework/mgr/UIMgr";
+import { UIImage } from "../../framework/ui/UIImage";
+import { UIScrollView } from "../../framework/ui/UIScrollView";
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
  */
@@ -59,7 +70,7 @@ export class TestScene extends BaseScene {
 
     private entity: GameEntity | undefined;
     entities: any;
-    private advancedTexture: GUI.AdvancedDynamicTexture | undefined;
+    // private advancedTexture: GUI.AdvancedDynamicTexture | undefined;
     // private touchCoordsText: GUI.TextBlock | undefined; // Replaced for multi-touch
     // private touchDot: GUI.Ellipse | undefined; // Replaced for multi-touch
     private touchControls: Map<number, { textBlock: GUI.TextBlock; dot: GUI.Ellipse }> = new Map();
@@ -92,7 +103,7 @@ export class TestScene extends BaseScene {
         shadowGenerator.useBlurExponentialShadowMap = true;
         shadowGenerator.blurKernel = 32;
         shadowGenerator.darkness = 0.4;
-        this.advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, this.scene);
+        // this.advancedTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI", true, this.scene);
         this.setupCamera();
         this.setupLights();
         this.setupPostProcessing();
@@ -233,7 +244,21 @@ export class TestScene extends BaseScene {
         const panelAggregate = new PhysicsAggregate(panel, 
             PhysicsShapeType.BOX, { mass: 0, restitution:0.1, friction:2, mesh:panel}, this.scene);
         // panelAggregate.body.setEventMask(0x1);
+
+        // const image = new GUI.Image("testImage", "./images/test1.png");
+        // // Set image properties
+        // image.width = "200px";
+        // image.height = "200px";
+        // image.horizontalAlignment = GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+        // image.verticalAlignment = GUI.Control.VERTICAL_ALIGNMENT_TOP;
+        
+        // // Add the image to the advanced texture
+        // this.advancedTexture?.addControl(image);
     }
+
+    /**
+     * Creates and displays a test image using GUI
+     */
     
     /**
      * Create character and setup third person controller
@@ -407,7 +432,46 @@ export class TestScene extends BaseScene {
 
         this.entity = new PlayerEntity("player",this);
         this.entity.root.root.position = new Vector3(0, 0, 0);
-    
+
+        // const mesh = await ResMgr.instance.loadResource("./glb/test1.glb", GLBAsset, 
+        //     {
+        //         onProgress: (progress) => {
+        //             console.log("progress",progress);
+        //             if(progress === 1){
+        //                 // const root = new TransformNode("root",this.scene);
+                       
+        //                 // // @ts-ignore
+        //                 // mesh.data?.addAllToScene(this.scene);
+        //                 // root.position = new Vector3(5, 0, 0);
+        //             }
+        //         }
+        //     },this.scene);
+        // const root = new TransformNode("root",this.scene);
+        // mesh.data?.meshes.forEach((item) => {
+        //     console.log("item",item);
+        //     if(item.name === "Alpha_Surface" || item.name === "Alpha_Joints"){
+        //         item.isVisible = false;
+        //     }
+        // });
+        // const model = mesh.data?.instantiateModelsToScene();
+        // model?.rootNodes.forEach((item) => {
+        //     console.log("item",item);
+        //     // @ts-ignore
+        //     item.setParent(root);
+        // });
+        // root.position = new Vector3(5, 0.5, 0);
+        // if (model) {
+        //     model.animationGroups?.forEach((item) => {
+        //         if(item.name.replace("Clone of ","") === "Running"){
+        //             console.log("item",item.name);
+        //             item.play(true);
+        //         }
+        //         // else{
+        //         //     item.stop();
+        //         // }
+        //     });
+        //     console.log("model",model.animationGroups);
+        // }
         // this.camera?.attachControl(displayCapsule, false);
 
         // characterController.keepDistance = 10;
@@ -460,6 +524,49 @@ export class TestScene extends BaseScene {
         const cube5Aggregate = new PhysicsAggregate(cube5, 
             PhysicsShapeType.BOX, { mass: 100, restitution:0, friction:0.1,startAsleep:false, mesh:cube5}, this.scene); 
         cube5Aggregate.body.setMotionType(PhysicsMotionType.STATIC);
+
+        // const basePanel = new UIPanel(this.scene,"basePanel");
+        // basePanel.setPosition(0,0);
+        // basePanel.setWidth("1000px");
+        // basePanel.setHeight("600px");
+        // basePanel.isDebug = true;
+
+        UIMgr.instance.initializeForScene(this.scene);
+
+        // 创建主面板
+        const mainPanel = new UIPanel("MainPanel", this.scene, 1, 1);
+        mainPanel.position = new Vector2(0, 0);
+        // mainPanel.background = "#2c3e5070";
+        mainPanel.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+        mainPanel.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
+
+        UIMgr.instance.addElement(mainPanel,this.scene);
+        
+        const image = new UIImage("testImage", "./images/test1.png");
+        mainPanel.addChild(image);
+        image.width = "100px";
+        image.height = "100px";
+        image.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+        image.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
+        image.position = new Vector2(0,0);
+    
+        const test = new UIText("text","AMC");
+        mainPanel.addChild(test);
+        test.fontSize = 22;
+        test.color = "white";
+        test.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+        test.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
+        test.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+        test.textVerticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
+        test.position = new Vector2(0,128);
+        
+        const scrollView = new UIScrollView("scrollView",1,1);
+        mainPanel.addChild(scrollView);
+        scrollView.width = "500px";
+        scrollView.height = "500px";
+        scrollView.position = new Vector2(0,128);
+        scrollView.contentRectWidth = "900px";
+        scrollView.contentRectHeight = "1200px";
     }
     
     /**

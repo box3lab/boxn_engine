@@ -1,6 +1,7 @@
 import { FollowCamera, Vector3, Mesh } from '@babylonjs/core';
 import { CameraComponent } from './CameraComponent';
-import type { IGameEntity } from '../../interface/IGameEntity';
+import { EventEmitter } from '../../common/EventEmitter';
+import type { Vector2 } from 'babylonjs';
 
 /**
  * 跟随相机组件 / Follow Camera Component
@@ -25,12 +26,22 @@ export class FollowCameraComponent extends CameraComponent {
   /**
    * 旋转速度 / Rotation speed
    */
-  private _rotationSpeed: number = 0.1;
+  private _rotationSpeed: number = 0.005;
 
   /**
    * 高度偏移 / Height offset
    */
   private _heightOffset: number = 4;
+
+  /**
+   * 相机的俯仰角度（弧度制） / Camera pitch angle
+   */
+  private pitch: number = 0;
+
+  /**
+   * 相机的偏航角度（弧度制） / Camera yaw angle
+   */
+  private yaw: number = 0;
 
   /**
    * 构造函数 / Constructor
@@ -74,6 +85,13 @@ export class FollowCameraComponent extends CameraComponent {
 
     // 设置相机 / Set camera
     this.setCamera(camera);
+
+    // 监听鼠标位置改变 / Listen to mouse position changes
+    EventEmitter.instance.on("MouseMove", (event) => {
+        if(!event) return;
+        const delta = event.delta as Vector2;
+        this.updateCameraPosition(delta);
+    })
   }
 
   /**
@@ -90,6 +108,19 @@ export class FollowCameraComponent extends CameraComponent {
     // if (camera.lockedTarget !== this._target) {
     //   camera.lockedTarget = this._target;
     // }
+  }
+
+  public updateCameraPosition(delta: Vector2){
+    this.pitch += -delta.y * this._rotationSpeed;
+    this.yaw += delta.x * this._rotationSpeed;
+
+    this.pitch = Math.max(0.01 - Math.PI / 2, Math.min(Math.PI / 2 - 0.01, this.pitch));
+    this.yaw = this.yaw % (2 * Math.PI);
+
+    const camera = this._camera as FollowCamera;
+    camera.radius = Math.cos(this.pitch) * this._radius;
+    camera.heightOffset = Math.sin(this.pitch) * this._radius;
+    camera.rotationOffset = this.yaw / Math.PI * 180;
   }
 
   /**

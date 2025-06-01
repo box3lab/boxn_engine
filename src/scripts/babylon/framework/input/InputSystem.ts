@@ -40,9 +40,11 @@ export class InputSystem extends Singleton<InputSystem>() {
     
     // Mouse movement delta since last frame / 自上一帧以来的鼠标移动增量
     private _mouseDelta: Vector2 = Vector2.Zero();
-    // Mouse movement delta since last frame / 自上一帧以来的鼠标移动增量
-    private _mouseActive: number = 0;
-    // Mouse position from the previous frame / 上一帧的鼠标位置
+
+    /**
+     * Mouse position from the previous frame / 上一帧的鼠标位置  
+     * @deprecated 
+    */
     private lastMousePosition: Vector2 = Vector2.Zero();
 
     // 存储多指触控状态 / Store multi-touch states
@@ -176,19 +178,16 @@ export class InputSystem extends Singleton<InputSystem>() {
         // 鼠标输入监听 / Mouse input listener
         this.scene.onPointerObservable.add((pointerInfo) => {
             const event = pointerInfo.event as IPointerEvent;
-            const { clientX: x, clientY: y, inputIndex, pointerId=0 } = event;
+            const { clientX: x, clientY: y, inputIndex, pointerId=0, movementX, movementY } = event;
             const type = pointerInfo.type;
 
             // 更新全局鼠标状态 / Update global mouse state
+            this._mousePosition.x = x;
+            this._mousePosition.y = y;
             if (type === PointerEventTypes.POINTERMOVE || type === PointerEventTypes.POINTERDOWN) {
-                this._mouseDelta.x = x - this.lastMousePosition.x;
-                this._mouseDelta.y = y - this.lastMousePosition.y;
-                this._mousePosition.x = x;
-                this._mousePosition.y = y;
-                this.lastMousePosition = this._mousePosition.clone();
+                this._mouseDelta.x = movementX;
+                this._mouseDelta.y = movementY;
             } else if (type === PointerEventTypes.POINTERUP) {
-                this._mousePosition.x = x;
-                this._mousePosition.y = y;
                 this.lastMousePosition = this._mousePosition.clone();
                 this._mouseDelta = Vector2.Zero();
             }
@@ -259,6 +258,17 @@ export class InputSystem extends Singleton<InputSystem>() {
                 InputEventType.KEYDOWN : InputEventType.KEYUP });
         }
     }
+
+    /**
+     * Trigger an action based on touch event state
+     * 根据触控事件状态触发动作
+     * 
+     * @param buttonid - The button ID of the touch event / 触控事件的按钮ID
+     * @param touchType - The type of touch event (POINTERDOWN/POINTERUP/POINTERMOVE/POINTERWHEEL) / 触控事件类型（按下/释放/移动/滚轮）
+     * @param pointerId - The ID of the pointer (mouse/touch) / 指针的ID（鼠标/触控）
+     * @param position - The position of the touch event / 触控事件的位置
+     */
+
     private triggerTouchAction(buttonid: number, touchType: number, pointerId: number, position: Vector2): void {
         const pointerInputMap: { [buttonid: number]: string } = {
             [PointerInput.LeftClick]: "MOUSE_LEFT",
@@ -282,6 +292,7 @@ export class InputSystem extends Singleton<InputSystem>() {
             this.actions[actionName].trigger({ eventType: (pointerEventTypeMap[touchType]), value: {position:position, key:key}, id: pointerId });
         }
     }
+    
     /**
      * Check for key combinations (e.g., Shift + W for running)
      * 检查按键组合（例如：Shift + W 用于奔跑）

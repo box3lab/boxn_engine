@@ -48,6 +48,9 @@ export class AnimationState extends BaseAnimState {
         // 可以在这里添加每帧的动画更新逻辑 / Add per-frame animation update logic here
     }
 
+    /**
+     * 播放动画 / Play animation
+     */
     private playAnimation(): void {
         this.stopAnimation();
         const animationGroup = this.skeletonMeshComponent.animationGroups.get(this.clip);
@@ -57,10 +60,21 @@ export class AnimationState extends BaseAnimState {
         }
     }
 
+    /**
+     * 停止动画 / Stop animation
+     */
     private stopAnimation(): void {
         if (this.currentAnimationGroup) {
             this.currentAnimationGroup.stop();
             this.currentAnimationGroup = undefined;
         }
+    }
+
+    /**
+     * 获取动画是否正在播放 / Get whether the animation is playing
+     * @returns 动画是否正在播放 / Whether the animation is playing
+     */
+    public get isPlaying(): boolean {
+        return this.currentAnimationGroup?.isPlaying ?? false;
     }
 } 

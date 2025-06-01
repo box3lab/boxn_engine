@@ -43,7 +43,7 @@ export class PlayerEntity extends GameEntity {
         super(name, scene);
         this.skeletonMeshComponent = new SkeletonMeshComponent("skeletonMeshComponent",meshUrl,scene.scene);
         this.addComponent("SkeletonMeshComponent",this.skeletonMeshComponent);
-        this.skeletonMeshComponent.scale = 1;
+        this.skeletonMeshComponent.scale = 0.01;
 
         this.animatorComponent = new AnimatorComponent("animatorComponent");
         this.addComponent("AnimatorComponent",this.animatorComponent);
