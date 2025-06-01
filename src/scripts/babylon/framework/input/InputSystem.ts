@@ -40,9 +40,11 @@ export class InputSystem extends Singleton<InputSystem>() {
     
     // Mouse movement delta since last frame / 自上一帧以来的鼠标移动增量
     private _mouseDelta: Vector2 = Vector2.Zero();
-    // Mouse movement delta since last frame / 自上一帧以来的鼠标移动增量
-    private _mouseActive: number = 0;
-    // Mouse position from the previous frame / 上一帧的鼠标位置
+
+    /**
+     * Mouse position from the previous frame / 上一帧的鼠标位置  
+     * @deprecated 
+    */
     private lastMousePosition: Vector2 = Vector2.Zero();
 
     // 存储多指触控状态 / Store multi-touch states
@@ -176,19 +178,16 @@ export class InputSystem extends Singleton<InputSystem>() {
         // 鼠标输入监听 / Mouse input listener
         this.scene.onPointerObservable.add((pointerInfo) => {
             const event = pointerInfo.event as IPointerEvent;
-            const { clientX: x, clientY: y, inputIndex, pointerId=0 } = event;
+            const { clientX: x, clientY: y, inputIndex, pointerId=0, movementX, movementY } = event;
             const type = pointerInfo.type;
 
             // 更新全局鼠标状态 / Update global mouse state
+            this._mousePosition.x = x;
+            this._mousePosition.y = y;
             if (type === PointerEventTypes.POINTERMOVE || type === PointerEventTypes.POINTERDOWN) {
-                this._mouseDelta.x = x - this.lastMousePosition.x;
-                this._mouseDelta.y = y - this.lastMousePosition.y;
-                this._mousePosition.x = x;
-                this._mousePosition.y = y;
-                this.lastMousePosition = this._mousePosition.clone();
+                this._mouseDelta.x = movementX;
+                this._mouseDelta.y = movementY;
             } else if (type === PointerEventTypes.POINTERUP) {
-                this._mousePosition.x = x;
-                this._mousePosition.y = y;
                 this.lastMousePosition = this._mousePosition.clone();
                 this._mouseDelta = Vector2.Zero();
             }
