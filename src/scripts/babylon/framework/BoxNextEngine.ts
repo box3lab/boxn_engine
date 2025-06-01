@@ -4,6 +4,7 @@ import { TestScene } from "../project/example/TestScene";
 import { SceneMgr } from "./mgr/SceneMgr";
 import { ResMgr } from "./mgr/ResMgr";
 import { PhyMgrV2 } from "./mgr/PhyMgrV2";
+import { PointerMgr } from "./mgr/PointerMgr";
 /**
  * BoxNextEngine - A custom engine class for Babylon.js
  * 一个用于 Babylon.js 的自定义引擎类
@@ -44,6 +45,8 @@ export class BoxNextEngine extends Singleton<BoxNextEngine>(){
         SceneMgr.instance.activateScene("test",true);
         // Set Scene for Resource Manager
         ResMgr.instance.setScene(SceneMgr.instance.getScene("test")?.scene as Scene);
+        // Initialize Pointer Manager
+        PointerMgr.instance.initialize(this.canvas);
 
         // Initialize Physics Manager
         // PhyMgr.instance.initialize();
