@@ -296,6 +296,8 @@ export class PlayerController extends BaseController {
         if(camera && direction){
             const moveDirection = camera.getDirection(Vector3.Forward()).scale(direction.z).add
                 (camera.getDirection(Vector3.Right()).scale(direction.x));
+            // 设置移动方向的y轴为0，去除移动方向的y轴 remove the y axis of the move direction
+            moveDirection.y = 0;
             this.playerEntity.movementComponent?.setMoveDirection(moveDirection.normalize());
         }
     }
