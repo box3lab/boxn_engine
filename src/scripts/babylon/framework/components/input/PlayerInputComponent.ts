@@ -25,7 +25,7 @@ export class PlayerInputComponent extends InputComponent {
      * 玩家实体的运动组件
      */
     private _movementComponent: MovementComponent | null = null;
-    
+
     /**
      * The forward input action
      * 向前移动输入动作
@@ -77,7 +77,9 @@ export class PlayerInputComponent extends InputComponent {
      */
     public attachTo(gameEntity: PlayerEntity): void {
         this._gameEntity = gameEntity;
-        this._movementComponent = gameEntity.getComponent("MovementComponent") as MovementComponent;
+        this._movementComponent = gameEntity.getComponent(
+            "MovementComponent",
+        ) as MovementComponent;
         this.bindInput();
     }
 
@@ -99,22 +101,39 @@ export class PlayerInputComponent extends InputComponent {
         super.dispose();
         this.unbindInput();
     }
-    
+
     /**
      * Bind the input actions to the player input component
      * 将输入动作绑定到玩家输入组件
      */
     bindInput(): void {
-        this.registerAction("MoveForward", { key: "w" }, (options) => this.moveForward(options));
-        this.registerAction("MoveBackward", { key: "s" }, (options) => this.moveBackward(options));
-        this.registerAction("MoveLeft", { key: "a" }, (options) => this.moveLeft(options));
-        this.registerAction("MoveRight", { key: "d" }, (options) => this.moveRight(options));
-        this.registerAction("Jump", { key: " " }, (options) => this.jump(options));
-        // this.registerAction("Attack1", { key: "MOUSE_LEFT" }, (options) => this.mouseLeft(options));
-        // this.registerAction("Attack2", { key: "MOUSE_RIGHT" }, (options) => this.mouseRight(options));
-        this.registerAction("MouseLeft", { key: "MOUSE_LEFT" }, (options) => this.mouseLeft(options));
-        this.registerAction("MouseRight", { key: "MOUSE_RIGHT" }, (options) => this.mouseRight(options));
-        this.registerAction("MouseMove", { key: "MOUSE_MOVE" }, () => this.mouseMove());
+        this.registerAction("MoveForward", { key: "w" }, (options) =>
+            this.moveForward(options),
+        );
+        this.registerAction("MoveBackward", { key: "s" }, (options) =>
+            this.moveBackward(options),
+        );
+        this.registerAction("MoveLeft", { key: "a" }, (options) =>
+            this.moveLeft(options),
+        );
+        this.registerAction("MoveRight", { key: "d" }, (options) =>
+            this.moveRight(options),
+        );
+        this.registerAction("Jump", { key: " " }, (options) =>
+            this.jump(options),
+        );
+        this.registerAction("MouseLeft", { key: "MOUSE_LEFT" }, (options) =>
+            this.mouseLeft(options),
+        );
+        this.registerAction("MouseRight", { key: "MOUSE_RIGHT" }, (options) =>
+            this.mouseRight(options),
+        );
+        this.registerAction("MouseMove", { key: "MOUSE_MOVE" }, () =>
+            this.mouseMove(),
+        );
+        this.registerAction("MouseWheel", { key: "MOUSE_WHEEL_Y" }, () =>
+            this.onMouseWheel(),
+        );
     }
 
     /**
@@ -127,11 +146,10 @@ export class PlayerInputComponent extends InputComponent {
         this.unregisterAction("MoveLeft");
         this.unregisterAction("MoveRight");
         this.unregisterAction("Jump");
-        // this.unregisterAction("Attack1");
-        // this.unregisterAction("Attack2");
         this.unregisterAction("MouseLeft");
         this.unregisterAction("MouseRight");
         this.unregisterAction("MouseMove");
+        this.unregisterAction("MouseWheel");
     }
 
     /**
@@ -201,26 +219,24 @@ export class PlayerInputComponent extends InputComponent {
      */
     protected calculateMovement(): void {
         this.inputDirection = Vector3.Zero();
-        
+
         if (this.isForward) {
             this.inputDirection.z = 1;
-        }
-        else if (this.isBackward) {
+        } else if (this.isBackward) {
             this.inputDirection.z = -1;
         }
         if (this.isLeft) {
             this.inputDirection.x -= 1;
-        }
-        else if (this.isRight) {
+        } else if (this.isRight) {
             this.inputDirection.x += 1;
         }
         // this._movementComponent?.setMoveDirection(direction.normalize());
     }
 
     protected mouseLeft(options: InputActionEvent): void {
-        if(PointerMgr.instance.isPointerLocked){
+        if (PointerMgr.instance.isPointerLocked) {
             EventEmitter.instance.emit("MouseLeft", options.eventType);
-        }else{
+        } else if (options.eventType === InputEventType.MOUSE_UP) {
             PointerMgr.instance.requestPointerLock();
         }
     }
@@ -230,10 +246,16 @@ export class PlayerInputComponent extends InputComponent {
     }
 
     protected mouseMove(): void {
-        if(PointerMgr.instance.isPointerLocked){
+        if (PointerMgr.instance.isPointerLocked) {
             EventEmitter.instance.emit("MouseMove", {
-                delta: InputSystem.instance.mouseDelta
+                delta: InputSystem.instance.mouseDelta,
             });
         }
+    }
+
+    protected onMouseWheel(): void {
+        EventEmitter.instance.emit("MouseWheel", {
+            delta: InputSystem.instance.wheelDelta,
+        });
     }
 }
