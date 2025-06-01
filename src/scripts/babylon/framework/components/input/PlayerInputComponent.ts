@@ -5,6 +5,9 @@ import { type InputActionEvent, InputEventType } from "../../input/InputAction";
 import { Vector3 } from "@babylonjs/core/Maths/math.vector";
 import type { SkeletonAnimationComponent } from "../animation/SkeletonAnimationComponent";
 import { EventEmitter } from "../../common/EventEmitter";
+import { PointerMgr } from "../../mgr/PointerMgr";
+import type { Vector2 } from "babylonjs";
+import { InputSystem } from "../../input/InputSystem";
 /**
  * Player Input Component - 玩家输入组件
  * Handles player input and movement
@@ -104,8 +107,11 @@ export class PlayerInputComponent extends InputComponent {
         this.registerAction("MoveLeft", { key: "a" }, (options) => this.moveLeft(options));
         this.registerAction("MoveRight", { key: "d" }, (options) => this.moveRight(options));
         this.registerAction("Jump", { key: " " }, (options) => this.jump(options));
-        this.registerAction("Attack1", { key: "MOUSE_LEFT" }, (options) => this.mouseLeft(options));
-        this.registerAction("Attack2", { key: "MOUSE_RIGHT" }, (options) => this.mouseRight(options));
+        // this.registerAction("Attack1", { key: "MOUSE_LEFT" }, (options) => this.mouseLeft(options));
+        // this.registerAction("Attack2", { key: "MOUSE_RIGHT" }, (options) => this.mouseRight(options));
+        this.registerAction("MouseLeft", { key: "MOUSE_LEFT" }, (options) => this.mouseLeft(options));
+        this.registerAction("MouseRight", { key: "MOUSE_RIGHT" }, (options) => this.mouseRight(options));
+        this.registerAction("MouseMove", { key: "MOUSE_MOVE" }, () => this.mouseMove());
     }
 
     /**
@@ -118,8 +124,11 @@ export class PlayerInputComponent extends InputComponent {
         this.unregisterAction("MoveLeft");
         this.unregisterAction("MoveRight");
         this.unregisterAction("Jump");
-        this.unregisterAction("Attack1");
-        this.unregisterAction("Attack2");
+        // this.unregisterAction("Attack1");
+        // this.unregisterAction("Attack2");
+        this.unregisterAction("MouseLeft");
+        this.unregisterAction("MouseRight");
+        this.unregisterAction("MouseMove");
     }
 
     /**
@@ -205,10 +214,22 @@ export class PlayerInputComponent extends InputComponent {
     }
 
     protected mouseLeft(options: InputActionEvent): void {
-        EventEmitter.instance.emit("MouseLeft", options.eventType);
+        if(PointerMgr.instance.isPointerLocked){
+            EventEmitter.instance.emit("MouseLeft", options.eventType);
+        }else{
+            PointerMgr.instance.requestPointerLock();
+        }
     }
 
     protected mouseRight(options: InputActionEvent): void {
         EventEmitter.instance.emit("MouseRight", options.eventType);
+    }
+
+    protected mouseMove(): void {
+        if(PointerMgr.instance.isPointerLocked){
+            EventEmitter.instance.emit("MouseMove", {
+                delta: InputSystem.instance.mouseDelta
+            });
+        }
     }
 }
