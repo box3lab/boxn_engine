@@ -159,11 +159,10 @@ export class PlayerController extends BaseController {
      * @param eventType - The type of the input event / 输入事件类型
      */
     public onMouseLeft(eventType: InputEventType): void {
-        console.log("attack1",this.isAttack);
         if(this.isAttack) return;
-        if(!this.playerEntity.movementComponent?.isGrounded!) return;
-        this.isAttack = true;
+        if(!this.playerEntity.movementComponent?.isGrounded) return;
         if(eventType === InputEventType.MOUSE_DOWN){
+            this.isAttack = true;
             this.playerEntity.animatorComponent?.setState("attack1");
             setTimeout(() => {
                 this.isAttack = false;
