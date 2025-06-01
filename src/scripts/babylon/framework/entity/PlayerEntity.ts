@@ -39,33 +39,57 @@ export class PlayerEntity extends GameEntity {
      */
     public cameraComponent: CameraComponent | null = null;
 
-    constructor(name: string, scene: IScene,meshUrl: string = "./glb/test1.glb") {
+    constructor(
+        name: string,
+        scene: IScene,
+        meshUrl: string = "./glb/test1.glb",
+    ) {
         super(name, scene);
-        this.skeletonMeshComponent = new SkeletonMeshComponent("skeletonMeshComponent",meshUrl,scene.scene);
-        this.addComponent("SkeletonMeshComponent",this.skeletonMeshComponent);
+        this.skeletonMeshComponent = new SkeletonMeshComponent(
+            "skeletonMeshComponent",
+            meshUrl,
+            scene.scene,
+        );
+        this.addComponent("SkeletonMeshComponent", this.skeletonMeshComponent);
         this.skeletonMeshComponent.scale = 0.01;
 
         this.animatorComponent = new AnimatorComponent("animatorComponent");
-        this.addComponent("AnimatorComponent",this.animatorComponent);
-        this.animatorComponent.setSkeletonMeshComponent(this.skeletonMeshComponent);
+        this.addComponent("AnimatorComponent", this.animatorComponent);
+        this.animatorComponent.setSkeletonMeshComponent(
+            this.skeletonMeshComponent,
+        );
 
-        this.charactorColliderComponent = new CharactorColliderComponent("CharactorColliderComponent", 0.5, 2, 0, true);
-        this.addComponent("CharactorColliderComponent",this.charactorColliderComponent);
+        this.charactorColliderComponent = new CharactorColliderComponent(
+            "CharactorColliderComponent",
+            0.5,
+            2,
+            0,
+            true,
+        );
+        this.addComponent(
+            "CharactorColliderComponent",
+            this.charactorColliderComponent,
+        );
         this.charactorColliderComponent.IsShowDebug = false;
 
         this.movementComponent = new MovementComponent("MovementComponent");
-        this.addComponent("MovementComponent",this.movementComponent);
+        this.addComponent("MovementComponent", this.movementComponent);
         // this._movementComponent.jumpForce = 20;
         // this._movementComponent.maxMoveSpeed = 30;
         // this._movementComponent.acceleration = 5;
 
-        this.playerInputComponent = new PlayerInputComponent("PlayerInputComponent");
-        this.addComponent("PlayerInputComponent",this.playerInputComponent);
+        this.playerInputComponent = new PlayerInputComponent(
+            "PlayerInputComponent",
+        );
+        this.addComponent("PlayerInputComponent", this.playerInputComponent);
 
-        const followCameraComponent = new FollowCameraComponent("FollowCameraComponent");
-        this.addComponent("FollowCameraComponent",followCameraComponent);
-        followCameraComponent.setTarget(this.charactorColliderComponent!.colliderMesh!);
-        followCameraComponent.setRadius(-8);
+        const followCameraComponent = new FollowCameraComponent(
+            "FollowCameraComponent",
+        );
+        this.addComponent("FollowCameraComponent", followCameraComponent);
+        followCameraComponent.setTarget(
+            this.charactorColliderComponent!.colliderMesh!,
+        );
         followCameraComponent.setHeight(3);
         this.cameraComponent = followCameraComponent;
 
