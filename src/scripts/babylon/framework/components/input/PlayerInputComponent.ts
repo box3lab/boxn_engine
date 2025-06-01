@@ -220,7 +220,7 @@ export class PlayerInputComponent extends InputComponent {
     protected mouseLeft(options: InputActionEvent): void {
         if(PointerMgr.instance.isPointerLocked){
             EventEmitter.instance.emit("MouseLeft", options.eventType);
-        }else{
+        }else if(options.eventType === InputEventType.MOUSE_UP) {
             PointerMgr.instance.requestPointerLock();
         }
     }
