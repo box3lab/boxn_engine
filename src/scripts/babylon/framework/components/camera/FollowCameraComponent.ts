@@ -10,11 +10,6 @@ import { Vector2 } from 'babylonjs';
 export class FollowCameraComponent extends CameraComponent {
 
   /**
-   * 跟随相机 / Follow camera
-   */
-  private _followCamera: FollowCamera | null = null;
-
-  /**
    * 目标实体 / Target entity
    */
   private _target: Mesh | null = null;
@@ -103,24 +98,24 @@ export class FollowCameraComponent extends CameraComponent {
     if (!this._target || !this.entity?.scene?.scene) return;
 
     // 创建跟随相机 / Create follow camera
-    this._followCamera = new FollowCamera(
+    const followCamera  = new FollowCamera(
       `${this.name}_camera`,
       new Vector3(0, this._height, -this._radius),
       this.entity.scene.scene
     );
 
     // 设置相机参数 / Set camera parameters
-    this._followCamera.heightOffset = this._height;
-    this._followCamera.radius = this._radius;
-    this._followCamera.rotationOffset = 0;
-    this._followCamera.cameraAcceleration = 0.5;
-    this._followCamera.maxCameraSpeed = 10;
+    followCamera.heightOffset = this._height;
+    followCamera.radius = this._radius;
+    followCamera.rotationOffset = 0;
+    followCamera.cameraAcceleration = 0.5;
+    followCamera.maxCameraSpeed = 10;
 
     // 检查目标是否为Mesh / Check if target is a Mesh
-    this._followCamera.lockedTarget = this._target;
+    followCamera.lockedTarget = this._target;
 
     // 设置相机 / Set camera
-    this.setCamera(this._followCamera);
+    this.setCamera(followCamera);
 
       // // 监听鼠标位置改变 / Listen to mouse position changes
       // EventEmitter.instance.on("MouseMove", (event) => {
@@ -157,11 +152,12 @@ export class FollowCameraComponent extends CameraComponent {
     this.pitch = Math.max(0.01 - Math.PI / 2, Math.min(Math.PI / 2 - 0.01, this.pitch));
     this.yaw = this.yaw % (2 * Math.PI);
 
-    if(this._followCamera){
-      this._followCamera.radius = Math.cos(this.pitch) * this._radius;
+    if(this._camera){
+      const followCamera = this._camera as FollowCamera;
+      followCamera.radius = Math.cos(this.pitch) * this._radius;
       this.setHeight(Math.sin(this.pitch) * this._radius);
-      this._followCamera.heightOffset = this._height
-      this._followCamera.rotationOffset = this.yaw / Math.PI * 180;
+      // this._followCamera.heightOffset = this._height
+      followCamera.rotationOffset = this.yaw / Math.PI * 180;
     }
   }
 
@@ -172,7 +168,7 @@ export class FollowCameraComponent extends CameraComponent {
   public setHeight(height: number): void {
     this._height = Math.max(this._minHeight, Math.min(this._maxHeight, height))
     if (this._camera) {
-      (this._camera as FollowCamera).heightOffset = height;
+      (this._camera as FollowCamera).heightOffset = this._height;
     }
   }
 
@@ -220,10 +216,8 @@ export class FollowCameraComponent extends CameraComponent {
    * @param delta 增量 / Delta
    */
   public updateCameraRadius(delta: number): void {
-    if(this._followCamera){
-      const newRadius = this._radius + delta * this._radiusSpeed;
-      this.setRadius(Math.max(this._minRadius, Math.min(this._maxRadius, newRadius)));
-    }
+    const newRadius = this._radius + delta * this._radiusSpeed;
+    this.setRadius(Math.max(this._minRadius, Math.min(this._maxRadius, newRadius)));
   }
   
   /**
@@ -231,10 +225,8 @@ export class FollowCameraComponent extends CameraComponent {
    * @param delta 增量 / Delta
    */
   public updateCameraHeight(delta: number): void {
-    if(this._followCamera){
-      const newHeight = this._height + delta * this._heightSpeed;
-      this.setHeight(Math.max(this._minHeight, Math.min(this._maxHeight, newHeight)));
-    }
+    const newHeight = this._height + delta * this._heightSpeed;
+    this.setHeight(Math.max(this._minHeight, Math.min(this._maxHeight, newHeight)));
   }
 
   /**
