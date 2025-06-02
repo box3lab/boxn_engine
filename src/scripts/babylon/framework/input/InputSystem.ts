@@ -1,14 +1,27 @@
-import { KeyboardEventTypes, PointerEventTypes, Scene, Vector2 } from "@babylonjs/core";
-import { InputAction, type GamepadAxisMap, type GamepadButtonMap, type KeyBindingMap, InputEventType } from "./InputAction";
+import {
+    KeyboardEventTypes,
+    PointerEventTypes,
+    Scene,
+    Vector2,
+    Vector3,
+} from "@babylonjs/core";
+import {
+    InputAction,
+    type GamepadAxisMap,
+    type GamepadButtonMap,
+    type KeyBindingMap,
+    InputEventType,
+} from "./InputAction";
 import { Singleton } from "../common/Singleton";
 import type { IPointerEvent } from "@babylonjs/core/Events/deviceInputEvents";
 import { PointerInput } from "@babylonjs/core/DeviceInput/InputDevices/deviceEnums";
+import type { IMouseEvent, IWheelEvent } from "babylonjs";
 
 /**
  * Input System - 输入系统
  * A comprehensive input management system that handles keyboard, mouse, and gamepad inputs
  * 一个综合的输入管理系统，处理键盘、鼠标和游戏手柄输入
- * 
+ *
  * Features / 功能:
  * - Keyboard input handling / 键盘输入处理
  * - Mouse position and movement tracking / 鼠标位置和移动追踪
@@ -19,36 +32,42 @@ import { PointerInput } from "@babylonjs/core/DeviceInput/InputDevices/deviceEnu
 export class InputSystem extends Singleton<InputSystem>() {
     // Scene reference for input handling / 用于输入处理的场景引用
     private scene: Scene | null = null;
-    
+
     // Storage for all registered input actions / 存储所有注册的输入动作
     private actions: Record<string, InputAction> = {};
-    
+
     // Mapping of keyboard keys to action names / 键盘按键到动作名称的映射
     private keyBindings: KeyBindingMap = {};
-    
+
     // Mapping of gamepad buttons to action names / 游戏手柄按钮到动作名称的映射
     private gamepadButtonBindings: GamepadButtonMap = {};
-    
+
     // Mapping of gamepad axes to action names / 游戏手柄摇杆到动作名称的映射
     private gamepadAxisBindings: GamepadAxisMap = {};
-    
+
     // Set of currently pressed keys / 当前按下的按键集合
     private activeKeys: Set<string> = new Set();
-    
+
     // Current mouse position in screen coordinates / 当前鼠标在屏幕坐标中的位置
     private _mousePosition: Vector2 = Vector2.Zero();
-    
+
     // Mouse movement delta since last frame / 自上一帧以来的鼠标移动增量
     private _mouseDelta: Vector2 = Vector2.Zero();
 
+    // Mouse wheel delta since last frame / 自上一帧以来的鼠标滚轮增量
+    private _wheelDelta: Vector3 = Vector3.Zero();
+
     /**
-     * Mouse position from the previous frame / 上一帧的鼠标位置  
-     * @deprecated 
-    */
+     * Mouse position from the previous frame / 上一帧的鼠标位置
+     * @deprecated
+     */
     private lastMousePosition: Vector2 = Vector2.Zero();
 
     // 存储多指触控状态 / Store multi-touch states
-    private _touchPoints: Map<number, { position: Vector2; delta: Vector2; lastPosition: Vector2}> = new Map();
+    private _touchPoints: Map<
+        number,
+        { position: Vector2; delta: Vector2; lastPosition: Vector2 }
+    > = new Map();
 
     /**
      * Initialize the input system with a Babylon.js scene
@@ -63,7 +82,7 @@ export class InputSystem extends Singleton<InputSystem>() {
     /**
      * Register a new input action with optional key, gamepad button, or axis bindings
      * 注册新的输入动作，可选的键盘按键、游戏手柄按钮或摇杆绑定
-     * 
+     *
      * @param actionName - Name of the action to register / 要注册的动作名称
      * @param options - Optional binding configurations / 可选的绑定配置
      * @param options.key - Keyboard key to bind / 要绑定的键盘按键
@@ -71,17 +90,20 @@ export class InputSystem extends Singleton<InputSystem>() {
      * @param options.gamepadAxis - Gamepad axis index to bind / 要绑定的游戏手柄摇杆索引
      * @returns The created InputAction instance / 返回创建的输入动作实例
      */
-    public registerAction(actionName: string, options?: {
-        key?: string | string[];
-        gamepadButton?: number;
-        gamepadAxis?: number;
-    }): InputAction {
+    public registerAction(
+        actionName: string,
+        options?: {
+            key?: string | string[];
+            gamepadButton?: number;
+            gamepadAxis?: number;
+        },
+    ): InputAction {
         const action = new InputAction();
         this.actions[actionName] = action;
 
         if (options?.key) {
             if (Array.isArray(options.key)) {
-                options.key.forEach(key => {
+                options.key.forEach((key) => {
                     this.keyBindings[key] = actionName;
                 });
             } else {
@@ -103,7 +125,7 @@ export class InputSystem extends Singleton<InputSystem>() {
     /**
      * Remap an existing action to a new keyboard key
      * 将现有动作重新映射到新的键盘按键
-     * 
+     *
      * @param actionName - Name of the action to remap / 要重映射的动作名称
      * @param newKey - New keyboard key to bind / 要绑定的新键盘按键
      */
@@ -139,26 +161,33 @@ export class InputSystem extends Singleton<InputSystem>() {
         return this._mouseDelta.clone();
     }
 
+    public get wheelDelta(): Vector3 {
+        return this._wheelDelta.clone();
+    }
+
     /**
      * Get the touch points
      * 获取触控点
      * @returns A Map containing touch points / 包含触控点的 Map
      */
-    public get touchPoints(): Map<number, { position: Vector2; delta: Vector2; lastPosition: Vector2 }> {
+    public get touchPoints(): Map<
+        number,
+        { position: Vector2; delta: Vector2; lastPosition: Vector2 }
+    > {
         return this._touchPoints;
     }
 
     /**
      * Set up input event listeners for keyboard, mouse, and gamepad
      * 设置键盘、鼠标和游戏手柄的输入事件监听器
-     * 
+     *
      * This method initializes all necessary event observers:
      * 此方法初始化所有必要的事件观察器：
      * - Keyboard events for key press/release / 按键按下/释放的键盘事件
      * - Mouse events for position and movement / 鼠标位置和移动的鼠标事件
      * - Gamepad state updates / 游戏手柄状态更新
      */
-    private setupInputListeners(): void {  
+    private setupInputListeners(): void {
         if (!this.scene) return;
         // 键盘输入监听 / Keyboard input listener
         this.scene.onKeyboardObservable.add((kbInfo) => {
@@ -171,72 +200,112 @@ export class InputSystem extends Singleton<InputSystem>() {
                 this.activeKeys.delete(key);
                 this.triggerKeyAction(key, kbInfo.type);
             }
-            
+
             this.checkKeyCombinations();
         });
 
         // 鼠标输入监听 / Mouse input listener
         this.scene.onPointerObservable.add((pointerInfo) => {
-            const event = pointerInfo.event as IPointerEvent;
-            const { clientX: x, clientY: y, inputIndex, pointerId=0, movementX, movementY } = event;
+            const event = pointerInfo.event;
             const type = pointerInfo.type;
 
-            // 更新全局鼠标状态 / Update global mouse state
-            this._mousePosition.x = x;
-            this._mousePosition.y = y;
-            if (type === PointerEventTypes.POINTERMOVE || type === PointerEventTypes.POINTERDOWN) {
+            // 根据事件类型提取不同的参数 / Extract different parameters based on event type
+            if (type === PointerEventTypes.POINTERWHEEL) {
+                // 鼠标滚轮事件处理 / Mouse wheel event handling
+                const {
+                    clientX: x = 0,
+                    clientY: y = 0,
+                    inputIndex,
+                    deltaX = 0,
+                    deltaY = 0,
+                    deltaZ = 0,
+                } = event as IWheelEvent;
+
+                // Wheel events don't have pointerId, so use default value
+                const pointerId = 0;
+
+                // 更新鼠标位置（滚轮事件也可能有位置信息）/ Update mouse position (wheel events may also have position info)
+                this._mousePosition.x = x;
+                this._mousePosition.y = y;
+
+                this._wheelDelta = new Vector3(deltaX, deltaY, deltaZ);
+
+                this.triggerTouchAction(
+                    inputIndex,
+                    type,
+                    pointerId,
+                    this._mousePosition,
+                );
+            } else if (type) {
+                // 普通指针事件处理 / Normal pointer event handling
+                const {
+                    clientX: x,
+                    clientY: y,
+                    inputIndex,
+                    pointerId = 0,
+                    movementX,
+                    movementY,
+                } = event as IPointerEvent;
+
+                // 更新全局鼠标状态 / Update global mouse state
+                this._mousePosition.x = x;
+                this._mousePosition.y = y;
                 this._mouseDelta.x = movementX;
                 this._mouseDelta.y = movementY;
-            } else if (type === PointerEventTypes.POINTERUP) {
-                this.lastMousePosition = this._mousePosition.clone();
-                this._mouseDelta = Vector2.Zero();
-            }
 
-            switch (type) {
-                case PointerEventTypes.POINTERDOWN:
-                    // 添加触控点 / Add touch point
-                    this._touchPoints.set(pointerId, {
-                        position: new Vector2(x, y),
-                        delta: Vector2.Zero(),
-                        lastPosition: new Vector2(x, y)
-                    });
-                    this.triggerTouchAction(inputIndex, type, pointerId, new Vector2(x, y));
+                switch (type) {
+                    case PointerEventTypes.POINTERDOWN:
+                        // 添加触控点 / Add touch point
+                        this._touchPoints.set(pointerId, {
+                            position: new Vector2(x, y),
+                            delta: Vector2.Zero(),
+                            lastPosition: new Vector2(x, y),
+                        });
+                        this.triggerTouchAction(
+                            inputIndex,
+                            type,
+                            pointerId,
+                            new Vector2(x, y),
+                        );
+                        break;
 
-                    break;
+                    case PointerEventTypes.POINTERMOVE:
+                        // 多指触控处理 / Multi-touch handling
+                        if (this._touchPoints.has(pointerId)) {
+                            const tp = this._touchPoints.get(pointerId)!;
+                            tp.delta.x = x - tp.lastPosition.x;
+                            tp.delta.y = y - tp.lastPosition.y;
+                            tp.position.x = x;
+                            tp.position.y = y;
+                            tp.lastPosition = tp.position.clone();
+                        }
+                        this.triggerTouchAction(
+                            inputIndex,
+                            type,
+                            pointerId,
+                            new Vector2(x, y),
+                        );
+                        break;
 
-                case PointerEventTypes.POINTERMOVE:
-                    // 多指触控处理 / Multi-touch handling
-                    if (this._touchPoints.has(pointerId)) {
-                        const tp = this._touchPoints.get(pointerId)!;
-                        tp.delta.x = x - tp.lastPosition.x;
-                        tp.delta.y = y - tp.lastPosition.y;
-                        tp.position.x = x;
-                        tp.position.y = y;
-                        tp.lastPosition = tp.position.clone();
-                    }
-                    this.triggerTouchAction(inputIndex, type, pointerId, new Vector2(x, y));
+                    case PointerEventTypes.POINTERUP:
+                        // 鼠标按钮释放 / Mouse button release
+                        // 恢复调用 triggerTouchAction 以便分发 MOUSE_UP 事件
+                        this.triggerTouchAction(
+                            inputIndex,
+                            type,
+                            pointerId,
+                            new Vector2(x, y),
+                        );
+                        // 恢复移除触控点
+                        this._touchPoints.delete(pointerId);
+                        this._mouseDelta = Vector2.Zero();
+                        break;
 
-                    break;
-
-                case PointerEventTypes.POINTERUP:
-                    // 鼠标按钮释放 / Mouse button release
-                    // 恢复调用 triggerTouchAction 以便分发 MOUSE_UP 事件
-                    this.triggerTouchAction(inputIndex, type, pointerId, new Vector2(x, y));
-                    // 恢复移除触控点
-                    this._touchPoints.delete(pointerId);
-                    this.lastMousePosition = this._mousePosition.clone(); // Use _mousePosition which is updated
-                    this._mouseDelta = Vector2.Zero();
-                    break;
-
-                case PointerEventTypes.POINTERWHEEL:
-                    // 鼠标滚轮事件 / Mouse wheel event
-                    this.triggerTouchAction(inputIndex, type, pointerId, new Vector2(x, y));
-                    break;
-                default:
-                    break;
+                    default:
+                        break;
+                }
             }
         });
-                // 鼠标输入监听 / Mouse input listener
 
         // 游戏手柄监听 / Gamepad listener
         this.scene.onBeforeRenderObservable.add(() => {
@@ -247,32 +316,41 @@ export class InputSystem extends Singleton<InputSystem>() {
     /**
      * Trigger an action based on key press state
      * 根据按键状态触发动作
-     * 
+     *
      * @param key - The keyboard key that was pressed/released / 被按下/释放的键盘按键
      * @param keyType - The type of keyboard event (KEYDOWN/KEYUP) / 键盘事件类型（按下/释放）
      */
     private triggerKeyAction(key: string, keyType: KeyboardEventTypes): void {
         const actionName = this.keyBindings[key];
         if (actionName && this.actions[actionName]) {
-            this.actions[actionName].trigger({ eventType: keyType === KeyboardEventTypes.KEYDOWN ? 
-                InputEventType.KEYDOWN : InputEventType.KEYUP });
+            this.actions[actionName].trigger({
+                eventType:
+                    keyType === KeyboardEventTypes.KEYDOWN
+                        ? InputEventType.KEYDOWN
+                        : InputEventType.KEYUP,
+            });
         }
     }
 
     /**
      * Trigger an action based on touch event state
      * 根据触控事件状态触发动作
-     * 
+     *
      * @param buttonid - The button ID of the touch event / 触控事件的按钮ID
      * @param touchType - The type of touch event (POINTERDOWN/POINTERUP/POINTERMOVE/POINTERWHEEL) / 触控事件类型（按下/释放/移动/滚轮）
      * @param pointerId - The ID of the pointer (mouse/touch) / 指针的ID（鼠标/触控）
      * @param position - The position of the touch event / 触控事件的位置
      */
 
-    private triggerTouchAction(buttonid: number, touchType: number, pointerId: number, position: Vector2): void {
+    private triggerTouchAction(
+        buttonid: number,
+        touchType: number,
+        pointerId: number,
+        position: Vector2,
+    ): void {
         const pointerInputMap: { [buttonid: number]: string } = {
             [PointerInput.LeftClick]: "MOUSE_LEFT",
-            [PointerInput.MiddleClick]: "MOUSE_MIDDLE", 
+            [PointerInput.MiddleClick]: "MOUSE_MIDDLE",
             [PointerInput.RightClick]: "MOUSE_RIGHT",
             [PointerInput.BrowserBack]: "BROWSER_BACK",
             [PointerInput.BrowserForward]: "BROWSER_FORWARD",
@@ -289,14 +367,18 @@ export class InputSystem extends Singleton<InputSystem>() {
         const key = pointerInputMap[buttonid];
         const actionName = this.keyBindings[key];
         if (actionName && this.actions[actionName]) {
-            this.actions[actionName].trigger({ eventType: (pointerEventTypeMap[touchType]), value: {position:position, key:key}, id: pointerId });
+            this.actions[actionName].trigger({
+                eventType: pointerEventTypeMap[touchType],
+                value: { position: position, key: key },
+                id: pointerId,
+            });
         }
     }
-    
+
     /**
      * Check for key combinations (e.g., Shift + W for running)
      * 检查按键组合（例如：Shift + W 用于奔跑）
-     * 
+     *
      * This method handles complex input combinations that require multiple keys
      * 此方法处理需要多个按键的复杂输入组合
      */
@@ -312,7 +394,7 @@ export class InputSystem extends Singleton<InputSystem>() {
     /**
      * Update gamepad input state
      * 更新游戏手柄输入状态
-     * 
+     *
      * This method processes:
      * 此方法处理：
      * - Gamepad button states / 游戏手柄按钮状态
@@ -320,19 +402,23 @@ export class InputSystem extends Singleton<InputSystem>() {
      */
     private updateGamepads(): void {
         const gamepads = navigator.getGamepads();
-        
+
         for (const gamepad of gamepads) {
             if (!gamepad) continue;
-            
+
             // 处理游戏手柄按钮 / Handle gamepad buttons
             for (let i = 0; i < gamepad.buttons.length; i++) {
                 const actionName = this.gamepadButtonBindings[i];
                 if (actionName && this.actions[actionName]) {
                     const isPressed = gamepad.buttons[i].pressed;
-                    this.actions[actionName].trigger({ eventType: isPressed ? InputEventType.MOUSE_DOWN : InputEventType.MOUSE_UP });
+                    this.actions[actionName].trigger({
+                        eventType: isPressed
+                            ? InputEventType.MOUSE_DOWN
+                            : InputEventType.MOUSE_UP,
+                    });
                 }
             }
-            
+
             // 处理游戏手柄摇杆 / Handle gamepad axes
             for (let i = 0; i < gamepad.axes.length; i++) {
                 const actionName = this.gamepadAxisBindings[i];
@@ -340,14 +426,14 @@ export class InputSystem extends Singleton<InputSystem>() {
                     const value = gamepad.axes[i];
                     // 添加死区处理 / Add deadzone handling
                     if (Math.abs(value) > 0.1) {
-                        this.actions[actionName].trigger({ 
+                        this.actions[actionName].trigger({
                             eventType: InputEventType.MOUSE_DOWN,
-                            value: value 
+                            value: value,
                         });
                     } else {
-                        this.actions[actionName].trigger({ 
+                        this.actions[actionName].trigger({
                             eventType: InputEventType.MOUSE_UP,
-                            value: 0 
+                            value: 0,
                         });
                     }
                 }
@@ -358,7 +444,7 @@ export class InputSystem extends Singleton<InputSystem>() {
     /**
      * Clean up and dispose of the input system
      * 清理并释放输入系统
-     * 
+     *
      * Resets all input states and clears stored data
      * 重置所有输入状态并清除存储的数据
      */
@@ -375,7 +461,9 @@ export class InputSystem extends Singleton<InputSystem>() {
      * @param pointerId 触控点ID / Touch point ID
      * @returns 触控点数据，如果不存在则返回null / Touch point data, or null if not exists
      */
-    public getTouchPoint(pointerId: number): { position: Vector2; delta: Vector2; lastPosition: Vector2 } | null {
+    public getTouchPoint(
+        pointerId: number,
+    ): { position: Vector2; delta: Vector2; lastPosition: Vector2 } | null {
         return this._touchPoints.get(pointerId) || null;
     }
 
