@@ -17,7 +17,7 @@ import type { IGameEntity } from "../interface/IGameEntity";
 import { BaseController } from "./BaseController";
 import { AnimationState } from "../components/animation/AnimationState";
 import { EventEmitter } from "../common/EventEmitter";
-import { InputEventType } from "../input/InputAction";
+import { InputEventType, type InputActionEvent } from "../input/InputAction";
 import type { FollowCameraComponent } from "../components/camera/FollowCameraComponent";
 /**
  * 玩家控制器 / Player controller
@@ -247,18 +247,10 @@ export class PlayerController extends BaseController {
      * @param eventType - The type of the input event / 输入事件类型
      */
     public onMouseLeft(eventType: InputEventType): void {
-<<<<<<< HEAD
-        console.log("attack1",this.isAttack);
-        if(this.isAttack) return;
-        if(!this.playerEntity.movementComponent?.isGrounded!) return;
-        this.isAttack = true;
-        if(eventType === InputEventType.MOUSE_DOWN){
-=======
         if (this.isAttack) return;
         if (!this.playerEntity.movementComponent?.isGrounded) return;
         if (eventType === InputEventType.MOUSE_DOWN) {
             this.isAttack = true;
->>>>>>> remotes/origin/dev_surfish
             this.playerEntity.animatorComponent?.setState("attack1");
             setTimeout(() => {
                 this.isAttack = false;
@@ -333,6 +325,33 @@ export class PlayerController extends BaseController {
     }
 
     /**
+     * 鼠标移动事件 / Mouse move event
+     * @param event - The event object / 事件对象
+     */
+    private onMouseMove(event: any): void {
+        const delta = event.delta as Vector2;
+        if (!delta) return;
+        (
+            this.playerEntity.cameraComponent as FollowCameraComponent
+        ).updateCameraForward(delta);
+        (
+            this.playerEntity.cameraComponent as FollowCameraComponent
+        ).updateCameraHeight(delta.y);
+    }
+
+    /**
+     * 鼠标滚轮事件 / Mouse wheel event
+     * @param event - The event object / 事件对象
+     */
+    private onMouseWheel(event: any): void {
+        const delta = event.delta as Vector3;
+        if (!delta) return;
+        (
+            this.playerEntity.cameraComponent as FollowCameraComponent
+        ).updateCameraRadius(delta.y);
+    }
+
+    /**
      * 绑定事件 / Bind event
      */
     public bindEvent(): void {
@@ -343,18 +362,10 @@ export class PlayerController extends BaseController {
             this.onMouseRight(eventType);
         });
         EventEmitter.instance.on("MouseMove", (event) => {
-            const delta = event.delta as Vector2;
-            if (!delta) return;
-            (
-                this.playerEntity.cameraComponent as FollowCameraComponent
-            ).updateCameraForward(delta);
+            this.onMouseMove(event);
         });
         EventEmitter.instance.on("MouseWheel", (event) => {
-            const delta = event.delta as Vector3;
-            if (!delta) return;
-            (
-                this.playerEntity.cameraComponent as FollowCameraComponent
-            ).updateCameraRadius(delta.y);
+            this.onMouseWheel(event);
         });
     }
 
@@ -432,14 +443,6 @@ export class PlayerController extends BaseController {
         const direction =
             this.playerEntity.playerInputComponent?.inputDirection;
         const camera = this.playerEntity.cameraComponent?.getCamera();
-<<<<<<< HEAD
-        if(camera && direction){
-            let moveDirection = camera.getDirection(Vector3.Forward()).scale(direction.z).add
-                (camera.getDirection(Vector3.Right()).scale(direction.x));
-            // 设置移动方向的y轴为0，去除移动方向的y轴 remove the y axis of the move direction
-            moveDirection.y = 0;
-            this.playerEntity.movementComponent?.setMoveDirection( moveDirection.normalize());
-=======
         if (camera && direction) {
             const moveDirection = camera
                 .getDirection(Vector3.Forward())
@@ -450,7 +453,6 @@ export class PlayerController extends BaseController {
             this.playerEntity.movementComponent?.setMoveDirection(
                 moveDirection.normalize(),
             );
->>>>>>> remotes/origin/dev_surfish
         }
     }
 }
