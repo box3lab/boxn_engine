@@ -560,13 +560,13 @@ export class TestScene extends BaseScene {
         test.textVerticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
         test.position = new Vector2(0,128);
         
-        const scrollView = new UIScrollView("scrollView",1,1);
-        mainPanel.addChild(scrollView);
-        scrollView.width = "500px";
-        scrollView.height = "500px";
-        scrollView.position = new Vector2(0,128);
-        scrollView.contentRectWidth = "900px";
-        scrollView.contentRectHeight = "1200px";
+        // const scrollView = new UIScrollView("scrollView",1,1);
+        // mainPanel.addChild(scrollView);
+        // scrollView.width = "500px";
+        // scrollView.height = "500px";
+        // scrollView.position = new Vector2(0,128);
+        // scrollView.contentRectWidth = "900px";
+        // scrollView.contentRectHeight = "1200px";
     }
     
     /**

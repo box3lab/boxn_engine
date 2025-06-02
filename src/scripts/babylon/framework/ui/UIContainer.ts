@@ -1,9 +1,6 @@
 import type { Scene } from "@babylonjs/core";
 import { UINode } from "./UINode";
-import { Container, Control } from "@babylonjs/gui";
-import { UIImage } from "./UIImage";
-import { UIMgr } from "../mgr/UIMgr";
-import * as GUI from "@babylonjs/gui";
+import { Container } from "@babylonjs/gui";
 export class UIContainer extends UINode {
     protected _children: UINode[] = [];
     protected _containerControl: Container;

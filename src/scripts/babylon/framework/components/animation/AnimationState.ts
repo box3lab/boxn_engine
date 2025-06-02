@@ -6,9 +6,21 @@ import { BaseAnimState } from "./BaseAnimState";
  * 用于处理单个动画片段 / Used for handling single animation clips
  */
 export class AnimationState extends BaseAnimState {
+    /**
+     * 动画片段名称 / Animation clip name
+     */
     private clip: string;
+    /**
+     * 动画速度 / Animation speed
+     */
     private speed: number;
+    /**
+     * 是否循环 / Whether to loop
+     */ 
     private isLoop: boolean;
+    /**
+     * 当前动画组 / Current animation group
+     */
     private currentAnimationGroup: AnimationGroup | undefined;
 
     constructor(

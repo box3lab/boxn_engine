@@ -159,10 +159,11 @@ export class PlayerController extends BaseController {
      * @param eventType - The type of the input event / 输入事件类型
      */
     public onMouseLeft(eventType: InputEventType): void {
+        console.log("attack1",this.isAttack);
         if(this.isAttack) return;
-        if(!this.playerEntity.movementComponent?.isGrounded) return;
+        if(!this.playerEntity.movementComponent?.isGrounded!) return;
+        this.isAttack = true;
         if(eventType === InputEventType.MOUSE_DOWN){
-            this.isAttack = true;
             this.playerEntity.animatorComponent?.setState("attack1");
             setTimeout(() => {
                 this.isAttack = false;
@@ -294,11 +295,11 @@ export class PlayerController extends BaseController {
         const direction = this.playerEntity.playerInputComponent?.inputDirection;
         const camera = this.playerEntity.cameraComponent?.getCamera();
         if(camera && direction){
-            const moveDirection = camera.getDirection(Vector3.Forward()).scale(direction.z).add
+            let moveDirection = camera.getDirection(Vector3.Forward()).scale(direction.z).add
                 (camera.getDirection(Vector3.Right()).scale(direction.x));
             // 设置移动方向的y轴为0，去除移动方向的y轴 remove the y axis of the move direction
             moveDirection.y = 0;
-            this.playerEntity.movementComponent?.setMoveDirection(moveDirection.normalize());
+            this.playerEntity.movementComponent?.setMoveDirection( moveDirection.normalize());
         }
     }
 }
