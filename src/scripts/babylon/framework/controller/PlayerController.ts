@@ -336,7 +336,8 @@ export class PlayerController extends BaseController {
         ).updateCameraForward(delta);
         (
             this.playerEntity.cameraComponent as FollowCameraComponent
-        ).updateCameraHeight(delta.y);
+        ).updateCameraHeight(-delta.y);
+        //默认是反转y轴
     }
 
     /**

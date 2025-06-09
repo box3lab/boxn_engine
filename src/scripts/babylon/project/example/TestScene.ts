@@ -53,11 +53,13 @@ import { GLBAsset } from "../../framework/asset/GLBAsset";
 import { UINode } from "../../framework/ui/UINode";
 import { Control, TextBlock } from "@babylonjs/gui";
 import { UIPanel } from "../../framework/ui/UIPanel";
+import { UIProgress } from "../../framework/ui/UIProgress";
 import { UIText } from "../../framework/ui/UIText";
 import { UIButton } from "../../framework/ui/UIButton";
 import { UIMgr } from "../../framework/mgr/UIMgr";
 import { UIImage } from "../../framework/ui/UIImage";
 import { UIScrollView } from "../../framework/ui/UIScrollView";
+import { UISlider } from "../../framework/ui/UISlider";
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
  */
@@ -559,7 +561,38 @@ export class TestScene extends BaseScene {
         test.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
         test.textVerticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
         test.position = new Vector2(0,128);
-        
+        const healthBar = new UIProgress("HealthBar", 100, true);
+
+        // Set colors for health bar
+        healthBar.setColors("#00ff00", "#ffff00", "#ff0000", 0.5, 0.25);
+        healthBar.position = new Vector2(0,256);
+        // Update progress
+        healthBar.setValue(75); // 75/100
+
+        // Customize appearance
+        healthBar.setSize(300, 25);
+        healthBar.setTextFormat("{value}/{max} ({percentage}%)");
+        mainPanel.addChild(healthBar);
+        // 创建音量滑块
+        const volumeSlider = new UISlider("VolumeSlider", 0, 100, 75, true);
+        volumeSlider.position = new Vector2(0,300);
+        // 设置样式
+        volumeSlider.setSize("250px", "30px");
+        volumeSlider.setColors("#333333", "#00ff00");
+        volumeSlider.setTextFormat("音量: {value}%");
+
+        // 设置回调
+        volumeSlider.setOnValueChanged((value) => {
+            console.log("音量设置为:", value);
+            // 更新游戏音量
+        });
+        mainPanel.addChild(volumeSlider);
+        // 创建亮度滑块
+        const brightnessSlider = new UISlider("BrightnessSlider", 0, 1, 0.8, true);
+        brightnessSlider.position = new Vector2(0,350);
+        brightnessSlider.setStep(0.1);
+        brightnessSlider.setTextFormat("亮度: {percentage}%");
+        mainPanel.addChild(brightnessSlider);
         // const scrollView = new UIScrollView("scrollView",1,1);
         // mainPanel.addChild(scrollView);
         // scrollView.width = "500px";

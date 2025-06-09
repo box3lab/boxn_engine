@@ -17,6 +17,7 @@ export class PointerMgr extends Singleton<PointerMgr>() {
     }
 
     requestPointerLock() {
+        
         if (!this.canvasEl) {
             console.error("Canvas element is not initialized.");
             return;
