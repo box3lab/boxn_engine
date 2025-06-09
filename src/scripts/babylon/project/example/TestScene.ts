@@ -1,10 +1,10 @@
-import { 
-    Scene, 
-    Engine, 
-    Vector3, 
-    HemisphericLight, 
-    MeshBuilder, 
-    StandardMaterial, 
+import {
+    Scene,
+    Engine,
+    Vector3,
+    HemisphericLight,
+    MeshBuilder,
+    StandardMaterial,
     Color3,
     ArcRotateCamera,
     // Mesh
@@ -53,11 +53,16 @@ import { GLBAsset } from "../../framework/asset/GLBAsset";
 import { UINode } from "../../framework/ui/UINode";
 import { Control, TextBlock } from "@babylonjs/gui";
 import { UIPanel } from "../../framework/ui/UIPanel";
+<<<<<<< HEAD
 import { UIText } from "../../framework/ui/UIText";
 import { UIButton } from "../../framework/ui/UIButton";
 import { UIMgr } from "../../framework/mgr/UIMgr";
 import { UIImage } from "../../framework/ui/UIImage";
 import { UIScrollView } from "../../framework/ui/UIScrollView";
+=======
+
+import { ProgressBarComponent } from "../../framework/components/ui/ProgressBarComponent";
+>>>>>>> LF
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
  */
@@ -74,13 +79,13 @@ export class TestScene extends BaseScene {
     // private touchCoordsText: GUI.TextBlock | undefined; // Replaced for multi-touch
     // private touchDot: GUI.Ellipse | undefined; // Replaced for multi-touch
     private touchControls: Map<number, { textBlock: GUI.TextBlock; dot: GUI.Ellipse }> = new Map();
-    
+
     constructor(id: string, name: string, engine: Engine, priority: number = 0) {
         super(id, name, engine, priority);
-        
+
         // 设置场景背景色
         this.scene.clearColor = new Color4(0.1, 0.1, 0.1, 1);
-        
+
         // 设置环境光
         const envHelper = this.scene.createDefaultEnvironment({
             createGround: false,
@@ -119,12 +124,12 @@ export class TestScene extends BaseScene {
         });
 
 
-        
+
         // // Start the render loop
         // this.engine.runRenderLoop(() => {
         //     this.scene.render();
         // });
-        
+
         // // Handle browser resize
         // window.addEventListener('resize', () => {
         //     this.engine.resize();
@@ -144,7 +149,7 @@ export class TestScene extends BaseScene {
         }
     }
 
-  
+
     /**
      * Get all entities in the scene
      * 获取场景中的所有实体
@@ -159,49 +164,49 @@ export class TestScene extends BaseScene {
     private setupCamera(): void {
         // Create a camera for the scene
         this.camera = new ArcRotateCamera(
-            "camera", 
-            Math.PI / 2, 
-            Math.PI / 3, 
-            10, 
-            Vector3.Zero(), 
+            "camera",
+            Math.PI / 2,
+            Math.PI / 3,
+            10,
+            Vector3.Zero(),
             this.scene
         );
-        
+
         // Camera settings
         this.camera.lowerRadiusLimit = 100;
         this.camera.upperRadiusLimit = 100;
         this.camera.wheelDeltaPercentage = 0.01;
         this.camera.position = new Vector3(0, 50, -50);
     }
-    
+
     /**
      * Setup the lights for the scene
      */
     private setupLights(): void {
         // Create a basic light
         const light = new HemisphericLight(
-            "light", 
-            new Vector3(0, 1, 0), 
+            "light",
+            new Vector3(0, 1, 0),
             this.scene
         );
         light.intensity = 0.7;
     }
-    
+
     /**
      * Create a ground for the scene
      */
     private createGround(): void {
         // Create a ground
         // const ground = MeshBuilder.CreateGround(
-        //     "ground", 
-        //     { width: 20, height: 20 }, 
+        //     "ground",
+        //     { width: 20, height: 20 },
         //     this.scene
         // );
-        
+
         // // Create material for the ground
         // const groundMaterial = new StandardMaterial("groundMaterial", this.scene);
         // groundMaterial.diffuseColor = new Color3(0.5, 0.5, 0.5);
-        
+
         // // Apply material to ground
         // ground.material = groundMaterial;
 
@@ -213,35 +218,35 @@ export class TestScene extends BaseScene {
         //     this.scene
         // );
 
-        // const groundAggregate = new PhysicsAggregate(ground, 
+        // const groundAggregate = new PhysicsAggregate(ground,
         //     PhysicsShapeType.BOX, { mass: 0, restitution:0.75, friction:0.5, mesh:ground}, this.scene);
     }
-    
+
     /**
      * Create a panel for the scene
      */
     private createPanel(): void {
         // Create a panel
         const panel = MeshBuilder.CreateBox(
-            "panel", 
-            { width: 500, height: 1, depth: 500 }, 
+            "panel",
+            { width: 500, height: 1, depth: 500 },
             this.scene
         );
-        
+
         // Position panel above ground
         panel.position.y = 0;
-        
+
         // Create PBR material for the panel
         const panelMaterial = new PBRMaterial("panelMaterial", this.scene);
         panelMaterial.albedoColor = new Color3(0.2, 0.4, 0.8);
         panelMaterial.metallic = 0.0;
         panelMaterial.roughness = 0.8;
         panelMaterial.environmentIntensity = 1.0;
-        
+
         // Apply material to panel
         panel.material = panelMaterial;
 
-        const panelAggregate = new PhysicsAggregate(panel, 
+        const panelAggregate = new PhysicsAggregate(panel,
             PhysicsShapeType.BOX, { mass: 0, restitution:0.1, friction:2, mesh:panel}, this.scene);
         // panelAggregate.body.setEventMask(0x1);
 
@@ -256,10 +261,13 @@ export class TestScene extends BaseScene {
         // this.advancedTexture?.addControl(image);
     }
 
+<<<<<<< HEAD
     /**
      * Creates and displays a test image using GUI
      */
     
+=======
+>>>>>>> LF
     /**
      * Create character and setup third person controller
      */
@@ -277,7 +285,7 @@ export class TestScene extends BaseScene {
         //     { height: 8, width: 5, depth: 5},
         //     this.scene
         // );
-        
+
         // // Create material for the cube
         // const cubeMaterial = new StandardMaterial("cubeMaterial", this.scene);
         // cubeMaterial.diffuseColor = new Color3(1, 0, 0); // Red color
@@ -286,7 +294,7 @@ export class TestScene extends BaseScene {
         // cube.parent = this.root;
         // cube.position = new Vector3(0, 0, 0);
 
-      
+
         // // cube.parent = this.root;
 
         // const cube2 = MeshBuilder.CreateBox(
@@ -294,7 +302,7 @@ export class TestScene extends BaseScene {
         //     { height: 5, width: 5, depth: 5},
         //     this.scene
         // );
-        
+
         // // Create material for the cube
         // const cubeMaterial2 = new StandardMaterial("cubeMaterial2", this.scene);
         // cubeMaterial2.diffuseColor = new Color3(0, 0, 0); // Red color
@@ -311,17 +319,17 @@ export class TestScene extends BaseScene {
         //     Quaternion.Identity(),
         //     new Vector3(5, 5, 5),
         //     this.scene);
- 
-        // // const cubeAggregate = new PhysicsAggregate(cube, 
+
+        // // const cubeAggregate = new PhysicsAggregate(cube,
         // //     PhysicsShapeType.BOX, { mass: 1, restitution:0.75, friction:0.5, mesh:cube}, this.scene);
-        // // const cubeAggregate2 = new PhysicsAggregate(cube2, 
+        // // const cubeAggregate2 = new PhysicsAggregate(cube2,
         // //     PhysicsShapeType.BOX, { mass: 1, restitution:0.75, friction:0.5, mesh:cube2}, this.scene);
 
         // const shape = new PhysicsShapeContainer(this.scene);
         // shape.addChildFromParent(this.root,cubeShape,cube);
         // shape.addChildFromParent(this.root,cubeShape2,cube2);
 
-        // const body = new PhysicsBody(this.root, 
+        // const body = new PhysicsBody(this.root,
         //     PhysicsMotionType.DYNAMIC, false, this.scene);
         // shape.material = {friction: 0.2, restitution: 0};
         // body.shape = shape;
@@ -329,7 +337,7 @@ export class TestScene extends BaseScene {
         // body.setMassProperties ({
         //     mass: 1,
         // });
-        
+
         // body.setCollisionCallbackEnabled(true);
         // body.shape.isTrigger = false;
         // const observable = body.getCollisionObservable();
@@ -396,7 +404,7 @@ export class TestScene extends BaseScene {
         //         // if (rayResult.pickedMesh && rayResult.pickedMesh.name === "enemy") {
         //         //     (rayResult.pickedMesh as any).takeDamage(damageAmount); // 假设敌人有takeDamage方法
         //         // }
-                
+
         //         // if (pickResult.pickedPoint) {
         //         //     createExplosionEffect(pickResult.pickedPoint);
         //         // }
@@ -414,14 +422,14 @@ export class TestScene extends BaseScene {
         //         // if (rayResult.pickedMesh && rayResult.pickedMesh.name === "enemy") {
         //         //     (rayResult.pickedMesh as any).takeDamage(damageAmount); // 假设敌人有takeDamage方法
         //         // }
-                
+
         //         // if (pickResult.pickedPoint) {
         //         //     createExplosionEffect(pickResult.pickedPoint);
         //         // }
         //     }
         // };
         // cube3.parent = this.root;
-      
+
         // You have two options:
         // Body-specific callback
         // const observable = cubeAggregate.body.getCollisionObservable();
@@ -433,13 +441,51 @@ export class TestScene extends BaseScene {
         this.entity = new PlayerEntity("player",this);
         this.entity.root.root.position = new Vector3(0, 0, 0);
 
-        // const mesh = await ResMgr.instance.loadResource("./glb/test1.glb", GLBAsset, 
+        console.log("Player entity created at position:", this.entity.root.root.position);
+        console.log("Player entity world matrix:", this.entity.root.root.getWorldMatrix());
+
+        // 为玩家添加进度条组件
+        const progressBar = new ProgressBarComponent("PlayerProgressBar", 100, new Vector3(0, 2.5, 0));
+        const obj = new GameEntity("ProgressBarEntity",this);
+        obj.addComponent("ProgressBarComponent", progressBar);
+
+
+        console.log("Added ProgressBarComponent to player entity");
+
+        // 演示进度条功能
+        let damageTimer = 0;
+        const originalUpdate = this.entity.update.bind(this.entity);
+        this.entity.update = (deltaTime: number) => {
+            originalUpdate(deltaTime);
+
+            const progressBar = this.entity!.getComponent("ProgressBarComponent") as ProgressBarComponent;
+            if (!progressBar) return;
+
+            // 每3秒受到伤害（稍微慢一点，便于观察）
+            damageTimer += deltaTime;
+            if (damageTimer >= 3) {
+                damageTimer = 0;
+
+                if (progressBar.getValue() > 0) {
+                    progressBar.decreaseValue(10);
+                    console.log(`玩家受到伤害！当前数值: ${progressBar.getValue()}/${progressBar.getMaxValue()}`);
+
+                    // 数值为0时重置
+                    if (progressBar.getValue() <= 0) {
+                        console.log("玩家死亡，重置数值！");
+                        progressBar.setValue(100);
+                    }
+                }
+            }
+        };
+
+        // const mesh = await ResMgr.instance.loadResource("./glb/test1.glb", GLBAsset,
         //     {
         //         onProgress: (progress) => {
         //             console.log("progress",progress);
         //             if(progress === 1){
         //                 // const root = new TransformNode("root",this.scene);
-                       
+
         //                 // // @ts-ignore
         //                 // mesh.data?.addAllToScene(this.scene);
         //                 // root.position = new Vector3(5, 0, 0);
@@ -483,20 +529,20 @@ export class TestScene extends BaseScene {
         // characterController.maxAcceleration = 10;
 
         const cubeMaterial = new StandardMaterial("cubeMaterial3", this.scene);
-        cubeMaterial.diffuseColor = new Color3(1,0,0);
-      
+        cubeMaterial.diffuseColor = new Color3(1,1,1);
+
         const cube1 = MeshBuilder.CreateBox("cube1",{width:1,height:1,depth:1},this.scene);
         cube1.position = new Vector3(1,0.5,1);
         cube1.material = cubeMaterial;
 
-        const cube1Aggregate = new PhysicsAggregate(cube1, 
+        const cube1Aggregate = new PhysicsAggregate(cube1,
             PhysicsShapeType.BOX, { mass: 100, restitution:0.5, friction:0.7,startAsleep:false, mesh:cube1}, this.scene);
 
         const cube2 = MeshBuilder.CreateBox("cube2",{width:1,height:1,depth:1},this.scene);
         cube2.position = new Vector3(-1,0.5,1);
         cube2.material = cubeMaterial;
 
-        const cube2Aggregate = new PhysicsAggregate(cube2, 
+        const cube2Aggregate = new PhysicsAggregate(cube2,
             PhysicsShapeType.BOX, { mass: 100, restitution:0.5, friction:0.7,startAsleep:false, mesh:cube2}, this.scene);
 
 
@@ -504,27 +550,28 @@ export class TestScene extends BaseScene {
         cube3.position = new Vector3(0,0.5,1);
         cube3.material = cubeMaterial;
 
-        const cube3Aggregate = new PhysicsAggregate(cube3, 
+        const cube3Aggregate = new PhysicsAggregate(cube3,
             PhysicsShapeType.BOX, { mass: 100, restitution:0, friction:0.7,startAsleep:false, mesh:cube3}, this.scene);
 
         const cube4 = MeshBuilder.CreateBox("cube4",{width:1,height:1,depth:1},this.scene);
         cube4.position = new Vector3(0,1.5,1);
         cube4.material = cubeMaterial;
 
-        const cube4Aggregate = new PhysicsAggregate(cube4, 
+        const cube4Aggregate = new PhysicsAggregate(cube4,
             PhysicsShapeType.BOX, { mass: 100, restitution:0, friction:0.7,startAsleep:false, mesh:cube4}, this.scene);
-        
+
         const cubeMaterial2 = new StandardMaterial("cubeMaterial3", this.scene);
         cubeMaterial2.diffuseColor = new Color3(0,1,0);
 
         const cube5 = MeshBuilder.CreateBox("cube5",{width:1,height:1,depth:1},this.scene);
         cube5.position = new Vector3(2,1,1);
         cube5.material = cubeMaterial2;
-        
-        const cube5Aggregate = new PhysicsAggregate(cube5, 
-            PhysicsShapeType.BOX, { mass: 100, restitution:0, friction:0.1,startAsleep:false, mesh:cube5}, this.scene); 
+
+        const cube5Aggregate = new PhysicsAggregate(cube5,
+            PhysicsShapeType.BOX, { mass: 100, restitution:0, friction:0.1,startAsleep:false, mesh:cube5}, this.scene);
         cube5Aggregate.body.setMotionType(PhysicsMotionType.STATIC);
 
+<<<<<<< HEAD
         // const basePanel = new UIPanel(this.scene,"basePanel");
         // basePanel.setPosition(0,0);
         // basePanel.setWidth("1000px");
@@ -567,20 +614,29 @@ export class TestScene extends BaseScene {
         // scrollView.position = new Vector2(0,128);
         // scrollView.contentRectWidth = "900px";
         // scrollView.contentRectHeight = "1200px";
+=======
+        const basePanel = new UIPanel(this.scene,"basePanel");
+        basePanel.setPosition(0,0);
+        basePanel.setSize(100,100);
+        basePanel.setBackgroundColor(new Color4(1,0,0,0));
+
+        // 移除测试立方体，避免混淆
+        console.log("Health bar system ready - check player entity above");
+>>>>>>> LF
     }
-    
+
     /**
      * Dispose scene resources when component unmounts
      */
     public dispose(): void {
         // Dispose ThirdPersonComp controller
-        
+
         // Stop the render loop
         this.engine.stopRenderLoop();
-        
+
         // Dispose scene
         this.scene.dispose();
-        
+
         // Dispose engine
         this.engine.dispose();
     }
@@ -588,8 +644,8 @@ export class TestScene extends BaseScene {
     private setupPostProcessing(): void {
         // 创建默认渲染管线
         const pipeline = new DefaultRenderingPipeline(
-            "defaultPipeline", 
-            true, 
+            "defaultPipeline",
+            true,
             this.scene
         );
 
@@ -613,9 +669,9 @@ export class TestScene extends BaseScene {
         // pipeline.screenSpaceReflectionStrength = 0.5;
 
         // 启用色调映射
-        pipeline.imageProcessingEnabled = true;
-        pipeline.imageProcessing.contrast = 1.1;
-        pipeline.imageProcessing.exposure = 1.0;
-        pipeline.imageProcessing.toneMappingEnabled = true;
+        //pipeline.imageProcessingEnabled = false;
+        //pipeline.imageProcessing.contrast = 1.1;
+        //pipeline.imageProcessing.exposure = 1.0;
+        //pipeline.imageProcessing.toneMappingEnabled = true;
     }
 }
