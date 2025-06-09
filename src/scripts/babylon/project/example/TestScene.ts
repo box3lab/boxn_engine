@@ -60,6 +60,7 @@ import { UIMgr } from "../../framework/mgr/UIMgr";
 import { UIImage } from "../../framework/ui/UIImage";
 import { UIScrollView } from "../../framework/ui/UIScrollView";
 import { UISlider } from "../../framework/ui/UISlider";
+import { UIJoystick } from "../../framework/ui/UIJoystick";
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
  */
@@ -551,7 +552,7 @@ export class TestScene extends BaseScene {
         image.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
         image.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
         image.position = new Vector2(0,0);
-    
+        
         const test = new UIText("text","AMC");
         mainPanel.addChild(test);
         test.fontSize = 22;
@@ -561,6 +562,12 @@ export class TestScene extends BaseScene {
         test.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
         test.textVerticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
         test.position = new Vector2(0,128);
+
+        this.scene.onPointerObservable.add((pointerInfo) => {
+            test.text = "POINTERUP事件，pointerId:"+ pointerInfo.type;
+            
+        });
+    
         const healthBar = new UIProgress("HealthBar", 100, true);
 
         // Set colors for health bar
@@ -593,6 +600,61 @@ export class TestScene extends BaseScene {
         brightnessSlider.setStep(0.1);
         brightnessSlider.setTextFormat("亮度: {percentage}%");
         mainPanel.addChild(brightnessSlider);
+
+        // 创建虚拟摇杆
+        const joystick = new UIJoystick("GameJoystick", 60,this.scene);
+        joystick.position = new Vector2(200, -100); // 左下角位置
+        joystick.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+        joystick.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
+
+        // 设置摇杆样式
+        joystick.setBackgroundStyle("#1a1a1a", "#4a4a4a", 3);
+        joystick.setKnobStyle("#ffffff", "#cccccc", 2);
+        joystick.setAlpha(0.8, 0.9);
+        joystick.setDeadZone(0.15);
+        
+        // 启用调试模式
+
+        // 设置摇杆事件回调
+        joystick.setOnPositionChanged((x, y) => {
+            var player = (this.entity as PlayerEntity).playerInputComponent;
+            if(!player)return;
+            player.controlled = true
+            player.inputDirection = new Vector3(x,0,-y);
+            // 这里可以添加角色移动逻辑
+        });
+
+        joystick.setOnPressed(() => {
+            console.log("摇杆被按下");
+        });
+
+        joystick.setOnReleased(() => {
+            var player = (this.entity as PlayerEntity).playerInputComponent;
+            if(!player)return;
+            player.controlled = false
+        });
+
+        mainPanel.addChild(joystick);
+
+        // 创建第二个摇杆用于摄像机控制
+        const cameraJoystick = new UIJoystick("CameraJoystick", 50,this.scene );
+        cameraJoystick.position = new Vector2(-200, -100); // 右下角位置
+        cameraJoystick.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_RIGHT;
+        cameraJoystick.verticalAlignment = Control.VERTICAL_ALIGNMENT_BOTTOM;
+
+        // 设置不同的样式以区分
+        cameraJoystick.setBackgroundStyle("#2a1a1a", "#6a4a4a", 2);
+        cameraJoystick.setKnobStyle("#ffaa00", "#cc8800", 1);
+        cameraJoystick.setAlpha(0.7, 0.8);
+        cameraJoystick.setDeadZone(0.1);
+
+        // 摄像机控制回调
+        cameraJoystick.setOnPositionChanged((x, y) => {
+            console.log(`摄像机摇杆: X=${x.toFixed(2)}, Y=${y.toFixed(2)}`);
+            // 这里可以添加摄像机旋转逻辑
+        });
+
+        mainPanel.addChild(cameraJoystick);
         // const scrollView = new UIScrollView("scrollView",1,1);
         // mainPanel.addChild(scrollView);
         // scrollView.width = "500px";
