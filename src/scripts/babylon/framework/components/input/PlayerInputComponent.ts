@@ -62,6 +62,9 @@ export class PlayerInputComponent extends InputComponent {
      */
     public inputDirection: Vector3 = Vector3.Zero();
 
+    
+    public controlled : boolean = false;
+
     /**
      * Constructor
      * @param name Component name / 组件名称
@@ -218,6 +221,7 @@ export class PlayerInputComponent extends InputComponent {
      * 计算移动方向
      */
     protected calculateMovement(): void {
+        if (this.controlled){return}
         this.inputDirection = Vector3.Zero();
 
         if (this.isForward) {
