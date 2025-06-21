@@ -61,6 +61,7 @@ import { UIImage } from "../../framework/ui/UIImage";
 import { UIScrollView } from "../../framework/ui/UIScrollView";
 import { UISlider } from "../../framework/ui/UISlider";
 import { UIJoystick } from "../../framework/ui/UIJoystick";
+import { UIInputText } from "../../framework/ui/UIInputText";
 /**
  * TestScene - Creates a scene with a panel and a character using ThirdPersonComp
  */
@@ -600,6 +601,25 @@ export class TestScene extends BaseScene {
         brightnessSlider.setStep(0.1);
         brightnessSlider.setTextFormat("亮度: {percentage}%");
         mainPanel.addChild(brightnessSlider);
+
+        const chatDisplayText = new UIText("ChatDisplayText", "最新聊天：鲸鱼不要在我的项目上拉什啊喂！！！");
+        chatDisplayText.position = new Vector2(0,450);
+        chatDisplayText.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+        chatDisplayText.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
+        chatDisplayText.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+        chatDisplayText.textVerticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
+        mainPanel.addChild(chatDisplayText);
+
+        const chatInputText = new UIInputText("ChatInput", "", "输入聊天内容...");
+        chatInputText.position = new Vector2(0,400);
+        chatInputText.horizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+        chatInputText.verticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
+        chatInputText.textHorizontalAlignment = Control.HORIZONTAL_ALIGNMENT_LEFT;
+        chatInputText.textVerticalAlignment = Control.VERTICAL_ALIGNMENT_TOP;
+        chatInputText.onEnterPressed((_0, _1) => {
+            chatDisplayText.text = `最新聊天：${chatInputText.text}`;
+        })
+        mainPanel.addChild(chatInputText);
 
         // 创建虚拟摇杆
         const joystick = new UIJoystick("GameJoystick", 60,this.scene);
